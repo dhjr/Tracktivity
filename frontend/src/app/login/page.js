@@ -2,39 +2,62 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    email: "admin@example.com",
+    password: "password",
+  });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate login
-    setTimeout(() => setLoading(false), 2000);
+    setError("");
+
+    // Simulate login wrapper
+    setTimeout(() => {
+      setLoading(false);
+      // Check hardcoded fake credentials
+      if (
+        (formData.email === "admin@example.com" ||
+          formData.email === "user@example.com") &&
+        formData.password === "password"
+      ) {
+        // Redirect to dashboard on success
+        router.push("/dashboard");
+      } else {
+        setError("Invalid credentials. Use admin@example.com / password");
+      }
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-background transition-colors duration-300">
-      {/* Background decoration */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full" />
-      </div>
-
+    <div className="min-h-[calc(100vh-6rem)] w-full flex items-center justify-center p-4 bg-background transition-colors duration-300">
       <div className="w-full max-w-md relative z-10">
-        <div className="glass rounded-3xl p-8 border border-white/10 shadow-2xl backdrop-blur-xl">
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 premium-gradient rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 mb-4 animate-float">
-              <span className="text-3xl font-bold text-white">T</span>
+        <div className="bg-background rounded-2xl p-6 md:p-8 border border-border shadow-sm">
+          <div className="flex flex-col items-center mb-6">
+            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mb-3">
+              <span className="text-2xl font-bold text-primary-foreground">
+                T
+              </span>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Welcome Back
             </h1>
             <p className="text-foreground/60 mt-2">
               Log in to track your progress
             </p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-lg text-center">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
@@ -44,7 +67,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 required
-                className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
+                className="w-full px-4 py-2.5 rounded-lg bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:border-input transition-all duration-200"
                 placeholder="name@example.com"
                 value={formData.email}
                 onChange={(e) =>
@@ -65,7 +88,7 @@ export default function LoginPage() {
               <input
                 type="password"
                 required
-                className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
+                className="w-full px-4 py-2.5 rounded-lg bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:border-input transition-all duration-200"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) =>
@@ -77,7 +100,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl font-semibold text-white premium-gradient shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
+              className="w-full py-2.5 rounded-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -100,21 +123,6 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        .animate-float {
-          animation: float 4s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 }
