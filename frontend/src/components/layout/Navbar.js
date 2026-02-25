@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function Navbar() {
@@ -21,7 +20,7 @@ export default function Navbar() {
     { name: "Home", href: "/" },
     { name: "Features", href: "/#features" },
     { name: "Pricing", href: "/#pricing" },
-    { name: "About", href: "/#about" },
+    { name: "About", href: "/about" },
   ];
 
   return (
@@ -133,7 +132,6 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-2">
-            <ThemeToggle className="p-2 rounded-xl text-foreground hover:bg-foreground/10 transition-colors focus:outline-none flex items-center justify-center group" />
             <button
               onClick={toggleMobileMenu}
               className="inline-flex items-center justify-center p-2 rounded-xl text-foreground hover:bg-foreground/10 focus:outline-none transition-colors"

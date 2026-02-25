@@ -1,6 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function Home() {
+  const router = useRouter();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
+
+  // If user exists, we are redirecting, so optionally render nothing or a loader
+  if (user) return null;
+
   return (
     <div className="min-h-[calc(100vh-6rem)] flex flex-col items-center justify-center p-6 md:p-24 text-center bg-background transition-colors duration-300">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
