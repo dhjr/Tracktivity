@@ -30,7 +30,13 @@ export default function LoginPage() {
         formData.password === "password"
       ) {
         // Redirect to dashboard on success
-        login({ email: formData.email, name: formData.email.split("@")[0] });
+        const role =
+          formData.email === "admin@example.com" ? "faculty" : "student";
+        login({
+          email: formData.email,
+          name: formData.email.split("@")[0],
+          role,
+        });
         router.push("/dashboard");
       } else {
         setError("Invalid credentials. Use admin@example.com / password");
