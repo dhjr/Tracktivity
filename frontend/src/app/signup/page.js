@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     name: "John Doe",
     email: "user@example.com",
@@ -20,6 +22,7 @@ export default function SignupPage() {
     // Simulate signup
     setTimeout(() => {
       setLoading(false);
+      login({ email: formData.email, name: formData.name });
       router.push("/dashboard");
     }, 1000);
   };

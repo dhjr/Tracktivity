@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/providers/ThemeProvider";
+import AuthProvider from "@/components/providers/AuthProvider";
 import ThemeToggle from "@/components/ThemeToggle";
 import Navbar from "@/components/layout/Navbar";
 
@@ -43,11 +44,13 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          <Navbar />
-          <ThemeToggle className="hidden md:flex fixed top-6 right-6 z-50 p-3 rounded-full bg-background border border-border shadow-sm hover:bg-secondary transition-all duration-300 active:scale-95 group" />
-          <main className="pt-24">{children}</main>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <Navbar />
+            <ThemeToggle className="hidden md:flex fixed top-6 right-6 z-50 p-3 rounded-full bg-background border border-border shadow-sm hover:bg-secondary transition-all duration-300 active:scale-95 group" />
+            <main className="pt-24">{children}</main>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "admin@example.com",
     password: "password",
@@ -28,6 +30,7 @@ export default function LoginPage() {
         formData.password === "password"
       ) {
         // Redirect to dashboard on success
+        login({ email: formData.email, name: formData.email.split("@")[0] });
         router.push("/dashboard");
       } else {
         setError("Invalid credentials. Use admin@example.com / password");

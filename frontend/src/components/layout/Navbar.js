@@ -5,10 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -60,18 +63,72 @@ export default function Navbar() {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4 shrink-0 z-10">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/signup"
-              className="text-sm font-medium bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-all active:scale-95"
-            >
-              Sign up
-            </Link>
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                  className="flex items-center gap-2 p-2 rounded-xl hover:bg-foreground/5 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <span className="text-sm font-bold text-primary">
+                      {user.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="text-sm font-medium">{user.name}</span>
+                </button>
+
+                {isProfileMenuOpen && (
+                  <div className="absolute top-12 right-0 w-48 bg-background border border-border rounded-xl shadow-lg py-2 overflow-hidden flex flex-col">
+                    <div className="px-4 py-2 border-b border-border">
+                      <p className="text-sm font-medium truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-foreground/60 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                      className="px-4 py-2 text-sm hover:bg-foreground/5 transition-colors text-left"
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                      className="px-4 py-2 text-sm hover:bg-foreground/5 transition-colors text-left"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsProfileMenuOpen(false);
+                      }}
+                      className="px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 transition-colors text-left"
+                    >
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="text-sm font-medium bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-all active:scale-95"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -117,20 +174,65 @@ export default function Navbar() {
           </div>
 
           <div className="flex flex-col space-y-4 pt-6 mt-6 border-t border-border">
-            <Link
-              href="/login"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full text-center py-3 rounded-xl font-medium border border-border text-foreground hover:bg-secondary transition-colors"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/signup"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full text-center py-3 rounded-lg font-medium bg-primary text-primary-foreground active:scale-95 transition-all"
-            >
-              Sign up
-            </Link>
+            {user ? (
+              <>
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-foreground/5 mb-2">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <span className="text-lg font-bold text-primary">
+                      {user.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-sm font-medium truncate">
+                      {user.name}
+                    </span>
+                    <span className="text-xs text-foreground/60 truncate">
+                      {user.email}
+                    </span>
+                  </div>
+                </div>
+                <Link
+                  href="/profile"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full text-center py-3 rounded-xl font-medium border border-border text-foreground hover:bg-secondary transition-colors"
+                >
+                  Profile
+                </Link>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full text-center py-3 rounded-xl font-medium border border-border text-foreground hover:bg-secondary transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-center py-3 rounded-lg font-medium bg-red-500/10 text-red-500 hover:bg-red-500/20 active:scale-95 transition-all"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full text-center py-3 rounded-xl font-medium border border-border text-foreground hover:bg-secondary transition-colors"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full text-center py-3 rounded-lg font-medium bg-primary text-primary-foreground active:scale-95 transition-all"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
