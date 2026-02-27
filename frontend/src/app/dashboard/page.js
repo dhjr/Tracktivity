@@ -11,14 +11,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user === null) {
-      if (!localStorage.getItem("user")) {
-        router.push("/login");
-      }
-    } else if (user) {
-      setLoading(false);
+    if (user === null && !loading) {
+      router.push("/login");
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
   if (loading || !user) {
     return (

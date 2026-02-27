@@ -14,11 +14,7 @@ export default function ProfilePage() {
   // Initialize form data when user loads, redirect if not logged in
   useEffect(() => {
     if (user === null) {
-      // Redirect if definitely not logged in (user is null and we've mounted)
-      const cached = localStorage.getItem("user");
-      if (!cached) {
-        router.push("/login");
-      }
+      router.push("/login");
     } else if (user) {
       setFormData({ name: user.name || "", email: user.email || "" });
     }

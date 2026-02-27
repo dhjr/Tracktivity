@@ -9,39 +9,25 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    email: "admin@example.com",
-    password: "password",
+    email: "",
+    password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    // Simulate login wrapper
-    setTimeout(() => {
+    try {
+      await login(formData.email, formData.password);
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err.message || "Failed to log in");
+    } finally {
       setLoading(false);
-      // Check hardcoded fake credentials
-      if (
-        (formData.email === "admin@example.com" ||
-          formData.email === "user@example.com") &&
-        formData.password === "password"
-      ) {
-        // Redirect to dashboard on success
-        const role =
-          formData.email === "admin@example.com" ? "faculty" : "student";
-        login({
-          email: formData.email,
-          name: formData.email.split("@")[0],
-          role,
-        });
-        router.push("/dashboard");
-      } else {
-        setError("Invalid credentials. Use admin@example.com / password");
-      }
-    }, 1000);
+    }
   };
 
   return (

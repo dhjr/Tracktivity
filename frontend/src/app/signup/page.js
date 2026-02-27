@@ -7,24 +7,35 @@ import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const [formData, setFormData] = useState({
-    name: "John Doe",
-    email: "user@example.com",
-    password: "password",
+    name: "",
+    email: "",
+    password: "",
     role: "student",
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate signup
-    setTimeout(() => {
-      setLoading(false);
-      login({ email: formData.email, name: formData.name });
+    setError("");
+
+    try {
+      await signup(
+        formData.email,
+        formData.password,
+        formData.name,
+        formData.role,
+      );
+      // Depending on Supabase settings, email confirmation might be required.
       router.push("/dashboard");
-    }, 1000);
+    } catch (err) {
+      setError(err.message || "Failed to sign up");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,6 +55,12 @@ export default function SignupPage() {
               Start your journey today
             </p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-lg text-center">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-2">
