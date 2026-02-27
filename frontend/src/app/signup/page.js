@@ -12,6 +12,7 @@ export default function SignupPage() {
     name: "",
     email: "",
     password: "",
+    ktuId: "",
     role: "student",
   });
   const [loading, setLoading] = useState(false);
@@ -23,14 +24,35 @@ export default function SignupPage() {
     setError("");
 
     try {
+      // Step 1: Enforce KTU ID Uniqueness for students
+      if (formData.role === "student" && formData.ktuId) {
+        const checkRes = await fetch("/api/check-ktu", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ktuId: formData.ktuId }),
+        });
+
+        const checkData = await checkRes.json();
+
+        if (checkRes.ok && !checkData.isUnique) {
+          throw new Error("A student with this KTU ID is already registered.");
+        }
+      }
+
+      // Step 2: Proceed with Signup
       await signup(
         formData.email,
         formData.password,
         formData.name,
         formData.role,
+        formData.ktuId,
       );
       // Depending on Supabase settings, email confirmation might be required.
-      router.push(formData.role === "faculty" ? "/faculty" : "/student");
+      router.push(
+        formData.role === "faculty"
+          ? "/faculty-dashboard"
+          : "/student-dashboard",
+      );
     } catch (err) {
       setError(err.message || "Failed to sign up");
     } finally {
@@ -98,7 +120,9 @@ export default function SignupPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, role: "faculty" })}
+                onClick={() =>
+                  setFormData({ ...formData, role: "faculty", ktuId: "" })
+                }
                 className={`py-2 border text-sm transition-colors ${
                   formData.role === "faculty"
                     ? "bg-foreground text-background border-foreground"
@@ -109,6 +133,25 @@ export default function SignupPage() {
               </button>
             </div>
           </div>
+
+          {formData.role === "student" && (
+            <div className="space-y-1.5">
+              <label className="text-sm text-foreground/80">KTU ID</label>
+              <input
+                type="text"
+                required
+                className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors uppercase placeholder:normal-case"
+                placeholder="e.g. KTE23CS043"
+                value={formData.ktuId}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    ktuId: e.target.value.toUpperCase(),
+                  })
+                }
+              />
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <label className="text-sm text-foreground/80">Password</label>

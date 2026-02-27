@@ -21,10 +21,14 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: "Home", href: "/" },
+    {
+      name: "Home",
+      href: user ? (userRole === "faculty" ? "/faculty" : "/student") : "/",
+    },
     {
       name: "Dashboard",
-      href: userRole === "faculty" ? "/faculty" : "/student",
+      href:
+        userRole === "faculty" ? "/faculty-dashboard" : "/student-dashboard",
     },
     { name: "Guidelines", href: "/guidelines" },
   ];
@@ -60,6 +64,12 @@ export default function Navbar() {
           {user ? (
             <div className="flex items-center space-x-4 text-sm">
               <span className="text-foreground/60">{userName}</span>
+              <Link
+                href="/profile"
+                className="text-foreground/60 hover:text-foreground transition-colors"
+              >
+                Profile
+              </Link>
               <button
                 onClick={logout}
                 className="text-foreground/60 hover:text-foreground transition-colors"
@@ -120,6 +130,13 @@ export default function Navbar() {
             {user ? (
               <>
                 <span className="text-foreground/50">{userName}</span>
+                <Link
+                  href="/profile"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-left text-foreground/70"
+                >
+                  Profile
+                </Link>
                 <button
                   onClick={() => {
                     logout();
