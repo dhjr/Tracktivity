@@ -42,7 +42,8 @@ export async function updateSession(request) {
     request.nextUrl.pathname.startsWith("/signup");
 
   const isProtectedRoute =
-    request.nextUrl.pathname.startsWith("/dashboard") ||
+    request.nextUrl.pathname.startsWith("/student") ||
+    request.nextUrl.pathname.startsWith("/faculty") ||
     request.nextUrl.pathname.startsWith("/profile") ||
     request.nextUrl.pathname.startsWith("/admin");
 
@@ -53,10 +54,35 @@ export async function updateSession(request) {
     return NextResponse.redirect(url);
   }
 
+  // Redirect based on user role
+  const userRole = user?.user_metadata?.role || "student";
+
   if (user && isAuthRoute) {
     // user is logged in, redirect away from auth pages
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = userRole === "faculty" ? "/faculty" : "/student";
+    return NextResponse.redirect(url);
+  }
+
+  // Prevent students from accessing faculty dashboard
+  if (
+    user &&
+    request.nextUrl.pathname.startsWith("/faculty") &&
+    userRole !== "faculty"
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/student";
+    return NextResponse.redirect(url);
+  }
+
+  // Prevent faculty from accessing student dashboard
+  if (
+    user &&
+    request.nextUrl.pathname.startsWith("/student") &&
+    userRole === "faculty"
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/faculty";
     return NextResponse.redirect(url);
   }
 

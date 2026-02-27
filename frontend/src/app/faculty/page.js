@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/components/providers/AuthProvider";
-import FacultyDashboard from "@/components/dashboard/FacultyDashboard";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
