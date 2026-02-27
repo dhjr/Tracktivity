@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/components/providers/AuthProvider";
-import FacultyDashboard from "@/components/dashboard/FacultyDashboard";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -11,14 +10,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user === null) {
-      if (!localStorage.getItem("user")) {
-        router.push("/login");
-      }
-    } else if (user) {
-      setLoading(false);
+    if (user === null && !loading) {
+      router.push("/login");
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
   if (loading || !user) {
     return (
