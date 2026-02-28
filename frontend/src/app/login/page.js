@@ -23,7 +23,9 @@ export default function LoginPage() {
     try {
       const data = await login(formData.email, formData.password);
       const userRole = data?.user?.user_metadata?.role || "student";
-      router.push(userRole === "faculty" ? "/faculty" : "/student");
+      router.push(
+        userRole === "faculty" ? "/faculty-dashboard" : "/student-dashboard",
+      );
     } catch (err) {
       setError(err.message || "Failed to log in");
     } finally {

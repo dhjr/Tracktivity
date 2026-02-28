@@ -52,7 +52,7 @@ export default function AuthProvider({ children }) {
     return data;
   };
 
-  const signup = async (email, password, name, role) => {
+  const signup = async (email, password, name, role, ktuId) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -60,6 +60,8 @@ export default function AuthProvider({ children }) {
         data: {
           name,
           role,
+          ktuId,
+          isKtuVerified: role === "student" ? false : undefined,
         },
       },
     });
@@ -70,10 +72,23 @@ export default function AuthProvider({ children }) {
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    window.location.href = "/";
+  };
+
+  const updateProfile = async ({ name, ktuId }) => {
+    const { data, error } = await supabase.auth.updateUser({
+      data: { name, ktuId },
+    });
+    if (error) throw error;
+    // Update local state to reflect new name immediately
+    setUser(data.user);
+    return data;
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, signup, logout, updateProfile }}
+    >
       {children}
     </AuthContext.Provider>
   );
