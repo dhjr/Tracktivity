@@ -24,32 +24,17 @@ export default function FacultyVerificationDashboard() {
   }, [user, router]);
 
   const fetchStudents = async () => {
-    // In a complete implementation, this would fetch from `enrollments` joined with profiles.
-    // Because we haven't built the rooms table yet, we will mock the view with some static data
-    setStudents([
-      {
-        id: "mock-student-1", // Would be UUID
-        name: "Alice Smith",
-        email: "alice@example.com",
-        ktuId: "KTE23CS001",
-        isKtuVerified: false,
-      },
-      {
-        id: "mock-student-2",
-        name: "Bob Jones",
-        email: "bob@example.com",
-        ktuId: "KTE23CS002",
-        isKtuVerified: true,
-      },
-      {
-        id: "mock-student-3",
-        name: "Charlie Brown",
-        email: "charlie@example.com",
-        ktuId: "KTE23CS003",
-        isKtuVerified: false,
-      },
-    ]);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/get-students");
+      if (!res.ok) throw new Error("Failed to fetch students");
+      const data = await res.json();
+      setStudents(data.students || []);
+    } catch (err) {
+      console.error(err);
+      // Fallback or show error
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerify = async (studentId) => {
