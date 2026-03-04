@@ -73,23 +73,74 @@ $RULEBOOK$
   ],
 
   "capGroups": [
-    {
-      "capId": "COMMUNITY_SERVICE_CAP",
-      "description": "Activities 1.6 and 1.7 together are capped at 10 points",
-      "activityIds": ["COMMUNITY_2DAY", "COMMUNITY_WEEK"],
-      "maxPoints": 10
-    },
-    {
-      "capId": "NSS_NCC_CLUSTER",
-      "description": "Activities 1.11 through 1.19 combined cap at 40 points",
-      "activityIds": [
-        "NSS_VOLUNTEER_2YR", "NSS_LEADERSHIP_CAMP", "NSS_STATE_WINNER",
-        "NSS_SPECIAL_SERVICE", "NSS_STATE_NATIONAL_AWARD", "NSS_NATIONAL_CAMPS",
-        "NSS_VOLUNTEER_10DAY", "NSS_RDC_IDC", "NCC_CERTIFICATES"
-      ],
-      "maxPoints": 40
-    }
-  ],
+  {
+    "capId": "COMMUNITY_SERVICE_CAP",
+    "description": "Activities 1.6 and 1.7 together are capped at 10 points",
+    "codes": ["1.6", "1.7"],
+    "maxPoints": 10
+  },
+  {
+    "capId": "NSS_NCC_CLUSTER",
+    "description": "Activities 1.11 through 1.19 combined cap at 40 points",
+    "codes": [
+      "1.11", "1.12", "1.13",
+      "1.14", "1.15", "1.16",
+      "1.17", "1.18", "1.19"
+    ],
+    "maxPoints": 40
+  },
+  {
+    "capId": "HEALTH_LIFE_SKILLS_CLUSTER",
+    "description": "Activities 1.20 through 1.21 combined cap at 10 points",
+    "codes": [
+      "1.20", "1.21"
+    ],
+    "maxPoints": 10
+  },
+  {
+    "capId": "TECHNICAL_COMPETITIONS_CLUSTER",
+    "description": "Activities 2.1 through 2.4 combined cap at 40 points",
+    "codes": [
+      "2.1", "2.2", "2.3",
+      "2.4"
+    ],
+    "maxPoints": 40
+  },
+  {
+    "capId": "PAPER_PRESENTATION_CLUSTER",
+    "description": "Activities 2.6 through 2.10 combined cap at 40 points",
+    "codes": [
+      "2.6", "2.7", "2.8",
+      "2.9", "2.10"
+    ],
+    "maxPoints": 40
+  },
+  {
+    "capId": "COLLEGE_MAGAZINE_CLUSTER",
+    "description": "Activities 2.20 through 2.21 combined cap at 10 points",
+    "codes": [
+      "2.20", "2.21"
+    ],
+    "maxPoints": 10
+  },
+  {
+    "capId": "IV AND PROJECT CLUSTER",
+    "description": "Activities 3.1 through 3.3 combined cap at 20 points",
+    "codes": [
+      "3.1", "3.2", "3.3"
+    ],
+    "maxPoints": 20
+  },
+  {
+    "capId": "INNOVATION_COMPETITIONS_CLUSTER",
+    "description": "Activities 3.9 through 3.13 combined cap at 40 points",
+    "codes": [
+      "3.9", "3.10", "3.11","3.11b",
+      "3.12", "3.13"
+    ],
+    "maxPoints": 40
+  }
+],
 
   "categories": [
 
