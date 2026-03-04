@@ -8,6 +8,7 @@ const AuthContext = createContext({
   login: async () => {},
   signup: async () => {},
   logout: async () => {},
+  updatePassword: async () => {},
   loading: true,
 });
 
@@ -43,30 +44,62 @@ export default function AuthProvider({ children }) {
     };
   }, [supabase]);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   const login = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     });
-    if (error) throw error;
-    return data;
+
+    const respData = await res.json();
+
+    if (!res.ok) {
+      throw new Error(respData.detail || "Login failed");
+    }
+
+    if (respData.session) {
+      const { data, error } = await supabase.auth.setSession({
+        access_token: respData.session.access_token,
+        refresh_token: respData.session.refresh_token,
+      });
+      if (error) throw error;
+      return data;
+    }
+
+    return { user: respData.user };
   };
 
   const signup = async (email, password, name, role, ktuId) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          role,
-          ktuId,
-          isKtuVerified: role === "student" ? false : undefined,
-        },
-      },
+    const res = await fetch(`${API_URL}/auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password,
+        name,
+        role,
+        ktuId: ktuId || null,
+      }),
     });
-    if (error) throw error;
-    return data;
+
+    const respData = await res.json();
+
+    if (!res.ok) {
+      throw new Error(respData.detail || "Signup failed");
+    }
+
+    if (respData.session) {
+      const { data, error } = await supabase.auth.setSession({
+        access_token: respData.session.access_token,
+        refresh_token: respData.session.refresh_token,
+      });
+      if (error) throw error;
+      return data;
+    }
+
+    return { user: respData.user };
   };
 
   const logout = async () => {
@@ -85,9 +118,25 @@ export default function AuthProvider({ children }) {
     return data;
   };
 
+  const updatePassword = async (newPassword) => {
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    if (error) throw error;
+    return data;
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, signup, logout, updateProfile }}
+      value={{
+        user,
+        loading,
+        login,
+        signup,
+        logout,
+        updateProfile,
+        updatePassword,
+      }}
     >
       {children}
     </AuthContext.Provider>

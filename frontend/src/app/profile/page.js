@@ -5,11 +5,17 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, updatePassword } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", ktuId: "" });
+  const [passwordData, setPasswordData] = useState({
+    newPassword: "",
+    confirmPassword: "",
+  });
   const [loading, setLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState(null); // { type: 'success' | 'error', text: '' }
+  const [showPassword, setShowPassword] = useState(false);
 
   // Initialize form data when user loads, redirect if not logged in
   useEffect(() => {
@@ -62,6 +68,47 @@ export default function ProfilePage() {
       alert("Failed to update profile: " + err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPasswordMessage(null);
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordMessage({ type: "error", text: "Passwords do not match." });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordMessage({
+        type: "error",
+        text: "Password must be at least 6 characters long.",
+      });
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      await updatePassword(passwordData.newPassword);
+      setPasswordData({ newPassword: "", confirmPassword: "" });
+      setPasswordMessage({
+        type: "success",
+        text: "Password updated successfully!",
+      });
+      // Optionally hide the form after a delay
+      setTimeout(() => {
+        setIsChangingPassword(false);
+        setPasswordMessage(null);
+      }, 3000);
+    } catch (err) {
+      console.error("Failed to update password:", err);
+      setPasswordMessage({
+        type: "error",
+        text: err.message || "Failed to update password.",
+      });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -202,6 +249,104 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      {/* Security Section */}
+      <div className="mt-12 border-t border-border pt-8">
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-medium tracking-tight text-foreground">
+              Security
+            </h2>
+            <p className="text-sm text-foreground/60 mt-1">
+              Manage your password and security settings.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setPasswordData({ newPassword: "", confirmPassword: "" });
+              setPasswordMessage(null);
+              setShowPassword(false);
+              setIsChangingPassword(!isChangingPassword);
+            }}
+            className="text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
+          >
+            {isChangingPassword ? "Cancel" : "Change Password"}
+          </button>
+        </div>
+
+        {isChangingPassword && (
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            {passwordMessage && (
+              <div
+                className={`p-3 text-sm rounded-md ${
+                  passwordMessage.type === "success"
+                    ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
+                    : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                }`}
+              >
+                {passwordMessage.text}
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label className="text-sm text-foreground/80 flex items-center justify-between">
+                <span>New Password</span>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-xs text-foreground/50 hover:text-foreground transition-colors"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </label>
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={6}
+                className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors placeholder:text-foreground/30"
+                placeholder="Enter new password"
+                value={passwordData.newPassword}
+                onChange={(e) =>
+                  setPasswordData({
+                    ...passwordData,
+                    newPassword: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm text-foreground/80">
+                Confirm New Password
+              </label>
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={6}
+                className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors placeholder:text-foreground/30"
+                placeholder="Confirm new password"
+                value={passwordData.confirmPassword}
+                onChange={(e) =>
+                  setPasswordData({
+                    ...passwordData,
+                    confirmPassword: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={passwordLoading}
+              className="w-full py-2.5 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors mt-4 flex items-center justify-center"
+            >
+              {passwordLoading ? (
+                <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" />
+              ) : (
+                "Update Password"
+              )}
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }
