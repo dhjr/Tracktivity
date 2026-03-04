@@ -1,7 +1,4 @@
--- =============================================================================
--- KTU ACTIVITY POINTS — SINGLE JSONB RULEBOOK TABLE
--- Drop-in for Supabase. Read-only config; updates are rare.
--- =============================================================================
+
 
 CREATE TABLE IF NOT EXISTS activity_rulebook (
   id          INT  PRIMARY KEY DEFAULT 1 CHECK (id = 1),  -- singleton row
@@ -21,15 +18,6 @@ CREATE POLICY "Service role can update rulebook"
   ON activity_rulebook FOR ALL
   USING (auth.role() = 'service_role');
 
--- Indexes for common JSONB lookups
-CREATE INDEX idx_rulebook_groups
-  ON activity_rulebook USING GIN ((data->'groups'));
-
-CREATE INDEX idx_rulebook_categories
-  ON activity_rulebook USING GIN ((data->'categories'));
-
-CREATE INDEX idx_rulebook_data
-  ON activity_rulebook USING GIN (data);
 
 -- =============================================================================
 -- INSERT — Full KTU 2024 Rulebook
@@ -281,7 +269,7 @@ $RULEBOOK$
           "code": "1.15",
           "title": "Recipient of State / National Level Awards",
           "calculationType": "LEVEL",
-          "levels": { "state": 15, "national": 25 },
+          "levels": { "state award": 15, "national award": 25 },
           "maxPoints": 40,
           "rules": ["HIGHEST_LEVEL_ONLY"],
           "documentaryEvidence": "Certificate issued by the University / State NSS Cell / NCC Directorate.",
@@ -479,7 +467,7 @@ $RULEBOOK$
           "code": "2.11",
           "title": "Membership in Student Professional Societies (IEEE, IET, ASME, SAE, ACM, ASCE, ISA, etc.) – Minimum 2 Academic Years",
           "calculationType": "ROLE",
-          "roles": {
+          "levels": {
             "member": 5,
             "executive_committee": 10,
             "secretary_chapter_lead_chair": 15,
@@ -495,7 +483,7 @@ $RULEBOOK$
           "code": "2.12",
           "title": "College Union Members",
           "calculationType": "ROLE",
-          "roles": {
+          "levels": {
             "office_bearer": 20,
             "executive_committee_excl_office_bearer": 15,
             "university_union_office_bearer": 30,
@@ -510,7 +498,7 @@ $RULEBOOK$
           "code": "2.13",
           "title": "Department Student Association Activities",
           "calculationType": "ROLE",
-          "roles": {
+          "levels": {
             "executive_committee_office_bearer": 5,
             "event_coordinator": 5
           },
@@ -545,7 +533,7 @@ $RULEBOOK$
           "code": "2.16",
           "title": "Placement Cell (Minimum period of one Academic Year)",
           "calculationType": "ROLE",
-          "roles": {
+          "levels": {
             "executive_committee_member": 5,
             "coordinator_convenor": 10
           },
@@ -559,7 +547,7 @@ $RULEBOOK$
           "code": "2.17",
           "title": "IEDC Cell (Minimum period of one Academic Year)",
           "calculationType": "ROLE",
-          "roles": {
+          "levels": {
             "executive_committee_office_bearer": 5,
             "event_coordinator": 5
           },
@@ -583,7 +571,7 @@ $RULEBOOK$
           "code": "2.19",
           "title": "STRIDE – Social Technology & Research for Inclusive Design Excellence (K-DISC) – Minimum 1 Academic Year",
           "calculationType": "ROLE",
-          "roles": {
+          "levels": {
             "certified_volunteer_1yr": 5,
             "membership": 5,
             "leadership_team_role": 10,
@@ -611,7 +599,7 @@ $RULEBOOK$
           "code": "2.21",
           "title": "Hobby Clubs under College Union (Photography, Film, Music, Dance, Literary, Debate, Coding, Nature Clubs, etc.)",
           "calculationType": "ROLE",
-          "roles": { "executive_committee_convenor": 5 },
+          "levels": { "executive_committee_convenor": 5 },
           "maxPoints": 10,
           "rules": ["PER_ACADEMIC_YEAR"],
           "documentaryEvidence": "Certificate from the staff in charge of the Club and from the College Union Advisor.",
@@ -630,14 +618,14 @@ $RULEBOOK$
           "code": "2.22",
           "title": "ICFOSS / FOSS Club Activities – Minimum Period of 1 Academic Year",
           "calculationType": "MULTI_OPTION",
-          "options": [
-            { "optionId": "FOSS_CLUB_MEMBER",       "description": "FOSS Club Member – participated in at least 2 club activities", "points": 5 },
-            { "optionId": "FOSS_CLUB_LEAD",          "description": "FOSS Club Student Lead / FOSS Coordinator / Ambassador",        "points": 10 },
-            { "optionId": "FOSS_WORKSHOP",           "description": "ICFOSS approved Workshops / Bootcamps (minimum 2 days)",        "points": 5 },
-            { "optionId": "FOSS_HACKATHON",          "description": "ICFOSS Hackathons / FOSS Events",                               "points": 5 },
-            { "optionId": "FOSS_OPENSOURCE_CONTRIB", "description": "Contribution to Open-Source Projects (validated by ICFOSS)",    "points": 10 },
-            { "optionId": "FOSS_PROJECT_DEV",        "description": "FOSS Project Development under ICFOSS / internships (min 15 days)", "points": 10 }
-          ],
+          "levels": {
+              "FOSS Club Member – participated in at least 2 club activities": 5 ,
+              "FOSS Club Student Lead / FOSS Coordinator / Ambassador": 10 ,
+              "ICFOSS approved Workshops / Bootcamps (minimum 2 days)": 5 ,
+             "ICFOSS Hackathons / FOSS Events": 5 ,
+              "Contribution to Open-Source Projects (validated by ICFOSS)": 10 ,
+              "FOSS Project Development under ICFOSS / internships (min 15 days)": 10 
+          },
           "maxPoints": 20,
           "rules": [],
           "documentaryEvidence": "Certificates issued by ICFOSS, approved event organizers, or the faculty-in-Charge of the FOSS Club."
@@ -673,12 +661,28 @@ $RULEBOOK$
           "code": "2.24",
           "title": "English Proficiency Certifications (TOEFL, IELTS, PTE, BEC)",
           "calculationType": "SCORE_BAND",
-          "scoreBands": {
-            "TOEFL_IBT":    [ { "min": 105,              "points": 30 }, { "min": 95,  "max": 104, "points": 25 }, { "min": 80, "max": 94, "points": 20 } ],
-            "IELTS_ACADEMIC":[ { "min": 7.5,             "points": 30 }, { "min": 7.0, "max": 7.0, "points": 25 }, { "min": 6.5,"max": 6.5,"points": 20 } ],
-            "PTE_ACADEMIC":  [ { "min": 76,              "points": 30 }, { "min": 65,  "max": 75,  "points": 25 }, { "min": 58, "max": 64, "points": 20 } ],
-            "BEC_CAMBRIDGE": [ { "level": "higher_c1",   "points": 25 }, { "level": "vantage_b2",  "points": 20 }, { "level": "preliminary_b1", "points": 15 } ]
-          },
+         "levels": {
+                "TOEFL_IBT": [
+                  { ">=105": 30 },
+                  { "95-104": 25 },
+                  { "80-94": 20 }
+                ],
+                "IELTS_ACADEMIC": [
+                  { ">=7.5": 30 },
+                  { "7.0": 25 },
+                  { "6.5": 20 }
+                ],
+                "PTE_ACADEMIC": [
+                  { ">=76": 30 },
+                  { "65-75": 25 },
+                  { "58-64": 20 }
+                ],
+                "BEC_CAMBRIDGE": [
+                  { "higher_c1": 25 },
+                  { "vantage_b2": 20 },
+                  { "preliminary_b1": 15 }
+                ]
+},
           "maxPoints": 30,
           "rules": ["DURING_PROGRAMME_ONLY", "HIGHEST_SCORE_ONLY"],
           "documentaryEvidence": "Original score report or downloadable digital scorecard issued by the official testing authority.",
@@ -689,12 +693,28 @@ $RULEBOOK$
           "code": "2.25",
           "title": "Aptitude Proficiency Certifications (GRE, GATE, CAT, GMAT)",
           "calculationType": "SCORE_BAND",
-          "scoreBands": {
-            "GRE":  [ { "min": 320, "points": 30 }, { "min": 310, "max": 319, "points": 25 }, { "min": 300, "max": 309, "points": 20 } ],
-            "GATE": [ { "airMax": 5000, "points": 30 }, { "airMin": 5001, "airMax": 15000, "points": 25 }, { "qualified": true, "points": 20 } ],
-            "CAT":  [ { "minPercentile": 95, "points": 30 }, { "minPercentile": 90, "maxPercentile": 94, "points": 25 }, { "minPercentile": 85, "maxPercentile": 89, "points": 20 } ],
-            "GMAT": [ { "min": 700, "points": 30 }, { "min": 650, "max": 699, "points": 25 }, { "min": 600, "max": 649, "points": 20 } ]
-          },
+          "levels": {
+              "GRE": [
+                { ">=320": 30 },
+                { "310-319": 25 },
+                { "300-309": 20 }
+              ],
+              "GATE": [
+                { "AIR<=5000": 30 },
+                { "AIR5001-15000": 25 },
+                { "Qualified": 20 }
+              ],
+              "CAT": [
+                { ">=95%": 30 },
+                { "90-94%": 25 },
+                { "85-89%": 20 }
+              ],
+              "GMAT": [
+                { ">=700": 30 },
+                { "650-699": 25 },
+                { "600-649": 20 }
+              ]
+        }, 
           "maxPoints": 30,
           "rules": ["DURING_PROGRAMME_ONLY", "HIGHEST_SCORE_ONLY"],
           "documentaryEvidence": "Official scorecard containing score, percentile, test date, and candidate details."
@@ -743,11 +763,11 @@ $RULEBOOK$
           "code": "3.4",
           "title": "LEAP – IIT Madras Incubation Cell Skill Development Bootcamps",
           "calculationType": "MULTI_OPTION",
-          "options": [
-            { "optionId": "LEAP_BOOTCAMP", "description": "Completion of LEAP Bootcamps (LPB01 & LPB02)", "points": 10 },
-            { "optionId": "LEAP_COURSE",   "description": "Completion of LEAP Courses (LP1XX/LP2XX/LP3XX)", "points": 15, "perUnit": "per course" },
-            { "optionId": "LEAP_PROJECT",  "description": "Completion of LEAP Project / Prototype by LEAP Mentor", "points": 20 }
-          ],
+          "levels": {
+            "Completion of LEAP Bootcamps (LPB01 & LPB02)": 10 ,
+             "Completion of LEAP Courses (LP1XX/LP2XX/LP3XX)": 15, 
+             "Completion of LEAP Project / Prototype by LEAP Mentor": 20 
+          },
           "maxPoints": 30,
           "rules": [],
           "documentaryEvidence": "Official LEAP Certificate issued by IIT Madras Incubation Cell or certified training partners."
@@ -757,12 +777,12 @@ $RULEBOOK$
           "code": "3.5",
           "title": "YIP – Young Innovators Programme (K-DISC)",
           "calculationType": "MILESTONE",
-          "milestones": [
-            { "milestoneId": "YIP_IDEA_SUBMITTED",     "description": "Idea Submitted (accepted in YIP portal)",                       "points": 5 },
-            { "milestoneId": "YIP_PRELIMINARY_WINNER", "description": "Preliminary Winner (shortlisted for District Round)",            "points": 10 },
-            { "milestoneId": "YIP_DISTRICT_WINNER",    "description": "District Level Winner / Finalist (Selected by District Panel)",  "points": 20 },
-            { "milestoneId": "YIP_STATE_WINNER",       "description": "State Level Winner",                                             "points": 35 }
-          ],
+          "levels": {
+            "Idea Submitted (accepted in YIP portal)": 5 ,
+             "Preliminary Winner (shortlisted for District Round)": 10 ,
+             "District Level Winner / Finalist (Selected by District Panel)": 20 ,
+             "State Level Winner": 35
+          },
           "maxPoints": 35,
           "rules": ["HIGHEST_MILESTONE_ONLY"],
           "documentaryEvidence": "Certificates issued by KDISC or authorized officials of the YIP Programme."
@@ -772,12 +792,12 @@ $RULEBOOK$
           "code": "3.6",
           "title": "STRIDE – Social Technology & Research for Inclusive Design Excellence (K-DISC)",
           "calculationType": "MILESTONE",
-          "milestones": [
-            { "milestoneId": "STRIDE_IDEA_SUBMITTED", "description": "Idea Submitted (Phase 1 completed)",           "points": 5 },
-            { "milestoneId": "STRIDE_TOP100",         "description": "Top 100+ Teams (Selected to Phase-2)",         "points": 10 },
-            { "milestoneId": "STRIDE_TOP30",          "description": "Top 30+ Teams (State-Level Finalists, Phase 3)","points": 20 },
-            { "milestoneId": "STRIDE_STATE_WINNER",   "description": "State Level Winner",                           "points": 35 }
-          ],
+          "levels": {
+                "Idea Submitted (Phase 1 completed)": 5,
+                "Top 100+ Teams (Selected to Phase-2)": 10,
+                "Top 30+ Teams (State-Level Finalists, Phase 3)": 20,
+                "State Level Winner": 35
+          },
           "maxPoints": 35,
           "rules": ["HIGHEST_MILESTONE_ONLY"],
           "documentaryEvidence": "Certificates issued by KDISC or authorized officials of the STRIDE Programme."
@@ -787,12 +807,12 @@ $RULEBOOK$
           "code": "3.7",
           "title": "GDC AI Workforce Internship Program",
           "calculationType": "MILESTONE",
-          "milestones": [
-            { "milestoneId": "GDC_GRADING_TEST",          "description": "AI Grading Test Completed",                   "points": 5 },
-            { "milestoneId": "GDC_LEARNING_TRACK",        "description": "Learning Track Completed",                    "points": 15 },
-            { "milestoneId": "GDC_FELLOWSHIP_COURSEWORK", "description": "Fellowship Track Coursework Completed",        "points": 25 },
-            { "milestoneId": "GDC_6MONTH_INTERNSHIP",     "description": "6-Month Internship Completed (GDC Fellow)",   "points": 35 }
-          ],
+          "milestones": {
+                "AI Grading Test Completed": 5,
+                "Learning Track Completed": 15,
+                "Fellowship Track Coursework Completed": 25,
+                "6-Month Internship Completed (GDC Fellow)": 35
+          },
           "maxPoints": 35,
           "rules": ["HIGHEST_MILESTONE_ONLY"],
           "documentaryEvidence": "Certificates issued by AICTE, the official program executor, or the National Health Mission (NHM)."
@@ -830,12 +850,12 @@ $RULEBOOK$
           "code": "3.10",
           "title": "Patents",
           "calculationType": "MILESTONE",
-          "milestones": [
-            { "milestoneId": "PATENT_FILED",     "description": "Patent Filed – Application filed with IPO/WIPO",         "points": 20 },
-            { "milestoneId": "PATENT_PUBLISHED",  "description": "Patent Published in Patent Journal",                    "points": 30 },
-            { "milestoneId": "PATENT_GRANTED",    "description": "Patent Granted / Approved – legally granted",           "points": 40 },
-            { "milestoneId": "PATENT_LICENSED",   "description": "Patent Licensed – Technology licensed to industry/user","points": 40 }
-          ],
+          "milestones": {
+              "Patent Filed – Application filed with IPO/WIPO": 20,
+              "Patent Published in Patent Journal": 30,
+              "Patent Granted / Approved – legally granted": 40,
+              "Patent Licensed – Technology licensed to industry/user": 40
+         }
           "maxPoints": 40,
           "rules": ["HIGHEST_MILESTONE_ONLY"],
           "documentaryEvidence": "Documentary evidence issued by the respective competent authority (IPO/WIPO)."
@@ -911,7 +931,7 @@ $RULEBOOK$
           "code": "3.15",
           "title": "National Hackathons (SIH, KAVACH, MoE, MHA, AICTE, Central Government hackathons, etc.)",
           "calculationType": "PRIZE",
-          "prizes": { "first": 40, "second": 35, "third": 30 },
+          "levels": { "first prize": 40, "second prize": 35, "third prize": 30 },
           "maxPoints": 40,
           "rules": ["WIN_OVERRIDES_PARTICIPATION", "HIGHEST_PRIZE_ONLY"],
           "documentaryEvidence": "Certificates issued by the Hackathon Organizing Authority."
@@ -921,7 +941,7 @@ $RULEBOOK$
           "code": "3.16",
           "title": "International Hackathons (NASA Space Apps, Microsoft Imagine Cup, Google Solution Challenge, IBM Call for Code, Meta Global Hackathon, etc.)",
           "calculationType": "PRIZE",
-          "prizes": { "first": 40, "second_third": 35, "participation": 30 },
+          "levels": { "first prize": 40, "second prize": 35, "third prize": 30 },
           "maxPoints": 40,
           "rules": ["HIGHEST_PRIZE_ONLY"],
           "documentaryEvidence": "Certificates issued by the Hackathon Organizing Authority."
