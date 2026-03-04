@@ -901,12 +901,12 @@ $RULEBOOK$
           "code": "3.10",
           "title": "Patents",
           "calculationType": "MILESTONE",
-          "milestones": {
+          "levels": {
               "Patent Filed – Application filed with IPO/WIPO": 20,
               "Patent Published in Patent Journal": 30,
               "Patent Granted / Approved – legally granted": 40,
               "Patent Licensed – Technology licensed to industry/user": 40
-         }
+         },
           "maxPoints": 40,
           "rules": ["HIGHEST_MILESTONE_ONLY"],
           "documentaryEvidence": "Documentary evidence issued by the respective competent authority (IPO/WIPO)."
