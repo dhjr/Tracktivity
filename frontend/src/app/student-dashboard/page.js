@@ -10,10 +10,10 @@ export default function StudentDashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
 
-  const [rooms, setRooms] = useState([]);
-  const [loadingRooms, setLoadingRooms] = useState(true);
+  const [batches, setBatches] = useState([]);
+  const [loadingBatches, setLoadingBatches] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
-  const [joinCode, setJoinCode] = useState("");
+  const [batchCode, setBatchCode] = useState("");
   const [joinError, setJoinError] = useState("");
   const [joinSuccess, setJoinSuccess] = useState(false);
 
@@ -26,47 +26,47 @@ export default function StudentDashboardPage() {
     ) {
       router.push("/faculty-dashboard");
     } else {
-      fetchEnrolledRooms();
+      fetchEnrolledBatches();
     }
   }, [user, router]);
 
-  const fetchEnrolledRooms = async () => {
+  const fetchEnrolledBatches = async () => {
     try {
-      const res = await fetch("/api/rooms/student");
+      const res = await fetch("/api/batches/student");
       if (!res.ok) {
-        setRooms([]);
+        setBatches([]);
         return;
       }
       const data = await res.json();
-      setRooms(data.rooms || []);
+      setBatches(data.batches || []);
     } catch (err) {
-      console.error("Fetch enrolled rooms error:", err);
+      console.error("Fetch enrolled batches error:", err);
     } finally {
-      setLoadingRooms(false);
+      setLoadingBatches(false);
     }
   };
 
-  const handleJoinRoom = async (e) => {
+  const handleJoinBatch = async (e) => {
     e.preventDefault();
     setIsJoining(true);
     setJoinError("");
     setJoinSuccess(false);
 
     try {
-      const res = await fetch("/api/rooms/join", {
+      const res = await fetch("/api/batches/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ joinCode }),
+        body: JSON.stringify({ batchCode }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to join room");
+      if (!res.ok) throw new Error(data.error || "Failed to join batch");
 
       setJoinSuccess(true);
-      setJoinCode("");
+      setBatchCode("");
 
-      // Refresh the rooms list to show the newly joined room
-      await fetchEnrolledRooms();
+      // Refresh the batches list to show the newly joined batch
+      await fetchEnrolledBatches();
 
       // Clear success message after 3 seconds
       setTimeout(() => setJoinSuccess(false), 3000);
@@ -120,35 +120,34 @@ export default function StudentDashboardPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-medium flex items-center gap-2">
             <BookOpen className="w-6 h-6" />
-            Enrolled Rooms
+            My Batch
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Join Room Form Card */}
+          {/* Join Batch Form Card */}
           <div className="p-6 bg-secondary/10 border border-border rounded-xl">
             <h3 className="font-medium mb-4 flex items-center gap-2">
-              <KeyRound className="w-4 h-4" /> Join a Room
+              <KeyRound className="w-4 h-4" /> Join a Batch
             </h3>
-            <form onSubmit={handleJoinRoom} className="space-y-4">
+            <form onSubmit={handleJoinBatch} className="space-y-4">
               {joinError && <p className="text-xs text-red-500">{joinError}</p>}
               {joinSuccess && (
                 <p className="text-xs text-green-500">
-                  Join request sent! Waiting for faculty approval.
+                  Successfully joined the batch!
                 </p>
               )}
               <input
                 type="text"
-                placeholder="6-Digit Join Code"
+                placeholder="Ex. CS101A"
                 className="w-full px-3 py-2 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors uppercase placeholder:normal-case font-mono"
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                value={batchCode}
+                onChange={(e) => setBatchCode(e.target.value.toUpperCase())}
                 required
-                maxLength={6}
               />
               <button
                 type="submit"
-                disabled={isJoining || joinCode.length < 5}
+                disabled={isJoining || !batchCode.trim()}
                 className="w-full py-2 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors flex justify-center items-center"
               >
                 {isJoining ? (
@@ -160,39 +159,39 @@ export default function StudentDashboardPage() {
             </form>
           </div>
 
-          {/* List of Joined Rooms */}
-          {loadingRooms ? (
+          {/* List of Joined Batches */}
+          {loadingBatches ? (
             <div className="md:col-span-2 flex items-center justify-center border border-border border-dashed rounded-xl p-8">
               <Loader2 className="w-6 h-6 animate-spin text-foreground/30" />
             </div>
-          ) : rooms.length === 0 ? (
+          ) : batches.length === 0 ? (
             <div className="md:col-span-2 flex flex-col items-center justify-center border border-border border-dashed rounded-xl p-8 text-center bg-secondary/10">
               <span className="text-foreground/40 mb-2">
-                You aren't enrolled in any rooms.
+                You aren't enrolled in a batch yet.
               </span>
               <span className="text-sm text-foreground/60">
-                Ask your professor for a Join Code and enter it here.
+                Ask your faculty for a Batch Code and enter it here.
               </span>
             </div>
           ) : (
-            rooms.map((room) => (
+            batches.map((batch) => (
               <div
-                key={room.id}
+                key={batch.id}
                 className="p-6 bg-background border border-border rounded-xl flex flex-col justify-between hover:shadow-sm transition-all group relative"
               >
                 {/* Status Badge */}
                 <div className="absolute top-4 right-4">
-                  {room.status === "pending" ? (
+                  {batch.status === "pending" ? (
                     <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
                       Pending Approval
                     </span>
-                  ) : room.status === "rejected" ? (
+                  ) : batch.status === "rejected" ? (
                     <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400">
                       Rejected
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-500/10 text-green-600 dark:text-green-400">
-                      Approved
+                      Joined
                     </span>
                   )}
                 </div>
@@ -200,25 +199,25 @@ export default function StudentDashboardPage() {
                 <div>
                   <h3
                     className="font-medium text-lg leading-tight truncate pr-24"
-                    title={room.name}
+                    title={batch.name}
                   >
-                    {room.name}
+                    {batch.name}
                   </h3>
                   <div className="mt-3 text-xs text-foreground/50">
-                    Requested: {new Date(room.enrolled_at).toLocaleDateString()}
+                    Joined: {new Date(batch.enrolled_at).toLocaleDateString()}
                   </div>
                 </div>
 
-                {room.status === "approved" ? (
+                {batch.status === "approved" ? (
                   <Link
-                    href={`/student-dashboard/rooms/${room.id}`}
+                    href={`/student-dashboard/batches/${batch.id}`}
                     className="mt-6 text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors inline-block"
                   >
-                    Enter Room &rarr;
+                    View Batch &rarr;
                   </Link>
                 ) : (
                   <div className="mt-6 text-sm font-medium text-foreground/30 cursor-not-allowed">
-                    {room.status === "rejected"
+                    {batch.status === "rejected"
                       ? "Access Denied"
                       : "Waiting for Access..."}
                   </div>
