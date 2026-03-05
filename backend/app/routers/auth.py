@@ -1,13 +1,13 @@
-from fastapi import APIRouter, HTTPException, status
-from app.schemas.auth import LoginRequest, SignupRequest
-from app.db.supabase_client import supabase
+from fastapi import APIRouter, HTTPException, status,Depends
+from schemas.auth import LoginRequest, SignupRequest
+from internal.session import get_supabase
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/login")
-async def login(credentials: LoginRequest):
+async def login(credentials: LoginRequest,db=Depends(get_supabase)):
     try:
-        response = supabase.auth.sign_in_with_password({
+        response = db.auth.sign_in_with_password({
             "email": credentials.email,
             "password": credentials.password
         })
@@ -19,7 +19,7 @@ async def login(credentials: LoginRequest):
         )
 
 @router.post("/signup")
-async def signup(credentials: SignupRequest):
+async def signup(credentials: SignupRequest,db=Depends(get_supabase)):
     try:
         user_metadata = {
             "name": credentials.name,
@@ -29,7 +29,7 @@ async def signup(credentials: SignupRequest):
         if credentials.role == "student":
             user_metadata["isKtuVerified"] = False
 
-        response = supabase.auth.sign_up({
+        response = db.auth.sign_up({
             "email": credentials.email,
             "password": credentials.password,
             "options": {

@@ -2,16 +2,16 @@ from fastapi import FastAPI
 from datetime import date
 import uuid
 import uvicorn
-from app.routes import student
+from routes import student
 
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth
+from routers import auth
  
 app = FastAPI(title="Tractivity")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
