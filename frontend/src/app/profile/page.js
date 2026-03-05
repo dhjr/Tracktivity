@@ -8,6 +8,11 @@ export default function ProfilePage() {
   const { user, updateProfile, updatePassword } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    ktuId: "",
+  });
   const [passwordData, setPasswordData] = useState({
     newPassword: "",
     confirmPassword: "",
@@ -16,6 +21,7 @@ export default function ProfilePage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState(null); // { type: 'success' | 'error', text: '' }
   const [showPassword, setShowPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   // Initialize form data when user loads, redirect if not logged in
   useEffect(() => {

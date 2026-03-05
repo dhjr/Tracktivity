@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from internal.session import get_supabase
+from app.internal.session import get_supabase
 from typing import Optional
 from datetime import date
 import uuid
-from util.helper import fetchRuleBook, maxCheck_meritLevelValidation, validateActivity, highLevel_winOverride, cluster_cap
+from app.util.helper import fetchRuleBook, maxCheck_meritLevelValidation, validateActivity, highLevel_winOverride, cluster_cap
 
 app = APIRouter()
 
