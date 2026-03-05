@@ -14,7 +14,7 @@ export default function SignupPage() {
     password: "",
     ktuId: "",
     department: "",
-    studentCategory: "Regular Students",
+    studentCategory: "regular",
     role: "student",
   });
   const [loading, setLoading] = useState(false);
@@ -131,7 +131,7 @@ export default function SignupPage() {
                   setFormData({
                     ...formData,
                     role: "student",
-                    studentCategory: "Regular Students",
+                    studentCategory: "regular",
                   })
                 }
                 className={`py-2 border text-sm transition-colors ${
@@ -180,9 +180,9 @@ export default function SignupPage() {
                     })
                   }
                 >
-                  <option value="Regular Students">Regular Students</option>
-                  <option value="Lateral Entry">Lateral Entry</option>
-                  <option value="PwD Students">PwD Students</option>
+                  <option value="regular">Regular Students</option>
+                  <option value="lateralEntry">Lateral Entry</option>
+                  <option value="pwd">PwD Students</option>
                 </select>
               </div>
 

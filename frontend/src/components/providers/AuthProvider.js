@@ -118,9 +118,9 @@ export default function AuthProvider({ children }) {
     window.location.href = "/";
   };
 
-  const updateProfile = async ({ name, ktuId }) => {
+  const updateProfile = async ({ name, ktuId, department }) => {
     const { data, error } = await supabase.auth.updateUser({
-      data: { name, ktuId },
+      data: { name, ktuId, department },
     });
     if (error) throw error;
     // Update local state to reflect new name immediately
