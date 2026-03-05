@@ -1,16 +1,18 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from app.schemas.batch import BatchCreate, BatchJoin
 from app.internal.session import get_supabase
+from app.internal.dependencies import get_current_user, require_role
+
 
 router = APIRouter(prefix="/batches", tags=["batches"])
 
 @router.post("/")
-async def create_batch(batch_data: BatchCreate, db=Depends(get_supabase)):
+async def create_batch(batch_data: BatchCreate, db=Depends(get_supabase), current_user=Depends(require_role("faculty")) ):
     try:
         response = db.table("batches").insert({
             "name": batch_data.name,
             "batch_code": batch_data.batch_code,
-            "created_by": batch_data.created_by
+            "created_by": current_user.id
         }).execute()
 
         # The response could be empty if no data is returned, we check data
@@ -37,7 +39,7 @@ async def create_batch(batch_data: BatchCreate, db=Depends(get_supabase)):
         )
 
 @router.post("/join")
-async def join_batch(join_data: BatchJoin, db=Depends(get_supabase)):
+async def join_batch(join_data: BatchJoin, db=Depends(get_supabase), current_user=Depends(get_current_user)):
     try:
         # 1. Lookup the batch by batch_code
         batch_res = db.table("batches").select("id, name").eq("batch_code", join_data.batch_code).execute()
