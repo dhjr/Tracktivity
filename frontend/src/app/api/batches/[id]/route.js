@@ -20,38 +20,38 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // 2. Verify faculty actually created this room
-    const { data: room, error: roomErr } = await supabase
-      .from("rooms")
+    // 2. Verify faculty actually created this batch
+    const { data: batch, error: batchErr } = await supabase
+      .from("batches")
       .select("id")
       .eq("id", roomId)
       .eq("created_by", user.id)
       .single();
 
-    if (roomErr || !room) {
+    if (batchErr || !batch) {
       return NextResponse.json(
-        { error: "Room not found or unauthorized to manage this room." },
+        { error: "Batch not found or unauthorized to manage this batch." },
         { status: 404 },
       );
     }
 
-    // 3. Delete the room
+    // 3. Delete the batch
     const { error: deleteErr } = await supabase
-      .from("rooms")
+      .from("batches")
       .delete()
       .eq("id", roomId);
 
     if (deleteErr) {
-      console.error("Error deleting room:", deleteErr);
+      console.error("Error deleting batch:", deleteErr);
       return NextResponse.json(
-        { error: "Failed to delete room." },
+        { error: "Failed to delete batch." },
         { status: 500 },
       );
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Unexpected error in rooms/[id] DELETE route:", error);
+    console.error("Unexpected error in batches/[id] DELETE route:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

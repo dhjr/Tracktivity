@@ -18,24 +18,24 @@ export async function GET(request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Fetch all rooms created by this user, ordered newest first
-    const { data: rooms, error: fetchErr } = await supabase
-      .from("rooms")
+    // Fetch all batches created by this user, ordered newest first
+    const { data: batches, error: fetchErr } = await supabase
+      .from("batches")
       .select("*")
       .eq("created_by", user.id)
       .order("created_at", { ascending: false });
 
     if (fetchErr) {
-      console.error("Error fetching rooms:", fetchErr);
+      console.error("Error fetching batches:", fetchErr);
       return NextResponse.json(
-        { error: "Failed to fetch rooms" },
+        { error: "Failed to fetch batches" },
         { status: 500 },
       );
     }
 
-    return NextResponse.json({ rooms });
+    return NextResponse.json({ batches });
   } catch (error) {
-    console.error("Unexpected error in rooms/faculty route:", error);
+    console.error("Unexpected error in batches/faculty route:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
