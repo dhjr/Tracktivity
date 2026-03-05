@@ -7,4 +7,4 @@ class BatchCreate(BaseModel):
 
 class BatchJoin(BaseModel):
     batch_code: str
-    student_id: str  
+  
