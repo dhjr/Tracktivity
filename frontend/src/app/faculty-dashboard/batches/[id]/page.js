@@ -96,9 +96,6 @@ export default function FacultyBatchPage({ params }) {
     );
   }
 
-  const pendingRequests = enrollments.filter((e) => e.status === "pending");
-  const approvedStudents = enrollments.filter((e) => e.status === "approved");
-
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
       <div className="flex items-center justify-between mb-6">
@@ -246,7 +243,7 @@ export default function FacultyBatchPage({ params }) {
               </span>
               ?
               {confirmReject.type === "revoke" &&
-                " They will no longer have access to this room."}
+                " They will no longer be associated with this batch."}
             </p>
             <div className="flex items-center justify-end gap-3">
               <button
@@ -297,7 +294,8 @@ export default function FacultyBatchPage({ params }) {
               <br />
               This action is{" "}
               <span className="font-bold text-red-500">permanent</span> and
-              cannot be undone. All enrollments and batch data will be lost.
+              cannot be undone. All student associations and batch data will be
+              lost.
             </p>
             <div className="flex items-center justify-end gap-3">
               <button
