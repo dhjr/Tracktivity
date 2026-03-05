@@ -33,7 +33,10 @@ export default function StudentDashboardPage() {
   const fetchEnrolledRooms = async () => {
     try {
       const res = await fetch("/api/rooms/student");
-      if (!res.ok) throw new Error("Failed to fetch rooms");
+      if (!res.ok) {
+        setRooms([]);
+        return;
+      }
       const data = await res.json();
       setRooms(data.rooms || []);
     } catch (err) {

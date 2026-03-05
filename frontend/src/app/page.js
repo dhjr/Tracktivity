@@ -12,7 +12,9 @@ export default function Home() {
   useEffect(() => {
     if (user) {
       const userRole = user?.user_metadata?.role || "student";
-      router.push(userRole === "faculty" ? "/faculty" : "/student");
+      router.push(
+        userRole === "faculty" ? "/faculty-dashboard" : "/student-dashboard",
+      );
     }
   }, [user, router]);
 

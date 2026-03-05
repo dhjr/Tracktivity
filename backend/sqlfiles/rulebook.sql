@@ -19,9 +19,7 @@ CREATE POLICY "Service role can update rulebook"
   USING (auth.role() = 'service_role');
 
 
--- =============================================================================
--- INSERT — Full KTU 2024 Rulebook
--- =============================================================================
+
 INSERT INTO activity_rulebook (id, scheme, version, data) VALUES (
 1,
 'KTU 2024 Scheme',
