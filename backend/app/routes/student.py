@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from internal.session import get_supabase
+from app.db.supabase_client import supabase
 from typing import Optional
 from datetime import date
 import uuid
@@ -15,7 +15,7 @@ async def create_submission(
     level_key: Optional[str] = Form(None), 
     student_id: str = Form(...),     # Get from token in future
     file: UploadFile = File(...),
-    db=Depends(get_supabase)
+    db=Depends(supabase)
 ):
 
     ## fetching the rule book for prevalidation
@@ -69,7 +69,7 @@ async def create_submission(
     return {"message": "Success! Submission is pending faculty review."}    
 
 @app.get("/student/{student_id}/summary")
-async def get_student_summary(student_id: str, db=Depends(get_supabase)):
+async def get_student_summary(student_id: str, db=Depends(supabase)):
     # Fetch all approved submissions to calculate points
     response = db.table("submissions")\
         .select("points_awarded, group_name")\
