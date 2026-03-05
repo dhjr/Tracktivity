@@ -21,10 +21,14 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    {
-      name: "Home",
-      href: user ? (userRole === "faculty" ? "/faculty" : "/student") : "/",
-    },
+    ...(user
+      ? []
+      : [
+          {
+            name: "Home",
+            href: "/",
+          },
+        ]),
     {
       name: "Dashboard",
       href:
