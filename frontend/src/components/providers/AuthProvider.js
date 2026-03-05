@@ -71,7 +71,15 @@ export default function AuthProvider({ children }) {
     return { user: respData.user };
   };
 
-  const signup = async (email, password, name, role, ktuId) => {
+  const signup = async (
+    email,
+    password,
+    name,
+    role,
+    department,
+    ktuId,
+    studentCategory,
+  ) => {
     const res = await fetch(`${API_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -80,6 +88,8 @@ export default function AuthProvider({ children }) {
         password,
         name,
         role,
+        department,
+        studentCategory: studentCategory || null,
         ktuId: ktuId || null,
       }),
     });

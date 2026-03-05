@@ -13,6 +13,8 @@ export default function SignupPage() {
     email: "",
     password: "",
     ktuId: "",
+    department: "",
+    studentCategory: "Regular Students",
     role: "student",
   });
   const [loading, setLoading] = useState(false);
@@ -45,7 +47,9 @@ export default function SignupPage() {
         formData.password,
         formData.name,
         formData.role,
+        formData.department,
         formData.ktuId,
+        formData.studentCategory,
       );
       // Depending on Supabase settings, email confirmation might be required.
       router.push(
@@ -105,11 +109,31 @@ export default function SignupPage() {
           </div>
 
           <div className="space-y-1.5">
+            <label className="text-sm text-foreground/80">Department</label>
+            <input
+              type="text"
+              required
+              className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors"
+              placeholder="e.g. Computer Science"
+              value={formData.department}
+              onChange={(e) =>
+                setFormData({ ...formData, department: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-1.5">
             <label className="text-sm text-foreground/80">Account Type</label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, role: "student" })}
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    role: "student",
+                    studentCategory: "Regular Students",
+                  })
+                }
                 className={`py-2 border text-sm transition-colors ${
                   formData.role === "student"
                     ? "bg-foreground text-background border-foreground"
@@ -121,7 +145,12 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() =>
-                  setFormData({ ...formData, role: "faculty", ktuId: "" })
+                  setFormData({
+                    ...formData,
+                    role: "faculty",
+                    ktuId: "",
+                    studentCategory: "",
+                  })
                 }
                 className={`py-2 border text-sm transition-colors ${
                   formData.role === "faculty"
@@ -135,22 +164,45 @@ export default function SignupPage() {
           </div>
 
           {formData.role === "student" && (
-            <div className="space-y-1.5">
-              <label className="text-sm text-foreground/80">KTU ID</label>
-              <input
-                type="text"
-                required
-                className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors uppercase placeholder:normal-case"
-                placeholder="e.g. KTE23CS043"
-                value={formData.ktuId}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    ktuId: e.target.value.toUpperCase(),
-                  })
-                }
-              />
-            </div>
+            <>
+              <div className="space-y-1.5">
+                <label className="text-sm text-foreground/80">
+                  Student Category
+                </label>
+                <select
+                  required
+                  className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors appearance-none"
+                  value={formData.studentCategory}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      studentCategory: e.target.value,
+                    })
+                  }
+                >
+                  <option value="Regular Students">Regular Students</option>
+                  <option value="Lateral Entry">Lateral Entry</option>
+                  <option value="PwD Students">PwD Students</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm text-foreground/80">KTU ID</label>
+                <input
+                  type="text"
+                  required
+                  className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors uppercase placeholder:normal-case"
+                  placeholder="e.g. KTE23CS043"
+                  value={formData.ktuId}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      ktuId: e.target.value.toUpperCase(),
+                    })
+                  }
+                />
+              </div>
+            </>
           )}
 
           <div className="space-y-1.5">

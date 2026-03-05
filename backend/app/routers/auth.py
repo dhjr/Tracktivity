@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status,Depends
-from schemas.auth import LoginRequest, SignupRequest
-from internal.session import get_supabase
+from app.schemas.auth import LoginRequest, SignupRequest
+from app.internal.session import get_supabase
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -24,10 +24,12 @@ async def signup(credentials: SignupRequest,db=Depends(get_supabase)):
         user_metadata = {
             "name": credentials.name,
             "role": credentials.role,
+            "department": credentials.department,
             "ktuId": credentials.ktuId,
         }
         if credentials.role == "student":
             user_metadata["isKtuVerified"] = False
+            user_metadata["studentCategory"] = credentials.studentCategory
 
         response = db.auth.sign_up({
             "email": credentials.email,
