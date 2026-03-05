@@ -10,10 +10,10 @@ export default function FacultyDashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
 
-  const [rooms, setRooms] = useState([]);
-  const [loadingRooms, setLoadingRooms] = useState(true);
+  const [batches, setBatches] = useState([]);
+  const [loadingBatches, setLoadingBatches] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [newRoomName, setNewRoomName] = useState("");
+  const [newBatchName, setNewBatchName] = useState("");
   const [createError, setCreateError] = useState("");
 
   useEffect(() => {
@@ -22,41 +22,41 @@ export default function FacultyDashboardPage() {
     } else if (user?.user_metadata?.role !== "faculty") {
       router.push("/student-dashboard");
     } else {
-      fetchRooms();
+      fetchBatches();
     }
   }, [user, router]);
 
-  const fetchRooms = async () => {
+  const fetchBatches = async () => {
     try {
-      const res = await fetch("/api/rooms/faculty");
-      if (!res.ok) throw new Error("Failed to fetch rooms");
+      const res = await fetch("/api/batches/faculty");
+      if (!res.ok) throw new Error("Failed to fetch batches");
       const data = await res.json();
-      setRooms(data.rooms || []);
+      setBatches(data.batches || []);
     } catch (err) {
       console.error(err);
     } finally {
-      setLoadingRooms(false);
+      setLoadingBatches(false);
     }
   };
 
-  const handleCreateRoom = async (e) => {
+  const handleCreateBatch = async (e) => {
     e.preventDefault();
     setIsCreating(true);
     setCreateError("");
 
     try {
-      const res = await fetch("/api/rooms/create", {
+      const res = await fetch("/api/batches/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newRoomName }),
+        body: JSON.stringify({ name: newBatchName }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create room");
+      if (!res.ok) throw new Error(data.error || "Failed to create batch");
 
-      // Add the new room to the top of the list locally
-      setRooms([data.room, ...rooms]);
-      setNewRoomName(""); // clear input
+      // Add the new batch to the top of the list locally
+      setBatches([data.batch, ...batches]);
+      setNewBatchName(""); // clear input
     } catch (err) {
       setCreateError(err.message);
     } finally {
@@ -92,7 +92,7 @@ export default function FacultyDashboardPage() {
             Global Verification
           </h3>
           <p className="text-sm text-foreground/60">
-            Review and lock KTU IDs of all students enrolled in your rooms.
+            Review and lock KTU IDs of all students enrolled in your batches.
           </p>
         </Link>
 
@@ -112,7 +112,7 @@ export default function FacultyDashboardPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-medium flex items-center gap-2">
             <Users className="w-6 h-6" />
-            My Rooms
+            My Batches
           </h2>
         </div>
 
@@ -120,9 +120,9 @@ export default function FacultyDashboardPage() {
           {/* Create Room Form Card */}
           <div className="p-6 bg-secondary/10 border border-border rounded-xl">
             <h3 className="font-medium mb-4 flex items-center gap-2">
-              <Plus className="w-4 h-4" /> Create New Room
+              <Plus className="w-4 h-4" /> Create New Batch
             </h3>
-            <form onSubmit={handleCreateRoom} className="space-y-4">
+            <form onSubmit={handleCreateBatch} className="space-y-4">
               {createError && (
                 <p className="text-xs text-red-500">{createError}</p>
               )}
@@ -130,67 +130,66 @@ export default function FacultyDashboardPage() {
                 type="text"
                 placeholder="Ex: CS 101 - Fall 24"
                 className="w-full px-3 py-2 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
-                value={newRoomName}
-                onChange={(e) => setNewRoomName(e.target.value)}
+                value={newBatchName}
+                onChange={(e) => setNewBatchName(e.target.value)}
                 required
                 maxLength={50}
               />
               <button
                 type="submit"
-                disabled={isCreating || !newRoomName.trim()}
+                disabled={isCreating || !newBatchName.trim()}
                 className="w-full py-2 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors flex justify-center items-center"
               >
                 {isCreating ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  "Create Room"
+                  "Create Batch"
                 )}
               </button>
             </form>
           </div>
 
-          {/* List of Existing Rooms */}
-          {loadingRooms ? (
+          {loadingBatches ? (
             <div className="md:col-span-2 flex items-center justify-center border border-border border-dashed rounded-xl p-8">
               <Loader2 className="w-6 h-6 animate-spin text-foreground/30" />
             </div>
-          ) : rooms.length === 0 ? (
+          ) : batches.length === 0 ? (
             <div className="md:col-span-2 flex flex-col items-center justify-center border border-border border-dashed rounded-xl p-8 text-center bg-secondary/10">
               <span className="text-foreground/40 mb-2">
-                No rooms created yet.
+                No batches created yet.
               </span>
               <span className="text-sm text-foreground/60">
-                Create your first room by filling out the form.
+                Create your first batch by filling out the form.
               </span>
             </div>
           ) : (
-            rooms.map((room) => (
+            batches.map((batch) => (
               <div
-                key={room.id}
+                key={batch.id}
                 className="p-6 bg-background border border-border rounded-xl flex flex-col justify-between hover:shadow-sm transition-all group"
               >
                 <div>
                   <h3
                     className="font-medium text-lg leading-tight truncate"
-                    title={room.name}
+                    title={batch.name}
                   >
-                    {room.name}
+                    {batch.name}
                   </h3>
                   <div className="mt-3 flex items-center justify-between bg-secondary/30 px-3 py-2 rounded">
                     <span className="text-xs text-foreground/60 font-medium">
-                      JOIN CODE:
+                      BATCH CODE:
                     </span>
                     <span className="text-sm font-mono tracking-widest font-bold">
-                      {room.join_code}
+                      {batch.batch_code}
                     </span>
                   </div>
                 </div>
 
                 <Link
-                  href={`/faculty-dashboard/rooms/${room.id}`}
+                  href={`/faculty-dashboard/batches/${batch.id}`}
                   className="mt-6 text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors inline-block"
                 >
-                  Manage Room &rarr;
+                  Manage Batch &rarr;
                 </Link>
               </div>
             ))

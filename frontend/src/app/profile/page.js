@@ -12,6 +12,7 @@ export default function ProfilePage() {
     name: "",
     email: "",
     ktuId: "",
+    department: "",
   });
   const [passwordData, setPasswordData] = useState({
     newPassword: "",
@@ -32,6 +33,7 @@ export default function ProfilePage() {
         name: user.user_metadata?.name || "",
         email: user.email || "",
         ktuId: user.user_metadata?.ktuId || "",
+        department: user.user_metadata?.department || "",
       });
     }
   }, [user, router]);
@@ -65,6 +67,7 @@ export default function ProfilePage() {
 
       await updateProfile({
         name: formData.name,
+        department: formData.department,
         // Only submit the KTU ID if it hasn't been locked yet by a faculty member
         ...(isKtuVerified ? {} : { ktuId: formData.ktuId }),
       });
@@ -146,6 +149,7 @@ export default function ProfilePage() {
                 name: user.user_metadata?.name || "",
                 email: user.email || "",
                 ktuId: user.user_metadata?.ktuId || "",
+                department: user.user_metadata?.department || "",
               });
             }
             setIsEditing(!isEditing);
@@ -167,6 +171,18 @@ export default function ProfilePage() {
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
+              }
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm text-foreground/80">Department</label>
+            <input
+              type="text"
+              required
+              className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors"
+              value={formData.department}
+              onChange={(e) =>
+                setFormData({ ...formData, department: e.target.value })
               }
             />
           </div>
@@ -222,6 +238,12 @@ export default function ProfilePage() {
             <span className="text-foreground/50">Full Name</span>
             <span className="text-foreground">
               {user.user_metadata?.name || "Not provided"}
+            </span>
+          </div>
+          <div className="flex flex-col space-y-1 border-b border-border pb-4">
+            <span className="text-foreground/50">Department</span>
+            <span className="text-foreground">
+              {user.user_metadata?.department || "Not provided"}
             </span>
           </div>
           {user.user_metadata?.role !== "faculty" && (

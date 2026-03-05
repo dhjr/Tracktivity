@@ -13,7 +13,7 @@ payload = {
     "name": "Test User",
     "role": "student",
     "department": "Computer Science",
-    "studentCategory": "Lateral Entry",
+    "studentCategory": "lateralEntry",
     "ktuId": ktu_id
 }
 

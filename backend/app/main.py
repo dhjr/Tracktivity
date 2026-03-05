@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from datetime import date
 import uuid
 import uvicorn
-from routes import student
+# from routes import student
 
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth
+from app.routers import auth, batch
  
 app = FastAPI(title="Tractivity")
 
@@ -18,12 +18,13 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(batch.router)
 
 @app.get("/")
 def read_root():
       return "welcome to Tractivity"
 
-app.include_router(student.app)
+# app.include_router(student.app)
 
 if __name__ =="__main__":
       uvicorn.run("main:app",host="127.0.0.1",port=8000,reload=True)

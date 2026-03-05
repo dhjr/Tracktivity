@@ -71,7 +71,15 @@ export default function AuthProvider({ children }) {
     return { user: respData.user };
   };
 
-  const signup = async (email, password, name, role, ktuId) => {
+  const signup = async (
+    email,
+    password,
+    name,
+    role,
+    department,
+    ktuId,
+    studentCategory,
+  ) => {
     const res = await fetch(`${API_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -80,6 +88,8 @@ export default function AuthProvider({ children }) {
         password,
         name,
         role,
+        department,
+        studentCategory: studentCategory || null,
         ktuId: ktuId || null,
       }),
     });
@@ -108,9 +118,9 @@ export default function AuthProvider({ children }) {
     window.location.href = "/";
   };
 
-  const updateProfile = async ({ name, ktuId }) => {
+  const updateProfile = async ({ name, ktuId, department }) => {
     const { data, error } = await supabase.auth.updateUser({
-      data: { name, ktuId },
+      data: { name, ktuId, department },
     });
     if (error) throw error;
     // Update local state to reflect new name immediately

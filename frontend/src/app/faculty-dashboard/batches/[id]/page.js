@@ -16,18 +16,18 @@ import {
   Copy,
 } from "lucide-react";
 
-export default function FacultyRoomPage({ params }) {
+export default function FacultyBatchPage({ params }) {
   const { user } = useAuth();
   const router = useRouter();
-  const { id: roomId } = use(params);
+  const { id: batchId } = use(params);
 
-  const [room, setRoom] = useState(null);
-  const [enrollments, setEnrollments] = useState([]);
+  const [batch, setBatch] = useState(null);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [confirmReject, setConfirmReject] = useState(null); // stores the student to be rejected/revoked
-  const [confirmDeleteRoom, setConfirmDeleteRoom] = useState(false);
-  const [deleteRoomLoading, setDeleteRoomLoading] = useState(false);
+  const [confirmDeleteBatch, setConfirmDeleteBatch] = useState(false);
+  const [deleteBatchLoading, setDeleteBatchLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   useEffect(() => {
     if (user === null) {
@@ -35,75 +35,54 @@ export default function FacultyRoomPage({ params }) {
     } else if (user?.user_metadata?.role !== "faculty") {
       router.push("/student-dashboard");
     } else {
-      fetchRoomDetails();
+      fetchBatchDetails();
     }
-  }, [user, router, roomId]);
+  }, [user, router, batchId]);
 
-  const fetchRoomDetails = async () => {
+  const fetchBatchDetails = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/rooms/${roomId}/enrollments`);
+      const res = await fetch(`/api/batches/${batchId}/students`);
       if (!res.ok) {
         if (res.status === 404) router.push("/faculty-dashboard");
-        throw new Error("Failed to fetch room details");
+        throw new Error("Failed to fetch batch details");
       }
       const data = await res.json();
-      setRoom(data.room);
-      setEnrollments(data.enrollments || []);
+      setBatch(data.batch);
+      setStudents(data.students || []);
     } catch (err) {
-      console.error("Error fetching room details:", err);
+      console.error("Error fetching batch details:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleRespond = async (studentId, status) => {
-    setActionLoading(studentId);
-    try {
-      const res = await fetch(`/api/rooms/${roomId}/respond`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId, status }),
-      });
-
-      if (!res.ok) throw new Error("Failed to update status");
-
-      // Update local state
-      setEnrollments(
-        enrollments.map((enr) =>
-          enr.student_id === studentId ? { ...enr, status } : enr,
-        ),
-      );
-    } catch (err) {
-      console.error("Error responding to join request:", err);
-      alert("Failed to update student status.");
-    } finally {
-      setActionLoading(null);
-    }
+    // Left empty for future implementation
   };
 
-  const handleDeleteRoom = async () => {
-    setDeleteRoomLoading(true);
+  const handleDeleteBatch = async () => {
+    setDeleteBatchLoading(true);
     try {
-      const res = await fetch(`/api/rooms/${roomId}`, {
+      const res = await fetch(`/api/batches/${batchId}`, {
         method: "DELETE",
       });
 
-      if (!res.ok) throw new Error("Failed to delete room");
+      if (!res.ok) throw new Error("Failed to delete batch");
 
       router.push("/faculty-dashboard");
       router.refresh();
     } catch (err) {
-      console.error("Error deleting room:", err);
-      alert("Failed to delete room. Please try again.");
-      setDeleteRoomLoading(false);
-      setConfirmDeleteRoom(false);
+      console.error("Error deleting batch:", err);
+      alert("Failed to delete batch. Please try again.");
+      setDeleteBatchLoading(false);
+      setConfirmDeleteBatch(false);
     }
   };
 
   const handleCopyCode = () => {
-    if (room?.join_code) {
-      navigator.clipboard.writeText(room.join_code);
+    if (batch?.batch_code) {
+      navigator.clipboard.writeText(batch.batch_code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -130,17 +109,17 @@ export default function FacultyRoomPage({ params }) {
           <ArrowLeft className="w-4 h-4" /> Back to Dashboard
         </Link>
         <button
-          onClick={() => setConfirmDeleteRoom(true)}
+          onClick={() => setConfirmDeleteBatch(true)}
           className="inline-flex items-center gap-2 text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-500/10 px-3 py-1.5 rounded-md transition-colors"
         >
-          <Trash2 className="w-4 h-4" /> Delete Room
+          <Trash2 className="w-4 h-4" /> Delete Batch
         </button>
       </div>
 
       <div className="mb-8 border-b border-border pb-6 flex items-end justify-between">
         <div>
           <h1 className="text-3xl font-medium tracking-tight text-foreground">
-            {room?.name}
+            {batch?.name}
           </h1>
           <div className="flex items-center gap-4 mt-2">
             <button
@@ -148,9 +127,9 @@ export default function FacultyRoomPage({ params }) {
               className="text-sm text-foreground/60 flex items-center gap-2 hover:text-foreground transition-colors group"
               title="Click to copy join code"
             >
-              Join Code:{" "}
+              Batch Code:{" "}
               <span className="font-mono font-bold text-foreground group-hover:bg-foreground/10 px-1.5 py-0.5 rounded transition-colors">
-                {room?.join_code}
+                {batch?.batch_code}
               </span>
               {copied ? (
                 <Check className="w-3.5 h-3.5 text-green-500" />
@@ -160,133 +139,23 @@ export default function FacultyRoomPage({ params }) {
             </button>
             <span className="text-foreground/30">•</span>
             <p className="text-sm text-foreground/60 flex items-center gap-1">
-              <Users className="w-4 h-4" /> {approvedStudents.length} Students
+              <Users className="w-4 h-4" /> {students.length} Students
             </p>
           </div>
         </div>
       </div>
 
       <div className="space-y-12">
-        {/* Pending Requests Section */}
-        <section>
-          <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-            Pending Approval
-            {pendingRequests.length > 0 && (
-              <span className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 text-xs px-2 py-0.5 rounded-full font-bold">
-                {pendingRequests.length}
-              </span>
-            )}
-          </h2>
-
-          {pendingRequests.length === 0 ? (
-            <div className="p-6 border border-border border-dashed rounded-xl bg-secondary/10 flex flex-col items-center justify-center text-center">
-              <span className="text-foreground/40">
-                No pending join requests.
-              </span>
-            </div>
-          ) : (
-            <div className="border border-border rounded-xl overflow-hidden">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-secondary/30 border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 font-medium text-foreground/70">
-                      Name
-                    </th>
-                    <th className="px-4 py-3 font-medium text-foreground/70">
-                      Email
-                    </th>
-                    <th className="px-4 py-3 font-medium text-foreground/70">
-                      KTU ID
-                    </th>
-                    <th className="px-4 py-3 font-medium text-foreground/70 text-right">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border bg-background">
-                  {pendingRequests.map((student) => (
-                    <tr
-                      key={student.student_id}
-                      className="hover:bg-secondary/10 transition-colors"
-                    >
-                      <td className="px-4 py-3 font-medium">
-                        {student.studentName}
-                      </td>
-                      <td className="px-4 py-3 text-foreground/70">
-                        {student.studentEmail}
-                      </td>
-                      <td className="px-4 py-3 font-mono">
-                        <div className="flex items-center gap-2">
-                          {student.ktuId}
-                          {student.isKtuVerified ? (
-                            <ShieldCheck
-                              className="w-4 h-4 text-green-500"
-                              title="Verified KTU ID"
-                            />
-                          ) : (
-                            <ShieldAlert
-                              className="w-4 h-4 text-red-500"
-                              title="Unverified KTU ID"
-                            />
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() =>
-                              handleRespond(student.student_id, "approved")
-                            }
-                            disabled={actionLoading === student.student_id}
-                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-1 disabled:opacity-50"
-                          >
-                            {actionLoading === student.student_id ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <>
-                                <Check className="w-3 h-3" /> Approve
-                              </>
-                            )}
-                          </button>
-                          <button
-                            onClick={() =>
-                              setConfirmReject({
-                                id: student.student_id,
-                                name: student.studentName,
-                                type: "reject",
-                              })
-                            }
-                            disabled={actionLoading === student.student_id}
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-1 disabled:opacity-50"
-                          >
-                            {actionLoading === student.student_id ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <>
-                                <X className="w-3 h-3" /> Reject
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
         {/* Enrolled Students Section */}
         <section>
           <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
             Enrolled Students
           </h2>
 
-          {approvedStudents.length === 0 ? (
+          {students.length === 0 ? (
             <div className="p-6 border border-border border-dashed rounded-xl bg-secondary/10 flex flex-col items-center justify-center text-center">
               <span className="text-foreground/40">
-                No students are currently enrolled in this room.
+                No students are currently enrolled in this batch.
               </span>
             </div>
           ) : (
@@ -309,7 +178,7 @@ export default function FacultyRoomPage({ params }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border bg-background">
-                  {approvedStudents.map((student) => (
+                  {students.map((student) => (
                     <tr
                       key={student.student_id}
                       className="hover:bg-secondary/10 transition-colors"
@@ -411,39 +280,39 @@ export default function FacultyRoomPage({ params }) {
         </div>
       )}
 
-      {/* Delete Room Confirmation Modal */}
-      {confirmDeleteRoom && (
+      {/* Delete Batch Confirmation Modal */}
+      {confirmDeleteBatch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
           <div className="bg-background border border-border shadow-lg rounded-xl p-6 w-full max-w-md">
             <h3 className="text-xl font-medium mb-2 text-red-500 flex items-center gap-2">
-              <Trash2 className="w-5 h-5" /> Delete Room
+              <Trash2 className="w-5 h-5" /> Delete Batch
             </h3>
             <p className="text-foreground/70 mb-6">
               Are you absolute sure you want to delete{" "}
               <span className="font-semibold text-foreground">
-                {room?.name}
+                {batch?.name}
               </span>
               ?
               <br />
               <br />
               This action is{" "}
               <span className="font-bold text-red-500">permanent</span> and
-              cannot be undone. All enrollments and room data will be lost.
+              cannot be undone. All enrollments and batch data will be lost.
             </p>
             <div className="flex items-center justify-end gap-3">
               <button
-                onClick={() => setConfirmDeleteRoom(false)}
+                onClick={() => setConfirmDeleteBatch(false)}
                 className="px-4 py-2 rounded-md text-sm font-medium hover:bg-secondary/50 transition-colors"
-                disabled={deleteRoomLoading}
+                disabled={deleteBatchLoading}
               >
                 Cancel
               </button>
               <button
-                onClick={handleDeleteRoom}
-                disabled={deleteRoomLoading}
+                onClick={handleDeleteBatch}
+                disabled={deleteBatchLoading}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
               >
-                {deleteRoomLoading ? (
+                {deleteBatchLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <>

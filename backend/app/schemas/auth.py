@@ -10,4 +10,6 @@ class SignupRequest(BaseModel):
     password: str
     name: str
     role: str
+    department: str
+    studentCategory: Optional[str] = None
     ktuId: Optional[str] = None
