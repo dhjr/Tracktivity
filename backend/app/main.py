@@ -5,7 +5,7 @@ import uvicorn
 # from routes import student
 
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, batch
+from app.routers import auth, batch, faculty
  
 app = FastAPI(title="Tractivity")
 
@@ -19,6 +19,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(batch.router)
+app.include_router(faculty.router)
 
 @app.get("/")
 def read_root():
