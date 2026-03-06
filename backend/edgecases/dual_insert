@@ -1,3 +1,7 @@
+-- Insert batch ✅
+-- Insert batch_faculty ❌  ← fails for some reason
+-- Now you have a batch in the DB with no admin — it's orphaned and broken. This is a rare edge case but can happen.
+
 CREATE OR REPLACE FUNCTION create_batch_with_admin(
     p_name text,
     p_batch_code text,
