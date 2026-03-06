@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from app.internal.session import get_supabase
+from internal.session import get_supabase
 from typing import Optional
 from datetime import date
 import uuid

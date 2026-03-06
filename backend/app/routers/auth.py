@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status,Depends
-from app.schemas.auth import LoginRequest, SignupRequest
-from app.internal.session import get_supabase
+from schemas.auth import LoginRequest, SignupRequest
+from internal.session import get_supabase
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

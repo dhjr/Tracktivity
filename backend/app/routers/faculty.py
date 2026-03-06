@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from app.internal.session import get_supabase
-from app.internal.dependencies import require_role
+from internal.session import get_supabase
+from internal.dependencies import require_role
 
 router = APIRouter(prefix="/faculty", tags=["faculty"])
 
@@ -105,3 +105,65 @@ async def get_pending_submissions(
         .execute()
 
     return {"pending_submissions": res.data}
+
+
+
+@router.get("/submissions/{submission_id}")
+async def get_submission_detail(
+    submission_id: str,
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("faculty"))
+):
+    # 1. Fetch the submission
+    res = db.table("submissions") \
+        .select("""
+            id,
+            batch_id,
+            activity_id,
+            activity_name,
+            group_name,
+            level,
+            points_awarded,
+            academic_year,
+            certificate_date,
+            certificate_url,
+            status,
+            comments,
+            created_at,
+            student:students(id, full_name, ktuid, department)
+        """) \
+        .eq("id", submission_id) \
+        .single() \
+        .execute()
+
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Submission not found.")
+
+    submission = res.data
+
+    # 2. Verify faculty has admin access to this submission's batch
+    await verify_admin_access(submission["batch_id"], current_user.id, db)
+
+    # 3. Fetch matching rule from rulebook
+    rulebook_res = db.table("activity_rulebook") \
+        .select("data") \
+        .eq("id", 1) \
+        .single() \
+        .execute()
+
+    rule = None
+    if rulebook_res.data:
+       data = rulebook_res.data["data"]
+       activity_id = submission["activity_id"]  # e.g. "1.1"
+       for category in data.get("categories", []):
+          for activity in category.get("activities", []):
+              if activity.get("code") == activity_id:
+                 rule = activity
+                 break
+          if rule:
+            break
+
+    return {
+        "submission": submission,
+        "rule": rule
+    }
