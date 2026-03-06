@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from app.schemas.batch import BatchCreate, BatchJoin
-from app.internal.session import get_supabase
-from app.internal.dependencies import get_current_user, require_role
+from schemas.batch import BatchCreate, BatchJoin
+from internal.session import get_supabase
+from internal.dependencies import get_current_user, require_role
 
 
 router = APIRouter(prefix="/batches", tags=["batches"])
