@@ -1,0 +1,26 @@
+-- Insert batch ✅
+-- Insert batch_faculty ❌  ← fails for some reason
+-- Now you have a batch in the DB with no admin — it's orphaned and broken. This is a rare edge case but can happen.
+
+CREATE OR REPLACE FUNCTION create_batch_with_admin(
+    p_name text,
+    p_batch_code text,
+    p_faculty_id uuid
+)
+RETURNS json AS $$
+DECLARE
+    new_batch batches;
+BEGIN
+    INSERT INTO batches (name, batch_code, created_by)
+    VALUES (p_name, p_batch_code, p_faculty_id)
+    RETURNING * INTO new_batch;
+
+    INSERT INTO batch_faculty (batch_id, faculty_id, is_admin)
+    VALUES (new_batch.id, p_faculty_id, true);
+
+    RETURN row_to_json(new_batch);
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- And called from FastAPI as db.rpc("create_batch_with_admin", {...}).execute().
