@@ -3,7 +3,6 @@ from datetime import date
 import uuid
 import uvicorn
 from routes import student
-
 from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, batch, faculty
 

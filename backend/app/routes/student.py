@@ -69,15 +69,15 @@ async def create_submission(
     
     print("activity certifiacte url obtained successully")
     # --- 7. DATABASE PERSISTENCE ---
-    student_info = db.table("students").select("batch_id").eq("id", student_id).single().execute()
+    student_info = db.table("students").select("batch_id").eq("id", student_id).execute()
     if not student_info.data:
          raise HTTPException(status_code=404, detail="Student profile not found")
-    
+    batch_id = student_info.data[0]["batch_id"]
     print("Student info obtained successfully")
 
     submission_data = {
         "student_id": student_id,
-        "batch_id": student_info.data["batch_id"],
+        "batch_id": batch_id,
         "activity_id": activity_code,
         "activity_name": target_activity["title"],
         "group_name": group_name,
