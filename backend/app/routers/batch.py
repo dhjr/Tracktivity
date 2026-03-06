@@ -13,7 +13,7 @@ async def create_batch(
     current_user=Depends(require_role("faculty"))
 ):
     try:
-        # 1. Create the batch
+        # Create the batch
         response = db.table("batches").insert({
             "name": batch_data.name,
             "batch_code": batch_data.batch_code,
@@ -28,7 +28,7 @@ async def create_batch(
 
         batch_id = response.data[0]["id"]
 
-        # 2. Add the faculty as admin in batch_faculty
+        # Add the faculty as admin in batch_faculty
         bf_response = db.table("batch_faculty").insert({
             "batch_id": batch_id,
             "faculty_id": current_user.id,
@@ -66,7 +66,7 @@ async def join_batch(
     db=Depends(get_supabase),
     current_user=Depends(get_current_user)
 ):
-    # 1. Lookup batch
+    # Lookup batch
     batch_res = db.table("batches").select("id, name").eq("batch_code", join_data.batch_code).execute()
     if not batch_res.data:
         raise HTTPException(status_code=404, detail="Invalid batch code.")
