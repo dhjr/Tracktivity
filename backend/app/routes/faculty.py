@@ -167,3 +167,48 @@ async def get_submission_detail(
         "submission": submission,
         "rule": rule
     }
+
+@router.get("/students")
+async def get_students(
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("faculty"))
+):
+    try:
+        response = db.auth.admin.list_users()
+        users = response.users if hasattr(response, "users") else (response if isinstance(response, list) else [])
+        
+        students = []
+        for user in users:
+            meta = user.user_metadata or {}
+            if meta.get("role") == "student":
+                students.append({
+                    "id": user.id,
+                    "name": meta.get("name", "Unknown"),
+                    "email": user.email,
+                    "ktuId": meta.get("ktuId", "N/A"),
+                    "isKtuVerified": meta.get("isKtuVerified") == True
+                })
+        return {"students": students}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/verify-student")
+async def verify_student(req: dict, db=Depends(get_supabase), current_user=Depends(require_role("faculty"))):
+    try:
+        student_id = req.get("studentId")
+        if not student_id:
+            raise HTTPException(status_code=400, detail="Student ID is required")
+            
+        student_req = db.auth.admin.get_user_by_id(student_id)
+        if not student_req or not hasattr(student_req, "user"):
+            raise HTTPException(status_code=404, detail="Student not found.")
+            
+        current_metadata = student_req.user.user_metadata or {}
+        current_metadata["isKtuVerified"] = True
+        
+        update_data = db.auth.admin.update_user_by_id(student_id, {"user_metadata": current_metadata})
+        user_dump = update_data.user.model_dump() if hasattr(update_data.user, "model_dump") else (update_data.user.__dict__ if hasattr(update_data.user, "__dict__") else update_data.user)
+
+        return {"success": True, "user": user_dump}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

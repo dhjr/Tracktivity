@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Users, FileCheck, Settings, Plus, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 export default function FacultyDashboardPage() {
   const { user } = useAuth();
@@ -28,7 +29,18 @@ export default function FacultyDashboardPage() {
 
   const fetchBatches = async () => {
     try {
-      const res = await fetch("/api/batches/faculty");
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+      const res = await fetch(`${API_URL}/faculty/my-batches`, {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
       if (!res.ok) throw new Error("Failed to fetch batches");
       const data = await res.json();
       setBatches(data.batches || []);
@@ -45,9 +57,19 @@ export default function FacultyDashboardPage() {
     setCreateError("");
 
     try {
-      const res = await fetch("/api/batches/create", {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+      const res = await fetch(`${API_URL}/batches/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
         body: JSON.stringify({ name: newBatchName }),
       });
 
