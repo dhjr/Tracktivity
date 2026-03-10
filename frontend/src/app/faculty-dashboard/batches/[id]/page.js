@@ -5,17 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
-import {
-  ArrowLeft,
-  Loader2,
-  Users,
-  Check,
-  X,
-  ShieldAlert,
-  ShieldCheck,
-  Trash2,
-  Copy,
-} from "lucide-react";
+import { ArrowLeft, Loader2, Users, Check, Trash2, Copy } from "lucide-react";
 
 export default function FacultyBatchPage({ params }) {
   const { user } = useAuth();
@@ -25,8 +15,6 @@ export default function FacultyBatchPage({ params }) {
   const [batch, setBatch] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(null);
-  const [confirmReject, setConfirmReject] = useState(null); // stores the student to be rejected/revoked
   const [confirmDeleteBatch, setConfirmDeleteBatch] = useState(false);
   const [deleteBatchLoading, setDeleteBatchLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -67,10 +55,6 @@ export default function FacultyBatchPage({ params }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleRespond = async (studentId, status) => {
-    // Left empty for future implementation
   };
 
   const handleDeleteBatch = async () => {
@@ -164,140 +148,16 @@ export default function FacultyBatchPage({ params }) {
         </div>
       </div>
 
-      <div className="space-y-12">
-        {/* Enrolled Students Section */}
-        <section>
-          <h2 className="text-xl font-medium mb-4 flex items-center gap-2">
-            Enrolled Students
-          </h2>
-
-          {students.length === 0 ? (
-            <div className="p-6 border border-border border-dashed rounded-xl bg-secondary/10 flex flex-col items-center justify-center text-center">
-              <span className="text-foreground/40">
-                No students are currently enrolled in this batch.
-              </span>
-            </div>
-          ) : (
-            <div className="border border-border rounded-xl overflow-hidden">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-secondary/30 border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 font-medium text-foreground/70">
-                      Name
-                    </th>
-                    <th className="px-4 py-3 font-medium text-foreground/70">
-                      Email
-                    </th>
-                    <th className="px-4 py-3 font-medium text-foreground/70">
-                      KTU ID
-                    </th>
-                    <th className="px-4 py-3 font-medium text-foreground/70 text-right">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border bg-background">
-                  {students.map((student) => (
-                    <tr
-                      key={student.student_id}
-                      className="hover:bg-secondary/10 transition-colors"
-                    >
-                      <td className="px-4 py-3 font-medium">
-                        {student.studentName}
-                      </td>
-                      <td className="px-4 py-3 text-foreground/70">
-                        {student.studentEmail}
-                      </td>
-                      <td className="px-4 py-3 font-mono">
-                        <div className="flex items-center gap-2">
-                          {student.ktuId}
-                          {student.isKtuVerified ? (
-                            <ShieldCheck
-                              className="w-4 h-4 text-green-500"
-                              title="Verified KTU ID"
-                            />
-                          ) : (
-                            <ShieldAlert
-                              className="w-4 h-4 text-red-500"
-                              title="Unverified KTU ID"
-                            />
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() =>
-                            setConfirmReject({
-                              id: student.student_id,
-                              name: student.studentName,
-                              type: "revoke",
-                            })
-                          }
-                          disabled={actionLoading === student.student_id}
-                          className="text-red-500 hover:text-red-600 font-medium text-xs disabled:opacity-50 flex items-center gap-1"
-                        >
-                          Revoke Access
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
+      <div className="flex flex-col items-center justify-center py-12">
+        <Link
+          href={`/faculty-dashboard/batches/${batchId}/students`}
+          className="w-40 h-40 bg-secondary/5 border-2 border-dashed border-border hover:border-foreground/20 hover:bg-secondary/10 transition-all group flex items-center justify-center rounded-none"
+        >
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40 group-hover:text-foreground/80">
+            View Students
+          </span>
+        </Link>
       </div>
-
-      {/* Confirmation Modal */}
-      {confirmReject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-          <div className="bg-background border border-border shadow-lg rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-medium mb-2">
-              {confirmReject.type === "reject"
-                ? "Reject Join Request"
-                : "Revoke Access"}
-            </h3>
-            <p className="text-foreground/70 mb-6">
-              Are you sure you want to{" "}
-              {confirmReject.type === "reject" ? "reject" : "revoke access for"}{" "}
-              <span className="font-semibold text-foreground">
-                {confirmReject.name}
-              </span>
-              ?
-              {confirmReject.type === "revoke" &&
-                " They will no longer be associated with this batch."}
-            </p>
-            <div className="flex items-center justify-end gap-3">
-              <button
-                onClick={() => setConfirmReject(null)}
-                className="px-4 py-2 rounded-md text-sm font-medium hover:bg-secondary/50 transition-colors"
-                disabled={actionLoading === confirmReject.id}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  handleRespond(confirmReject.id, "rejected");
-                  setConfirmReject(null);
-                }}
-                disabled={actionLoading === confirmReject.id}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
-              >
-                {actionLoading === confirmReject.id ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    <X className="w-4 h-4" />
-                    {confirmReject.type === "reject"
-                      ? "Reject Request"
-                      : "Revoke Access"}
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Batch Confirmation Modal */}
       {confirmDeleteBatch && (
