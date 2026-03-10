@@ -70,11 +70,14 @@ export default function FacultyDashboardPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({ name: newBatchName }),
+        body: JSON.stringify({
+          name: newBatchName,
+        }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create batch");
+      if (!res.ok)
+        throw new Error(data.detail || data.error || "Failed to create batch");
 
       // Add the new batch to the top of the list locally
       setBatches([data.batch, ...batches]);

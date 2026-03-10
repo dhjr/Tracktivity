@@ -1,23 +1,27 @@
-import asyncio
-from app.db.supabase_client import supabase
+import requests
+import uuid
 
-async def test():
-    try:
-        user_metadata = {
-            "name": "Test User",
-            "role": "student",
-            "ktuId": "TEST1234"
-        }
-        res = supabase.auth.sign_up({
-            "email": "test_db_err@example.com",
-            "password": "password123",
-            "options": {
-                "data": user_metadata
-            }
-        })
-        print("Success:", res)
-    except Exception as e:
-        print("Error:", e)
-        print("Type:", type(e))
+# generate a unique email and ktu id
+unique_id = str(uuid.uuid4())[:8]
+email = f"test_{unique_id}@example.com"
+ktu_id = f"KTE23CS{unique_id[:3]}"
 
-asyncio.run(test())
+url = "http://localhost:8000/auth/signup"
+payload = {
+    "email": email,
+    "password": "password123",
+    "name": "Test User",
+    "role": "student",
+    "department": "Computer Science",
+    "studentCategory": "Lateral Entry",
+    "ktuId": ktu_id
+}
+
+print(f"Testing signup with payload: {payload}")
+
+try:
+    response = requests.post(url, json=payload)
+    print(f"Status Code: {response.status_code}")
+    print(f"Response Body: {response.json()}")
+except Exception as e:
+    print(f"Error: {e}")
