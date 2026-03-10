@@ -1,3 +1,6 @@
+import random
+import string
+
 from fastapi import APIRouter, HTTPException, status, Depends
 from schemas.batch import BatchCreate, BatchJoin
 from internal.session import get_supabase
@@ -14,15 +17,35 @@ def generate_batch_code():
 
 router = APIRouter(prefix="/batches", tags=["batches"])
 
-@router.post("/create-batch")
+
+def generate_batch_code() -> str:
+    characters = string.ascii_lowercase + string.digits
+    return ''.join(random.choices(characters, k=7))
+
+
+@router.post("/")
 async def create_batch(
     batch_data: BatchCreate,
     db=Depends(get_supabase),
     current_user=Depends(require_role("faculty"))
 ):
     try:
-        batch_code = batch_data.batch_code or generate_batch_code()
-        
+
+        max_attempts = 5
+        batch_code = None
+        for _ in range(max_attempts):
+            candidate = generate_batch_code()
+            existing = db.table("batches").select("id").eq("batch_code", candidate).execute()
+            if not existing.data:
+                batch_code = candidate
+                break
+
+        if not batch_code:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to generate unique batch code. Please try again."
+            )
+
         # Create the batch
         response = db.table("batches").insert({
             "name": batch_data.name,
@@ -59,15 +82,9 @@ async def create_batch(
     except HTTPException:
         raise
     except Exception as e:
-        error_msg = str(e)
-        if "duplicate key value violates unique constraint" in error_msg or "batches_batch_code_key" in error_msg:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Batch code already exists."
-            )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=error_msg
+            detail=str(e)
         )
 
 @router.post("/join")
@@ -101,55 +118,50 @@ async def join_batch(
 
     return {"message": f"Successfully joined batch {batch_name}", "batch": batch_res.data[0]}
 
-@router.delete("/{batch_id}")
-async def delete_batch(
-    batch_id: str,
-    db=Depends(get_supabase),
-    current_user=Depends(require_role("faculty"))
-):
-    try:
-        # Verify faculty actually created this batch or has admin rights
-        batch = db.table("batches").select("id").eq("id", batch_id).eq("created_by", current_user.id).single().execute()
-        if not batch.data:
-            raise HTTPException(status_code=404, detail="Batch not found or unauthorized to manage this batch.")
-            
-        res = db.table("batches").delete().eq("id", batch_id).execute()
-        if not hasattr(res, 'data'):
-            raise HTTPException(status_code=500, detail="Failed to delete batch.")
-            
-        return {"success": True}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{batch_id}/students")
-async def get_batch_students(
+@router.get("/{batch_id}/members")
+async def get_batch_members(
     batch_id: str,
     db=Depends(get_supabase),
-    current_user=Depends(require_role("faculty"))
+    current_user=Depends(get_current_user)
 ):
-    try:
-        batch = db.table("batches").select("id, name, batch_code").eq("id", batch_id).eq("created_by", current_user.id).single().execute()
-        if not batch.data:
-            raise HTTPException(status_code=404, detail="Batch not found or unauthorized.")
-            
-        students_res = db.table("students").select("id, full_name, ktuid, department, student_type").eq("batch_id", batch_id).execute()
-        
-        formatted_students = []
-        if students_res.data:
-            for student in students_res.data:
-                formatted_students.append({
-                    "student_id": student.get("id"),
-                    "studentName": student.get("full_name") or "Unknown",
-                    "studentEmail": "N/A",
-                    "ktuId": student.get("ktuid") or "N/A",
-                    "department": student.get("department") or "N/A",
-                    "studentType": student.get("student_type") or "N/A",
-                    "isKtuVerified": False
-                })
-        return {"batch": batch.data, "students": formatted_students}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    user_role = current_user.user_metadata.get("role")
+
+    if user_role == "student":
+        member_check = db.table("students") \
+            .select("id") \
+            .eq("id", current_user.id) \
+            .eq("batch_id", batch_id) \
+            .execute()
+        if not member_check.data:
+            raise HTTPException(status_code=403, detail="You are not a member of this batch.")
+
+    elif user_role == "faculty":
+        member_check = db.table("batch_faculty") \
+            .select("faculty_id") \
+            .eq("faculty_id", current_user.id) \
+            .eq("batch_id", batch_id) \
+            .execute()
+        if not member_check.data:
+            raise HTTPException(status_code=403, detail="You are not a member of this batch.")
+
+    students_res = db.table("students") \
+        .select("id, full_name, ktuid, department, student_type") \
+        .eq("batch_id", batch_id) \
+        .execute()
+
+    faculty_res = db.table("batch_faculty") \
+        .select("is_admin, faculty:faculty(id, full_name, department)") \
+        .eq("batch_id", batch_id) \
+        .execute()
+
+    faculty_list = []
+    for row in (faculty_res.data or []):
+        member = row["faculty"]
+        member["is_admin"] = row["is_admin"]
+        faculty_list.append(member)
+
+    return {
+        "students": students_res.data or [],
+        "faculty": faculty_list
+    }
