@@ -1,4 +1,4 @@
-from random import random
+import random
 import string
 
 from fastapi import APIRouter, HTTPException, status, Depends
@@ -14,6 +14,7 @@ def generate_batch_code() -> str:
     characters = string.ascii_lowercase + string.digits
     return ''.join(random.choices(characters, k=7))
 
+
 @router.post("/")
 async def create_batch(
     batch_data: BatchCreate,
@@ -21,10 +22,26 @@ async def create_batch(
     current_user=Depends(require_role("faculty"))
 ):
     try:
+
+        max_attempts = 5
+        batch_code = None
+        for _ in range(max_attempts):
+            candidate = generate_batch_code()
+            existing = db.table("batches").select("id").eq("batch_code", candidate).execute()
+            if not existing.data:
+                batch_code = candidate
+                break
+
+        if not batch_code:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to generate unique batch code. Please try again."
+            )
+
         # Create the batch
         response = db.table("batches").insert({
             "name": batch_data.name,
-            "batch_code": batch_data.batch_code,
+            "batch_code": batch_code,
             "created_by": current_user.id
         }).execute()
 
@@ -57,15 +74,9 @@ async def create_batch(
     except HTTPException:
         raise
     except Exception as e:
-        error_msg = str(e)
-        if "duplicate key value violates unique constraint" in error_msg or "batches_batch_code_key" in error_msg:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Batch code already exists."
-            )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=error_msg
+            detail=str(e)
         )
 
 @router.post("/join")
