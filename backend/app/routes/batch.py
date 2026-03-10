@@ -226,7 +226,6 @@ async def get_batch_members(
         )
 
     return {
-        "batch": batch_res.data,
-        "students": formatted_students,
-        "faculty": faculty_list,
+        "students": students_res.data or [],
+        "faculty": faculty_list
     }
