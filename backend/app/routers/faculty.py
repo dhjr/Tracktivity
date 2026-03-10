@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from internal.session import get_supabase
 from internal.dependencies import require_role
+from schemas.facultyverification import VerifySubmission
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/faculty", tags=["faculty"])
 
@@ -193,4 +195,99 @@ async def get_submission_detail(
     return {
         "submission": submission,
         "rule": rule
+    }
+
+
+@router.patch("/submissions/{submission_id}/verify")
+async def verify_submission(
+    submission_id: str,
+    data: VerifySubmission,
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("faculty"))
+):
+    
+    if data.status not in ["approved", "rejected"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Status must be 'approved' or 'rejected'."
+        )
+
+    # 2. Fetch the submission
+    res = db.table("submissions") \
+        .select("id, batch_id, student_id, group_name, points_awarded, status") \
+        .eq("id", submission_id) \
+        .single() \
+        .execute()
+
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Submission not found.")
+
+    submission = res.data
+
+    # 3. Check it's still pending
+    if submission["status"] != "pending":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Submission is already {submission['status']}."
+        )
+
+    # 4. Verify faculty has admin access to this batch
+    await verify_admin_access(submission["batch_id"], current_user.id, db)
+
+    # 5. Update the submission
+    update_payload = {
+        "status": data.status,
+        "verified_by": current_user.id,
+        "verified_at": datetime.now(timezone.utc).isoformat(),
+        "comments": data.comments,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    db.table("submissions") \
+        .update(update_payload) \
+        .eq("id", submission_id) \
+        .execute()
+
+    # 6. If approved — update student group points
+    if data.status == "approved":
+        group_name = submission["group_name"]
+        points = submission["points_awarded"]
+        student_id = submission["student_id"]
+
+        # Map group_name to column
+        group_column_map = {
+            "GROUP_I": "grp1_points",
+            "GROUP_II": "grp2_points",
+            "GROUP_III": "grp3_points"
+        }
+
+        column = group_column_map.get(group_name)
+        if not column:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unknown group name: {group_name}"
+            )
+
+        # Fetch current points
+        student_res = db.table("students") \
+            .select(column) \
+            .eq("id", student_id) \
+            .single() \
+            .execute()
+
+        if not student_res.data:
+            raise HTTPException(status_code=404, detail="Student not found.")
+
+        current_points = student_res.data[column]
+
+        # Increment points
+        db.table("students") \
+            .update({column: current_points + points}) \
+            .eq("id", student_id) \
+            .execute()
+
+    return {
+        "message": f"Submission {data.status} successfully.",
+        "submission_id": submission_id,
+        "status": data.status
     }

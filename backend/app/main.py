@@ -23,6 +23,7 @@ app.include_router(faculty.router)
 app.include_router(student.app)
 
 
+
 @app.get("/")
 def read_root():
       return "welcome to Tractivity"
