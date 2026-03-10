@@ -1,3 +1,6 @@
+from random import random
+import string
+
 from fastapi import APIRouter, HTTPException, status, Depends
 from schemas.batch import BatchCreate, BatchJoin
 from internal.session import get_supabase
@@ -5,6 +8,11 @@ from internal.dependencies import get_current_user, require_role
 
 
 router = APIRouter(prefix="/batches", tags=["batches"])
+
+
+def generate_batch_code() -> str:
+    characters = string.ascii_lowercase + string.digits
+    return ''.join(random.choices(characters, k=7))
 
 @router.post("/")
 async def create_batch(
@@ -90,3 +98,51 @@ async def join_batch(
             raise HTTPException(status_code=500, detail="Failed to join batch.")
 
     return {"message": f"Successfully joined batch {batch_name}", "batch": batch_res.data[0]}
+
+
+@router.get("/{batch_id}/members")
+async def get_batch_members(
+    batch_id: str,
+    db=Depends(get_supabase),
+    current_user=Depends(get_current_user)
+):
+    user_role = current_user.user_metadata.get("role")
+
+    if user_role == "student":
+        member_check = db.table("students") \
+            .select("id") \
+            .eq("id", current_user.id) \
+            .eq("batch_id", batch_id) \
+            .execute()
+        if not member_check.data:
+            raise HTTPException(status_code=403, detail="You are not a member of this batch.")
+
+    elif user_role == "faculty":
+        member_check = db.table("batch_faculty") \
+            .select("faculty_id") \
+            .eq("faculty_id", current_user.id) \
+            .eq("batch_id", batch_id) \
+            .execute()
+        if not member_check.data:
+            raise HTTPException(status_code=403, detail="You are not a member of this batch.")
+
+    students_res = db.table("students") \
+        .select("id, full_name, ktuid, department, student_type") \
+        .eq("batch_id", batch_id) \
+        .execute()
+
+    faculty_res = db.table("batch_faculty") \
+        .select("is_admin, faculty:faculty(id, full_name, department)") \
+        .eq("batch_id", batch_id) \
+        .execute()
+
+    faculty_list = []
+    for row in (faculty_res.data or []):
+        member = row["faculty"]
+        member["is_admin"] = row["is_admin"]
+        faculty_list.append(member)
+
+    return {
+        "students": students_res.data or [],
+        "faculty": faculty_list
+    }
