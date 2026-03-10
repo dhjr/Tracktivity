@@ -5,6 +5,7 @@ import { BookOpen, Calendar, Activity, Loader2, KeyRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 
 export default function StudentDashboardPage() {
   const { user } = useAuth();
@@ -32,7 +33,18 @@ export default function StudentDashboardPage() {
 
   const fetchEnrolledBatches = async () => {
     try {
-      const res = await fetch("/api/batches/student");
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+      const res = await fetch(`${API_URL}/student/my-batches`, {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
       if (!res.ok) {
         setBatches([]);
         return;
@@ -53,10 +65,20 @@ export default function StudentDashboardPage() {
     setJoinSuccess(false);
 
     try {
-      const res = await fetch("/api/batches/join", {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+      const res = await fetch(`${API_URL}/batches/join`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ batchCode }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ batch_code: batchCode }),
       });
 
       const data = await res.json();

@@ -4,6 +4,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 import {
   ArrowLeft,
   Loader2,
@@ -42,7 +43,18 @@ export default function FacultyBatchPage({ params }) {
   const fetchBatchDetails = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/batches/${batchId}/students`);
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+      const res = await fetch(`${API_URL}/batches/${batchId}/students`, {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
       if (!res.ok) {
         if (res.status === 404) router.push("/faculty-dashboard");
         throw new Error("Failed to fetch batch details");
@@ -64,8 +76,18 @@ export default function FacultyBatchPage({ params }) {
   const handleDeleteBatch = async () => {
     setDeleteBatchLoading(true);
     try {
-      const res = await fetch(`/api/batches/${batchId}`, {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+      const res = await fetch(`${API_URL}/batches/${batchId}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
       });
 
       if (!res.ok) throw new Error("Failed to delete batch");

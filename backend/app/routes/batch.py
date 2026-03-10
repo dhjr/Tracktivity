@@ -5,6 +5,14 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from schemas.batch import BatchCreate, BatchJoin
 from internal.session import get_supabase
 from internal.dependencies import get_current_user, require_role
+import random
+import string
+
+def generate_batch_code():
+    chars = string.ascii_uppercase + string.digits
+    random_str = ''.join(random.choice(chars) for _ in range(8))
+    return f"BATCH-{random_str}"
+
 
 
 router = APIRouter(prefix="/batches", tags=["batches"])

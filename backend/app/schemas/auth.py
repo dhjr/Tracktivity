@@ -13,3 +13,6 @@ class SignupRequest(BaseModel):
     department: str
     studentCategory: Optional[str] = None
     ktuId: Optional[str] = None
+
+class CheckKTURequest(BaseModel):
+    ktuId: str
