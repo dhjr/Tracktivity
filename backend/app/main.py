@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from datetime import date
 import uuid
 import uvicorn
-from routes import student
+
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, batch, faculty
+from routes import  student,auth, batch, faculty
 
  
 app = FastAPI(title="Tractivity")
