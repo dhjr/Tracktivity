@@ -7,6 +7,8 @@ import shutil
 from pathlib import Path
 from util.helper import fetchRuleBook, maxCheck_meritLevelValidation, validateActivity, highLevel_winOverride, cluster_cap
 from datetime import datetime
+from enum import Enum
+
 
 app = APIRouter()
 
@@ -90,49 +92,102 @@ async def create_submission(
     db.table("submissions").insert(submission_data).execute()
     return {"message": "Success! Submission is pending faculty review."}    
 
-@app.get("/student/{student_id}/summary")
-async def get_student_summary(student_id: str, db=Depends(get_supabase)):
-    # Fetch all approved submissions to calculate points
-    response = db.table("submissions")\
-        .select("points_awarded, group_name")\
-        .eq("student_id", student_id)\
-        .eq("status", "approved")\
-        .execute()
+# @app.get("/student/{student_id}/summary")
+# async def get_student_summary(student_id: str, db=Depends(get_supabase)):
+#     # Fetch all approved submissions to calculate points
+#     response = db.table("submissions")\
+#         .select("points_awarded, group_name")\
+#         .eq("student_id", student_id)\
+#         .eq("status", "approved")\
+#         .execute()
     
-    # Fetch basic student details
-    student_details = db.table("students").select("full_name, ktuid").eq("id", student_id).single().execute()
+#     # Fetch basic student details
+#     student_details = db.table("students").select("full_name, ktuid").eq("id", student_id).single().execute()
 
-    # Basic summation logic
-    total_points = sum(item['points_awarded'] for item in response.data)
+#     # Basic summation logic
+#     total_points = sum(item['points_awarded'] for item in response.data)
+    
+#     return {
+#         "student": student_details.data,
+#         "total_approved_points": total_points,
+#         "breakdown": response.data
+#     }
+
+# from internal.dependencies import require_role
+
+# @app.get("/student/my-batches")
+# async def get_my_batches(
+#     db=Depends(get_supabase),
+#     current_user=Depends(require_role("student"))
+# ):
+#     try:
+#         student_res = db.table("students").select("batch_id").eq("id", current_user.id).single().execute()
+#         if not student_res.data or not student_res.data.get("batch_id"):
+#             return {"batches": []}
+            
+#         batch_id = student_res.data["batch_id"]
+#         batch_res = db.table("batches").select("id, name, batch_code, created_at, created_by").eq("id", batch_id).single().execute()
+        
+#         if not batch_res.data:
+#             return {"batches": []}
+            
+#         batch = batch_res.data
+#         batch["enrolled_at"] = batch["created_at"]
+#         batch["status"] = "approved"
+        
+#         return {"batches": [batch]}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
+
+# 1. Define View Options for Type Safety
+class DashboardView(str, Enum):
+    SUMMARY = "summary"
+    APPROVED = "approved"
+    PENDING = "pending"
+    REJECTED = "rejected"
+
+@app.get("/api/student/{student_id}/dashboard")
+async def get_dashboard_data(
+    student_id: str, 
+    view: DashboardView = DashboardView.SUMMARY,
+    db=Depends(get_supabase)
+):
+    # Base query for this specific student
+    # This utilizes the student_id part of your composite index
+    query = db.table("submissions").select("*").eq("student_id", student_id)
+
+    # 2. Handle the "Summary" View (Calculates points)
+    if view == DashboardView.SUMMARY:
+        # Fetching only approved to calculate the current progress
+        # Triggering: idx_submissions_approved_only
+        res = query.eq("status", "approved").execute()
+        total_points = sum(item['points_awarded'] for item in res.data)
+        
+        # We might also want a quick count of pending items for the summary badge
+        pending_count = db.table("submissions")\
+            .select("id", count="exact")\
+            .eq("student_id", student_id)\
+            .eq("status", "pending")\
+            .execute()
+
+        return {
+            "view": "summary",
+            "student_id": student_id,
+            "total_approved_points": total_points,
+            "pending_count": pending_count.count,
+            "recent_approved": res.data[:5] # Just show the last 5
+        }
+
+    # 3. Handle Subset Views (Approved, Pending, Rejected)
+    # This utilizes the (student_id, status) composite index: idx_submissions_lookup
+    response = query.eq("status", view.value).execute()
     
     return {
-        "student": student_details.data,
-        "total_approved_points": total_points,
-        "breakdown": response.data
+        "view": view.value,
+        "count": len(response.data),
+        "submissions": response.data
     }
-
-from internal.dependencies import require_role
-
-@app.get("/student/my-batches")
-async def get_my_batches(
-    db=Depends(get_supabase),
-    current_user=Depends(require_role("student"))
-):
-    try:
-        student_res = db.table("students").select("batch_id").eq("id", current_user.id).single().execute()
-        if not student_res.data or not student_res.data.get("batch_id"):
-            return {"batches": []}
-            
-        batch_id = student_res.data["batch_id"]
-        batch_res = db.table("batches").select("id, name, batch_code, created_at, created_by").eq("id", batch_id).single().execute()
-        
-        if not batch_res.data:
-            return {"batches": []}
-            
-        batch = batch_res.data
-        batch["enrolled_at"] = batch["created_at"]
-        batch["status"] = "approved"
-        
-        return {"batches": [batch]}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
