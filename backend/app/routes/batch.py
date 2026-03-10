@@ -14,7 +14,7 @@ def generate_batch_code():
 
 router = APIRouter(prefix="/batches", tags=["batches"])
 
-@router.post("/")
+@router.post("/create-batch")
 async def create_batch(
     batch_data: BatchCreate,
     db=Depends(get_supabase),

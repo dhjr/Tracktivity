@@ -34,8 +34,6 @@ async def create_submission(
     # Individual Max Check
     maxCheck_meritLevelValidation(points_awarded=points_awarded, target_activity=target_activity, level_key=level_key)
 
-
-
     print("Merit validation successfull!!")
     # --- 4. SPECIAL RULES (HIGHEST LEVEL / WIN OVERRIDES) ---
     highLevel_winOverride(target_activity,student_id,activity_code,points_awarded,db)
