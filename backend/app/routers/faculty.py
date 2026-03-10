@@ -212,7 +212,7 @@ async def verify_submission(
             detail="Status must be 'approved' or 'rejected'."
         )
 
-    # 2. Fetch the submission
+    # Fetch the submission
     res = db.table("submissions") \
         .select("id, batch_id, student_id, group_name, points_awarded, status") \
         .eq("id", submission_id) \
@@ -224,7 +224,7 @@ async def verify_submission(
 
     submission = res.data
 
-    # 3. Check it's still pending
+    #  Check it's still pending
     if submission["status"] != "pending":
         raise HTTPException(
             status_code=400,
