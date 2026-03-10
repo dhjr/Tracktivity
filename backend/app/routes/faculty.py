@@ -36,7 +36,7 @@ async def get_my_batches(
     batches = []
     for row in res.data:
         batch = row["batch"]
-        # batch["is_admin"] = row["is_admin"]
+        batch["is_admin"] = row["is_admin"]
         batches.append(batch)
 
     return {"batches": batches}
@@ -87,24 +87,33 @@ async def get_pending_submissions(
 
    
     res = db.table("submissions") \
-        .select("""
-            id,
-            activity_id,
-            activity_name,
-            group_name,
-            level,
-            points_awarded,
-            academic_year,
-            certificate_date,
-            created_at,
-            student:students(id, full_name, ktuid, department)
-        """) \
-        .eq("batch_id", batch_id) \
-        .eq("status", "pending") \
-        .order("created_at", desc=False) \
-        .execute()
+    .select("""
+        id,
+        student_id,
+        activity_id,
+        activity_name,
+        group_name,
+        level,
+        points_awarded,
+        academic_year,
+        certificate_date,
+        created_at
+    """) \
+    .eq("batch_id", batch_id) \
+    .eq("status", "pending") \
+    .order("created_at", desc=False) \
+    .execute()
 
-    return {"pending_submissions": res.data}
+    submissions = res.data
+    for sub in submissions:
+       student_res = db.table("students") \
+           .select("id, full_name, ktuid, department") \
+           .eq("id", sub["student_id"]) \
+           .single() \
+           .execute()
+       sub["student"] = student_res.data
+
+    return {"pending_submissions": submissions}
 
 
 
@@ -114,11 +123,12 @@ async def get_submission_detail(
     db=Depends(get_supabase),
     current_user=Depends(require_role("faculty"))
 ):
-    # 1. Fetch the submission
+
     res = db.table("submissions") \
         .select("""
             id,
             batch_id,
+            student_id,
             activity_id,
             activity_name,
             group_name,
@@ -129,8 +139,7 @@ async def get_submission_detail(
             certificate_url,
             status,
             comments,
-            created_at,
-            student:students(id, full_name, ktuid, department)
+            created_at
         """) \
         .eq("id", submission_id) \
         .single() \
@@ -141,10 +150,28 @@ async def get_submission_detail(
 
     submission = res.data
 
-    # 2. Verify faculty has admin access to this submission's batch
     await verify_admin_access(submission["batch_id"], current_user.id, db)
 
-    # 3. Fetch matching rule from rulebook
+    student_res = db.table("students") \
+        .select("id, full_name, ktuid, department") \
+        .eq("id", submission["student_id"]) \
+        .single() \
+        .execute()
+    submission["student"] = student_res.data
+
+    try:
+        file_path = submission["certificate_url"].split("/object/public/activity-certificates/")[-1]
+        signed = db.storage.from_("activity-certificates").create_signed_url(
+            path=file_path,
+            expires_in=300
+        )
+        print("Signed URL response:", signed)  
+
+        submission["certificate_url"] = signed["signedURL"]
+    except Exception as e:
+        print(f"Failed to generate signed URL: {e}")
+
+    # 5. Fetch matching rule from rulebook
     rulebook_res = db.table("activity_rulebook") \
         .select("data") \
         .eq("id", 1) \
@@ -153,15 +180,15 @@ async def get_submission_detail(
 
     rule = None
     if rulebook_res.data:
-       data = rulebook_res.data["data"]
-       activity_id = submission["activity_id"]  # e.g. "1.1"
-       for category in data.get("categories", []):
-          for activity in category.get("activities", []):
-              if activity.get("code") == activity_id:
-                 rule = activity
-                 break
-          if rule:
-            break
+        data = rulebook_res.data["data"]
+        activity_id = submission["activity_id"]
+        for category in data.get("categories", []):
+            for activity in category.get("activities", []):
+                if activity.get("code") == activity_id:
+                    rule = activity
+                    break
+            if rule:
+                break
 
     return {
         "submission": submission,
