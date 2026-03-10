@@ -34,8 +34,6 @@ async def create_submission(
     # Individual Max Check
     maxCheck_meritLevelValidation(points_awarded=points_awarded, target_activity=target_activity, level_key=level_key)
 
-
-
     print("Merit validation successfull!!")
     # --- 4. SPECIAL RULES (HIGHEST LEVEL / WIN OVERRIDES) ---
     highLevel_winOverride(target_activity,student_id,activity_code,points_awarded,db)
@@ -67,7 +65,7 @@ async def create_submission(
          print(f"Storage error: {e}")  # ← Add this so you can see the real error
          raise HTTPException(status_code=500, detail="Storage service error")
     
-    print("activity certifiacte url obtained successully")
+    print("activity certificate url obtained successully")
     # --- 7. DATABASE PERSISTENCE ---
     student_info = db.table("students").select("batch_id").eq("id", student_id).execute()
     if not student_info.data:
@@ -112,3 +110,29 @@ async def get_student_summary(student_id: str, db=Depends(get_supabase)):
         "total_approved_points": total_points,
         "breakdown": response.data
     }
+
+from internal.dependencies import require_role
+
+@app.get("/student/my-batches")
+async def get_my_batches(
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("student"))
+):
+    try:
+        student_res = db.table("students").select("batch_id").eq("id", current_user.id).single().execute()
+        if not student_res.data or not student_res.data.get("batch_id"):
+            return {"batches": []}
+            
+        batch_id = student_res.data["batch_id"]
+        batch_res = db.table("batches").select("id, name, batch_code, created_at, created_by").eq("id", batch_id).single().execute()
+        
+        if not batch_res.data:
+            return {"batches": []}
+            
+        batch = batch_res.data
+        batch["enrolled_at"] = batch["created_at"]
+        batch["status"] = "approved"
+        
+        return {"batches": [batch]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

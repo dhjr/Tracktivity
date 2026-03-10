@@ -44,3 +44,33 @@ async def signup(credentials: SignupRequest,db=Depends(get_supabase)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+
+@router.post("/check-ktu")
+async def check_ktu(req: dict, db=Depends(get_supabase)):
+    ktu_id = req.get("ktuId")
+    if not ktu_id:
+        raise HTTPException(
+            status_code=400, 
+            detail="KTU ID is required"
+        )
+    
+    try:
+        # 1. Query the 'students' table specifically for this ID
+        # 2. Case-insensitive check using '.ilike' or '.eq' with .upper()
+        result = db.table("students") \
+            .select("ktuid") \
+            .eq("ktuid", ktu_id.upper()) \
+            .execute()
+
+        # If result.data is empty, the ID is unique
+        is_unique = len(result.data) == 0
+        
+        return {"isPresentInDB": not is_unique}
+
+    except Exception as e:
+        # Log the actual error on your server for debugging
+        print(f"Error checking KTU ID: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="Internal server error during validation"
+        )

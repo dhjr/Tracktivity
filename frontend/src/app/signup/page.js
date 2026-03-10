@@ -28,7 +28,9 @@ export default function SignupPage() {
     try {
       // Step 1: Enforce KTU ID Uniqueness for students
       if (formData.role === "student" && formData.ktuId) {
-        const checkRes = await fetch("/api/check-ktu", {
+        const API_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const checkRes = await fetch(`${API_URL}/auth/check-ktu`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ktuId: formData.ktuId }),
