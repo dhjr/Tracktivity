@@ -4,7 +4,7 @@ import uuid
 import uvicorn
 
 from fastapi.middleware.cors import CORSMiddleware
-from routes import  student,auth, batch, faculty
+from routes import  student,auth, batch, faculty, rulebook
 
  
 app = FastAPI(title="Tractivity")
@@ -21,6 +21,7 @@ app.include_router(auth.router)
 app.include_router(batch.router)
 app.include_router(faculty.router)
 app.include_router(student.app)
+app.include_router(rulebook.router)
 
 
 
