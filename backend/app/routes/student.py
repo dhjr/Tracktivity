@@ -12,6 +12,14 @@ from enum import Enum
 
 app = APIRouter()
 
+# 1. Define View Options for Type Safety
+class DashboardView(str, Enum):
+    SUMMARY = "summary"
+    APPROVED = "approved"
+    PENDING = "pending"
+    REJECTED = "rejected"
+    ALL = "all"
+
 @app.post("/student/submit")
 async def create_submission(
     activity_code: str = Form(...),  # e.g., "1.1"
@@ -141,49 +149,44 @@ async def get_my_batches(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-# 1. Define View Options for Type Safety
-class DashboardView(str, Enum):
-    SUMMARY = "summary"
-    APPROVED = "approved"
-    PENDING = "pending"
-    REJECTED = "rejected"
-
-@app.get("/api/student/{student_id}/dashboard")
+@app.get("/student/dashboard")
 async def get_dashboard_data(
-    student_id: str, 
     view: DashboardView = DashboardView.SUMMARY,
-    db=Depends(get_supabase)
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("student"))
 ):
+    student_id = current_user.id
+    
     # Base query for this specific student
-    # This utilizes the student_id part of your composite index
     query = db.table("submissions").select("*").eq("student_id", student_id)
 
     # 2. Handle the "Summary" View (Calculates points)
     if view == DashboardView.SUMMARY:
         # Fetching only approved to calculate the current progress
-        # Triggering: idx_submissions_approved_only
         res = query.eq("status", "approved").execute()
         total_points = sum(item['points_awarded'] for item in res.data)
         
-        # We might also want a quick count of pending items for the summary badge
+        # Quick count of pending items for the summary badge
         pending_count = db.table("submissions")\
             .select("id", count="exact")\
             .eq("student_id", student_id)\
             .eq("status", "pending")\
+            .limit(1)\
             .execute()
 
         return {
             "view": "summary",
             "student_id": student_id,
             "total_approved_points": total_points,
-            "pending_count": pending_count.count,
+            "pending_count": pending_count.count or 0,
             "recent_approved": res.data[:5] # Just show the last 5
         }
 
-    # 3. Handle Subset Views (Approved, Pending, Rejected)
-    # This utilizes the (student_id, status) composite index: idx_submissions_lookup
-    response = query.eq("status", view.value).execute()
+    # 3. Handle Subset Views (Approved, Pending, Rejected, All)
+    if view != DashboardView.ALL:
+        query = query.eq("status", view.value)
+    
+    response = query.order("created_at", desc=True).execute()
     
     return {
         "view": view.value,

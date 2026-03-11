@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, HTTPException, status, Depends
 from internal.session import get_supabase
 from internal.dependencies import require_role
@@ -78,6 +79,47 @@ async def get_batch_stats(
 
 
 # not tested yet
+@router.get("/batches/{batch_id}/submissions")
+async def get_batch_submissions(
+    batch_id: str,
+    status: Optional[str] = None,
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("faculty"))
+):
+    await verify_admin_access(batch_id, current_user.id, db)
+    
+    query = db.table("submissions") \
+        .select("""
+            id,
+            student_id,
+            activity_id,
+            activity_name,
+            group_name,
+            level,
+            points_awarded,
+            academic_year,
+            certificate_date,
+            status,
+            created_at
+        """) \
+        .eq("batch_id", batch_id)
+
+    if status:
+        query = query.eq("status", status)
+        
+    res = query.order("created_at", desc=True).execute()
+
+    submissions = res.data
+    for sub in submissions:
+        student_res = db.table("students") \
+            .select("id, full_name, ktuid, department") \
+            .eq("id", sub["student_id"]) \
+            .single() \
+            .execute()
+        sub["student"] = student_res.data
+
+    return {"submissions": submissions}
+
 @router.get("/batches/{batch_id}/submissions/pending")
 async def get_pending_submissions(
     batch_id: str,
@@ -116,6 +158,44 @@ async def get_pending_submissions(
        sub["student"] = student_res.data
 
     return {"pending_submissions": submissions}
+
+@router.get("/batches/{batch_id}/students/{student_id}")
+async def get_student_metadata(
+    batch_id: str,
+    student_id: str,
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("faculty"))
+):
+    await verify_admin_access(batch_id, current_user.id, db)
+    
+    res = db.table("students") \
+        .select("id, full_name, ktuid, department, email, grp1_points, grp2_points, grp3_points") \
+        .eq("id", student_id) \
+        .single() \
+        .execute()
+    
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Student not found.")
+        
+    return {"student": res.data}
+
+@router.get("/batches/{batch_id}/students/{student_id}/submissions")
+async def get_student_submissions(
+    batch_id: str,
+    student_id: str,
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("faculty"))
+):
+    await verify_admin_access(batch_id, current_user.id, db)
+    
+    res = db.table("submissions") \
+        .select("*") \
+        .eq("batch_id", batch_id) \
+        .eq("student_id", student_id) \
+        .order("created_at", desc=True) \
+        .execute()
+        
+    return {"submissions": res.data}
 
 
 

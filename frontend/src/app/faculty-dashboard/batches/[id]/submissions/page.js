@@ -19,7 +19,7 @@ export default function BatchSubmissionsPage({ params }) {
   const { id: batchId } = use(params);
 
   const [batch, setBatch] = useState(null);
-  const [students, setStudents] = useState([]);
+  const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,11 +28,11 @@ export default function BatchSubmissionsPage({ params }) {
     } else if (user?.user_metadata?.role !== "faculty") {
       router.push("/student-dashboard");
     } else {
-      fetchBatchAndStudents();
+      fetchBatchAndSubmissions();
     }
   }, [user, router, batchId]);
 
-  const fetchBatchAndStudents = async () => {
+  const fetchBatchAndSubmissions = async () => {
     setLoading(true);
     try {
       const supabase = createClient();
@@ -42,21 +42,34 @@ export default function BatchSubmissionsPage({ params }) {
       const API_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-      // Reusing the members endpoint to get the list of students in the batch
-      const res = await fetch(`${API_URL}/batches/${batchId}/members`, {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
+      const headers = {
+        Authorization: `Bearer ${session?.access_token}`,
+      };
+
+      // 1. Fetch Batch Details
+      const bRes = await fetch(`${API_URL}/batches/${batchId}/members`, {
+        headers,
       });
+      if (bRes.ok) {
+        const bData = await bRes.json();
+        setBatch(bData.batch);
+      }
+
+      // 2. Fetch All Submissions for Batch
+      const res = await fetch(
+        `${API_URL}/faculty/batches/${batchId}/submissions`,
+        {
+          headers,
+        },
+      );
       if (!res.ok) {
         if (res.status === 404) router.push("/faculty-dashboard");
-        throw new Error("Failed to fetch batch details");
+        throw new Error("Failed to fetch submissions");
       }
       const data = await res.json();
-      setBatch(data.batch);
-      setStudents(data.students || []);
+      setSubmissions(data.submissions || []);
     } catch (err) {
-      console.error("Error fetching batch details:", err);
+      console.error("Error fetching batch submissions:", err);
     } finally {
       setLoading(false);
     }
@@ -88,17 +101,18 @@ export default function BatchSubmissionsPage({ params }) {
           </h1>
           <div className="flex items-center gap-4 mt-2">
             <p className="text-sm text-foreground/60 flex items-center gap-1">
-              <Users className="w-4 h-4" /> {students.length} Students
+              <FileText className="w-4 h-4" /> {submissions.length} Total
+              Submissions
             </p>
           </div>
         </div>
       </div>
 
       <div className="w-full pb-12">
-        {students.length === 0 ? (
+        {submissions.length === 0 ? (
           <div className="p-12 border border-border border-dashed rounded-none bg-secondary/5 flex items-center justify-center">
             <span className="text-foreground/30 text-xs font-medium uppercase tracking-widest">
-              No students in batch
+              No submissions found for this batch
             </span>
           </div>
         ) : (
@@ -110,45 +124,70 @@ export default function BatchSubmissionsPage({ params }) {
                     Student
                   </th>
                   <th className="px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-foreground/50">
-                    KTU ID
+                    Activity
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-foreground/50">
+                    Points
                   </th>
                   <th className="px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-foreground/50">
                     Status
                   </th>
                   <th className="px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-foreground/50 text-right">
-                    View Certs
+                    Action
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {students.map((student) => (
+                {submissions.map((sub) => (
                   <tr
-                    key={student.student_id}
+                    key={sub.id}
                     className="hover:bg-secondary/5 transition-colors cursor-pointer group"
                     onClick={() =>
                       router.push(
-                        `/faculty-dashboard/batches/${batchId}/submissions/${student.student_id}`,
+                        `/faculty-dashboard/batches/${batchId}/submissions/${sub.student_id}/${sub.id}`,
                       )
                     }
                   >
                     <td className="px-4 py-3 font-medium text-foreground/80">
-                      <div>{student.studentName}</div>
-                      <div className="text-foreground/50 text-xs font-normal">
-                        {student.studentEmail}
+                      <div>{sub.student?.full_name}</div>
+                      <div className="text-foreground/50 text-[10px] font-mono">
+                        {sub.student?.ktuid}
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs">
-                      {student.ktuId}
+                    <td className="px-4 py-3">
+                      <div
+                        className="max-w-[200px] truncate font-medium"
+                        title={sub.activity_name}
+                      >
+                        {sub.activity_name}
+                      </div>
+                      <div className="text-[10px] text-foreground/40">
+                        {sub.group_name} • year {sub.academic_year}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-bold text-foreground/70">
+                      {sub.points_awarded}
                     </td>
                     <td className="px-4 py-3">
-                      {/* Boilerplate status, to be updated later when we fetch actual certificates */}
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium bg-yellow-500/10 text-yellow-500">
-                        Pending Review
-                      </span>
+                      {sub.status === "pending" && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-yellow-500/10 text-yellow-500">
+                          Pending
+                        </span>
+                      )}
+                      {sub.status === "approved" && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-500/10 text-green-500">
+                          Approved
+                        </span>
+                      )}
+                      {sub.status === "rejected" && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-500/10 text-red-500">
+                          Rejected
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end items-center gap-2 text-foreground/50 group-hover:text-foreground transition-colors">
-                        <FileText className="w-4 h-4" />
+                      <div className="flex justify-end items-center gap-2 text-foreground/50 group-hover:text-foreground transition-colors text-xs font-bold uppercase tracking-wider">
+                        Review{" "}
                         <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                       </div>
                     </td>
