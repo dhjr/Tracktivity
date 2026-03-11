@@ -12,7 +12,7 @@ def generate_batch_code() -> str:
     characters = string.ascii_uppercase + string.digits
     return "".join(random.choices(characters, k=7))
 
-
+# create a new batch
 @router.post("/")
 async def create_batch(
     batch_data: BatchCreate,
@@ -81,6 +81,7 @@ async def create_batch(
             detail=str(e)
         )
 
+
 @router.post("/join")
 async def join_batch(
     join_data: BatchJoin,
@@ -115,7 +116,8 @@ async def join_batch(
 
     return {"message": f"Successfully joined batch {batch_name}", "batch": batch_res.data[0]}
 
-
+# delete a batch
+# can be only done by a faculty
 @router.delete("/{batch_id}")
 async def delete_batch(
     batch_id: str,
@@ -157,7 +159,8 @@ async def delete_batch(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{batch_id}/students")
+# get the list of all members within a batch
+# can be used by both faculty and students
 @router.get("/{batch_id}/members")
 async def get_batch_members(
     batch_id: str, db=Depends(get_supabase), current_user=Depends(get_current_user)

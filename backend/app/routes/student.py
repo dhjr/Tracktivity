@@ -92,6 +92,7 @@ async def create_submission(
     db.table("submissions").insert(submission_data).execute()
     return {"message": "Success! Submission is pending faculty review."}    
 
+
 @app.get("/student/{student_id}/summary")
 async def get_student_summary(student_id: str, db=Depends(get_supabase)):
     # Fetch all approved submissions to calculate points
@@ -115,6 +116,7 @@ async def get_student_summary(student_id: str, db=Depends(get_supabase)):
 
 from internal.dependencies import require_role
 
+# obtain list of batches enrolled by a student
 @app.get("/student/my-batches")
 async def get_my_batches(
     db=Depends(get_supabase),
