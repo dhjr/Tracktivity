@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Query
 from internal.session import get_supabase
 from internal.dependencies import require_role
 from schemas.facultyverification import VerifySubmission
 from datetime import datetime, timezone
+from typing import Optional
 
 router = APIRouter(prefix="/faculty", tags=["faculty"])
 
@@ -314,3 +315,67 @@ async def verify_student(req: dict, db=Depends(get_supabase), current_user=Depen
         return {"success": True, "user": user_dump}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+
+
+@router.get("/batches/{batch_id}/students/{student_id}/submissions")
+async def get_student_submissions(
+    batch_id: str,
+    student_id: str,
+    status: Optional[str] = Query(None, enum=["pending", "approved", "rejected"]),
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("faculty"))
+):
+    await verify_admin_access(batch_id, current_user.id, db)
+
+    student_res = db.table("students") \
+        .select("id, full_name, ktuid, department, student_type, grp1_points, grp2_points, grp3_points") \
+        .eq("id", student_id) \
+        .eq("batch_id", batch_id) \
+        .single() \
+        .execute()
+
+    if not student_res.data:
+        raise HTTPException(status_code=404, detail="Student not found in this batch.")
+
+    # Fetch submissions — filter by status if provided
+    query = db.table("submissions") \
+        .select("""
+            id,
+            activity_id,
+            activity_name,
+            group_name,
+            level,
+            points_awarded,
+            academic_year,
+            certificate_date,
+            status,
+            comments,
+            verified_at,
+            created_at
+        """) \
+        .eq("student_id", student_id) \
+        .eq("batch_id", batch_id) \
+        .order("created_at", desc=True)
+
+    if status:
+        query = query.eq("status", status)
+
+    subs_res = query.execute()
+
+    # Group by status for easy frontend consumption
+    grouped = {"pending": [], "approved": [], "rejected": []}
+    for sub in (subs_res.data or []):
+        grouped[sub["status"]].append(sub)
+
+    return {
+        "student": student_res.data,
+        "submissions": grouped if not status else subs_res.data,
+        "counts": {
+            "pending": len(grouped["pending"]),
+            "approved": len(grouped["approved"]),
+            "rejected": len(grouped["rejected"]),
+            "total": len(subs_res.data or [])
+        }
+    }
