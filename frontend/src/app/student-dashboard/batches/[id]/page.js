@@ -25,7 +25,7 @@ export default function StudentBatchDetailPage({ params }) {
   const [loading, setLoading] = useState(true);
 
   // Dummy variables for now until we link real endpoints
-  const totalPoints = 15;
+  const [totalPoints, setTotalPoints] = useState(0);
 
   useEffect(() => {
     if (user === null) {
@@ -36,16 +36,13 @@ export default function StudentBatchDetailPage({ params }) {
     ) {
       router.push("/faculty-dashboard");
     } else {
-      fetchBatchDetails();
+      fetchBatchAndSubmissions();
     }
   }, [user, router, batchId]);
 
-  const fetchBatchDetails = async () => {
+  const fetchBatchAndSubmissions = async () => {
     setLoading(true);
     try {
-      // In a real implementation we would fetch the specific batch details for the student
-      // as well as their submitted certificates.
-
       const supabase = createClient();
       const {
         data: { session },
@@ -53,44 +50,47 @@ export default function StudentBatchDetailPage({ params }) {
       const API_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-      const res = await fetch(`${API_URL}/student/my-batches`, {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
+      const headers = {
+        Authorization: `Bearer ${session?.access_token}`,
+      };
+
+      // 1. Fetch Batch Info (Discovery)
+      const batchesRes = await fetch(`${API_URL}/student/my-batches`, {
+        headers,
       });
-      if (!res.ok) {
-        throw new Error("Failed to fetch batches");
+      if (batchesRes.ok) {
+        const data = await batchesRes.json();
+        const currentBatch = data.batches?.find((b) => b.id === batchId);
+        if (currentBatch) setBatch(currentBatch);
       }
 
-      const data = await res.json();
-      const currentBatch = data.batches?.find((b) => b.id === batchId);
-
-      if (!currentBatch) {
-        router.push("/student-dashboard");
-        return;
+      // 2. Fetch Points Summary
+      const summaryRes = await fetch(
+        `${API_URL}/student/dashboard?view=summary`,
+        { headers },
+      );
+      if (summaryRes.ok) {
+        const summaryData = await summaryRes.json();
+        setTotalPoints(summaryData.total_approved_points || 0);
       }
 
-      setBatch(currentBatch);
-
-      // Dummy data for certificates
-      setCertificates([
-        {
-          id: "1",
-          name: "NSS Camp Participation",
-          category: "Social Service",
-          points: 10,
-          status: "pending",
-          submittedAt: "2024-03-10T10:00:00Z",
-        },
-        {
-          id: "2",
-          name: "Inter-college Hackathon",
-          category: "Technical Events",
-          points: 15,
-          status: "approved",
-          submittedAt: "2024-02-15T14:30:00Z",
-        },
-      ]);
+      // 3. Fetch All Submissions
+      const submissionsRes = await fetch(
+        `${API_URL}/student/dashboard?view=all`,
+        { headers },
+      );
+      if (submissionsRes.ok) {
+        const subData = await submissionsRes.json();
+        const mapped = (subData.submissions || []).map((s) => ({
+          id: s.id,
+          name: s.activity_name,
+          category: s.group_name,
+          points: s.points_awarded,
+          status: s.status,
+          submittedAt: s.created_at,
+        }));
+        setCertificates(mapped);
+      }
     } catch (err) {
       console.error("Error fetching batch details:", err);
     } finally {
@@ -117,7 +117,7 @@ export default function StudentBatchDetailPage({ params }) {
         </Link>
         <Link
           href={`/student-dashboard/batches/${batchId}/add-certificate`}
-          className="inline-flex items-center gap-2 text-sm font-medium bg-foreground text-background px-4 py-2 flex items-center justify-center hover:bg-foreground/90 transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium bg-foreground text-background px-4 py-2 hover:bg-foreground/90 transition-colors"
         >
           <PlusCircle className="w-4 h-4" /> Add Certificate
         </Link>

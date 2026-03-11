@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/providers/AuthProvider";
-import { BookOpen, Loader2, KeyRound } from "lucide-react";
+import { BookOpen, Loader2, KeyRound, Award, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -17,6 +17,10 @@ export default function StudentDashboardPage() {
   const [batchCode, setBatchCode] = useState("");
   const [joinError, setJoinError] = useState("");
   const [joinSuccess, setJoinSuccess] = useState(false);
+  const [stats, setStats] = useState({
+    total_approved_points: 0,
+    pending_count: 0,
+  });
 
   useEffect(() => {
     if (user === null) {
@@ -27,11 +31,12 @@ export default function StudentDashboardPage() {
     ) {
       router.push("/faculty-dashboard");
     } else {
-      fetchEnrolledBatches();
+      fetchDashboardData();
     }
   }, [user, router]);
 
-  const fetchEnrolledBatches = async () => {
+  const fetchDashboardData = async () => {
+    setLoadingBatches(true);
     try {
       const supabase = createClient();
       const {
@@ -39,20 +44,31 @@ export default function StudentDashboardPage() {
       } = await supabase.auth.getSession();
       const API_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const headers = { Authorization: `Bearer ${session?.access_token}` };
 
-      const res = await fetch(`${API_URL}/student/my-batches`, {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
+      // Fetch Batches
+      const batchRes = await fetch(`${API_URL}/student/my-batches`, {
+        headers,
       });
-      if (!res.ok) {
-        setBatches([]);
-        return;
+      if (batchRes.ok) {
+        const data = await batchRes.json();
+        setBatches(data.batches || []);
       }
-      const data = await res.json();
-      setBatches(data.batches || []);
+
+      // Fetch Stats
+      const statsRes = await fetch(
+        `${API_URL}/student/dashboard?view=summary`,
+        { headers },
+      );
+      if (statsRes.ok) {
+        const data = await statsRes.json();
+        setStats({
+          total_approved_points: data.total_approved_points || 0,
+          pending_count: data.pending_count || 0,
+        });
+      }
     } catch (err) {
-      console.error("Fetch enrolled batches error:", err);
+      console.error("Fetch dashboard data error:", err);
     } finally {
       setLoadingBatches(false);
     }
@@ -111,6 +127,46 @@ export default function StudentDashboardPage() {
           </h1>
           <p className="text-sm text-foreground/60 mt-1">
             Welcome back, {user?.user_metadata?.name || "Student"}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <div className="p-6 border border-border bg-secondary/5 rounded-none relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Award className="w-24 h-24" />
+          </div>
+          <p className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
+            Total Points Earned
+          </p>
+          <p className="text-4xl font-bold text-foreground">
+            {stats.total_approved_points}
+            <span className="text-sm font-normal text-foreground/40 ml-2">
+              / 100
+            </span>
+          </p>
+          <div className="mt-4 w-full bg-secondary/20 h-1.5 rounded-full overflow-hidden">
+            <div
+              className="bg-foreground h-full transition-all duration-1000"
+              style={{
+                width: `${Math.min(stats.total_approved_points, 100)}%`,
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="p-6 border border-border bg-secondary/5 rounded-none relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <FileText className="w-24 h-24" />
+          </div>
+          <p className="text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
+            Pending Verifications
+          </p>
+          <p className="text-4xl font-bold text-foreground">
+            {stats.pending_count}
+          </p>
+          <p className="mt-2 text-xs text-foreground/40 font-medium">
+            Waiting for faculty approval
           </p>
         </div>
       </div>

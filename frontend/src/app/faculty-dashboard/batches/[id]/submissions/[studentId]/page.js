@@ -23,41 +23,72 @@ export default function StudentSubmissionsPage({ params }) {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [totalPoints, setTotalPoints] = useState(0);
+
   useEffect(() => {
     if (user === null) {
       router.push("/login");
     } else if (user?.user_metadata?.role !== "faculty") {
       router.push("/student-dashboard");
     } else {
-      // In a real implementation, we would fetch the specific student's certs
-      // For now, just set some dummy data and stop loading
-      setStudentInfo({
-        name: "Student Name",
-        ktuId: "KTU123456",
-        email: "student@example.com",
-      });
-
-      setCertificates([
-        {
-          id: "1",
-          name: "NSS Camp Participation",
-          category: "Social Service",
-          points: 10,
-          status: "pending",
-          submittedAt: "2024-03-10T10:00:00Z",
-        },
-        {
-          id: "2",
-          name: "Inter-college Hackathon",
-          category: "Technical Events",
-          points: 15,
-          status: "approved",
-          submittedAt: "2024-02-15T14:30:00Z",
-        },
-      ]);
-      setLoading(false);
+      fetchStudentData();
     }
   }, [user, router, batchId, studentId]);
+
+  const fetchStudentData = async () => {
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const headers = {
+        Authorization: `Bearer ${session?.access_token}`,
+      };
+
+      // 1. Fetch Student Metadata
+      const metaRes = await fetch(
+        `${API_URL}/faculty/batches/${batchId}/students/${studentId}`,
+        { headers },
+      );
+      if (metaRes.ok) {
+        const metaData = await metaRes.json();
+        const s = metaData.student;
+        setStudentInfo({
+          name: s.full_name,
+          ktuId: s.ktuid,
+          email: s.email,
+        });
+        setTotalPoints(
+          (s.grp1_points || 0) + (s.grp2_points || 0) + (s.grp3_points || 0),
+        );
+      }
+
+      // 2. Fetch Submissions
+      const subRes = await fetch(
+        `${API_URL}/faculty/batches/${batchId}/students/${studentId}/submissions`,
+        { headers },
+      );
+      if (subRes.ok) {
+        const subData = await subRes.json();
+        const mapped = (subData.submissions || []).map((s) => ({
+          id: s.id,
+          name: s.activity_name,
+          category: s.group_name,
+          points: s.points_awarded,
+          status: s.status,
+          submittedAt: s.created_at,
+        }));
+        setCertificates(mapped);
+      }
+    } catch (err) {
+      console.error("Error fetching student submissions:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!user || loading) {
     return (
@@ -91,7 +122,8 @@ export default function StudentSubmissionsPage({ params }) {
             <p className="text-sm text-foreground/60">{studentInfo?.email}</p>
             <span className="text-foreground/30">•</span>
             <p className="text-sm font-medium text-foreground/80">
-              Total Points: <span className="text-green-500">15</span>
+              Total Points:{" "}
+              <span className="text-green-500">{totalPoints}</span>
             </p>
           </div>
         </div>
@@ -147,7 +179,14 @@ export default function StudentSubmissionsPage({ params }) {
                     )}
                   </div>
 
-                  <button className="text-xs font-bold uppercase tracking-wider text-foreground/50 hover:text-foreground transition-colors px-3 py-1.5 border border-border hover:bg-secondary/10">
+                  <button
+                    onClick={() =>
+                      router.push(
+                        `/faculty-dashboard/batches/${batchId}/submissions/${studentId}/${cert.id}`,
+                      )
+                    }
+                    className="text-xs font-bold uppercase tracking-wider text-foreground/50 hover:text-foreground transition-colors px-3 py-1.5 border border-border hover:bg-secondary/10"
+                  >
                     Review
                   </button>
                 </div>
