@@ -45,7 +45,7 @@ export default function FacultyBatchStudentsPage({ params }) {
       const API_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-      const res = await fetch(`${API_URL}/batches/${batchId}/students`, {
+      const res = await fetch(`${API_URL}/batches/${batchId}/members`, {
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
         },

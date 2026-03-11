@@ -43,7 +43,7 @@ async def get_my_batches(
 
     return {"batches": batches}
 
-# 
+# obtain the stats of a batch: total number of students, average points per group
 @router.get("/batches/{batch_id}/stats")
 async def get_batch_stats(
     batch_id: str,

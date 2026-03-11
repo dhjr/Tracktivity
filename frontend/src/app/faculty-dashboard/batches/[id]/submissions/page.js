@@ -42,8 +42,8 @@ export default function BatchSubmissionsPage({ params }) {
       const API_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-      // Reusing the students endpoint to get the list of students in the batch
-      const res = await fetch(`${API_URL}/batches/${batchId}/students`, {
+      // Reusing the members endpoint to get the list of students in the batch
+      const res = await fetch(`${API_URL}/batches/${batchId}/members`, {
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
         },
