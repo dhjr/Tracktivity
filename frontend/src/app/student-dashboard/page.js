@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/providers/AuthProvider";
-import { BookOpen, Calendar, Activity, Loader2, KeyRound } from "lucide-react";
+import { BookOpen, Loader2, KeyRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -111,30 +111,6 @@ export default function StudentDashboardPage() {
           </h1>
           <p className="text-sm text-foreground/60 mt-1">
             Welcome back, {user?.user_metadata?.name || "Student"}
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-        {/* Placeholder for Activity */}
-        <div className="block p-6 bg-secondary/20 border border-border border-dashed rounded-xl opacity-70">
-          <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-4">
-            <Activity className="w-5 h-5 text-foreground/60" />
-          </div>
-          <h3 className="font-medium text-foreground mb-1">Recent Activity</h3>
-          <p className="text-sm text-foreground/60">
-            Track your latest activity and submissions.
-          </p>
-        </div>
-
-        {/* Placeholder for Calendar */}
-        <div className="block p-6 bg-secondary/20 border border-border border-dashed rounded-xl opacity-70">
-          <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-4">
-            <Calendar className="w-5 h-5 text-foreground/60" />
-          </div>
-          <h3 className="font-medium text-foreground mb-1">Schedule</h3>
-          <p className="text-sm text-foreground/60">
-            View upcoming deadlines and events.
           </p>
         </div>
       </div>

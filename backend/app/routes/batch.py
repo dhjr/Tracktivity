@@ -138,7 +138,18 @@ async def delete_batch(
                 status_code=403, detail="Unauthorized to delete this batch."
             )
 
+        # 1. Delete all submissions associated with this batch
+        db.table("submissions").delete().eq("batch_id", batch_id).execute()
+
+        # 2. Un-enroll students from this batch (set batch_id to null)
+        db.table("students").update({"batch_id": None}).eq("batch_id", batch_id).execute()
+
+        # 3. Delete all faculty associations for this batch
+        db.table("batch_faculty").delete().eq("batch_id", batch_id).execute()
+
+        # 4. Finally delete the batch
         db.table("batches").delete().eq("id", batch_id).execute()
+        
         return {"success": True}
     except HTTPException:
         raise
@@ -226,6 +237,6 @@ async def get_batch_members(
         )
 
     return {
-        "students": students_res.data or [],
+        "students": formatted_students,
         "faculty": faculty_list
     }

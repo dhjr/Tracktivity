@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
-import { ArrowLeft, Loader2, Users, Check, Trash2, Copy } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader2,
+  Users,
+  Check,
+  Trash2,
+  Copy,
+  FileText,
+} from "lucide-react";
 
 export default function FacultyBatchPage({ params }) {
   const { user } = useAuth();
@@ -148,13 +156,22 @@ export default function FacultyBatchPage({ params }) {
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center py-12">
+      <div className="flex items-center justify-center gap-8 py-12">
         <Link
           href={`/faculty-dashboard/batches/${batchId}/students`}
           className="w-40 h-40 bg-secondary/5 border-2 border-dashed border-border hover:border-foreground/20 hover:bg-secondary/10 transition-all group flex items-center justify-center rounded-none"
         >
           <span className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40 group-hover:text-foreground/80">
             View Students
+          </span>
+        </Link>
+        <Link
+          href={`/faculty-dashboard/batches/${batchId}/submissions`}
+          className="w-40 h-40 bg-secondary/5 border-2 border-dashed border-border hover:border-foreground/20 hover:bg-secondary/10 transition-all group flex items-center justify-center flex-col gap-4 rounded-none"
+        >
+          <FileText className="w-8 h-8 text-foreground/20 group-hover:text-foreground/60 transition-colors" />
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40 group-hover:text-foreground/80">
+            View Submissions
           </span>
         </Link>
       </div>
