@@ -60,7 +60,8 @@ export async function updateSession(request) {
   if (user && isAuthRoute) {
     // user is logged in, redirect away from auth pages
     const url = request.nextUrl.clone();
-    url.pathname = userRole === "faculty" ? "/faculty" : "/student";
+    url.pathname =
+      userRole === "faculty" ? "/faculty-dashboard" : "/student-dashboard";
     return NextResponse.redirect(url);
   }
 
@@ -71,7 +72,7 @@ export async function updateSession(request) {
     userRole !== "faculty"
   ) {
     const url = request.nextUrl.clone();
-    url.pathname = "/student";
+    url.pathname = "/student-dashboard";
     return NextResponse.redirect(url);
   }
 
@@ -82,7 +83,7 @@ export async function updateSession(request) {
     userRole === "faculty"
   ) {
     const url = request.nextUrl.clone();
-    url.pathname = "/faculty";
+    url.pathname = "/faculty-dashboard";
     return NextResponse.redirect(url);
   }
 

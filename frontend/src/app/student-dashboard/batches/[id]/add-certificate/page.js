@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2, UploadCloud, CheckCircle2 } from "lucide-react";
+import CalendarPicker from "@/components/CalendarPicker";
 
 export default function StudentAddCertificatePage({ params }) {
   const { user } = useAuth();
@@ -19,12 +20,17 @@ export default function StudentAddCertificatePage({ params }) {
     activity_id: "",
     name: "",
     category: "",
+    groupId: "",
     date: "",
     file: null,
+    level_key: "",
+    points_awarded: 0,
+    academic_year: 1,
   });
 
   const [rulebook, setRulebook] = useState([]);
   const [fetchingRulebook, setFetchingRulebook] = useState(true);
+  const [selectedActivityDetails, setSelectedActivityDetails] = useState(null);
 
   useEffect(() => {
     if (user === null) {
@@ -47,48 +53,23 @@ export default function StudentAddCertificatePage({ params }) {
       const res = await fetch(`${API_URL}/rulebook`);
       if (res.ok) {
         const data = await res.json();
-        // Flatten activities from various possible JSON structures
-        let allActivities = [];
-        const processCategories = (categories) => {
-          if (Array.isArray(categories)) {
-            categories.forEach((category) => {
-              if (Array.isArray(category.activities)) {
-                category.activities.forEach((act) => {
-                  allActivities.push({
-                    ...act,
-                    categoryName: category.categoryName || category.groupId,
-                  });
+        const rulebookData = data.rulebook || data;
+
+        if (rulebookData.categories) {
+          const flattened = [];
+          rulebookData.categories.forEach((cat) => {
+            if (Array.isArray(cat.activities)) {
+              cat.activities.forEach((act) => {
+                flattened.push({
+                  ...act,
+                  categoryName: cat.categoryName,
+                  groupId: cat.groupId,
                 });
-              }
-            });
-          }
-        };
-
-        if (data && data.rulebook && Array.isArray(data.rulebook.categories)) {
-          processCategories(data.rulebook.categories);
-        } else if (data && Array.isArray(data.categories)) {
-          processCategories(data.categories);
-        } else if (
-          data &&
-          data.rulebook &&
-          data.rulebook.content &&
-          Array.isArray(data.rulebook.content.categories)
-        ) {
-          processCategories(data.rulebook.content.categories);
-        } else if (
-          data &&
-          data.rulebook &&
-          data.rulebook.data &&
-          Array.isArray(data.rulebook.data.categories)
-        ) {
-          processCategories(data.rulebook.data.categories);
-        } else if (Array.isArray(data.rulebook)) {
-          allActivities = data.rulebook;
-        } else if (Array.isArray(data)) {
-          allActivities = data;
+              });
+            }
+          });
+          setRulebook(flattened);
         }
-
-        setRulebook(allActivities);
       }
     } catch (error) {
       console.error("Failed to fetch rulebook:", error);
@@ -97,48 +78,97 @@ export default function StudentAddCertificatePage({ params }) {
     }
   };
 
+  // Group activities by category for the dropdown
+  const categories = rulebook.reduce((acc, current) => {
+    const catName = current.categoryName || "Other";
+    if (!acc[catName]) acc[catName] = [];
+    acc[catName].push(current);
+    return acc;
+  }, {});
+
   const handleActivityChange = (e) => {
     const selectedId = e.target.value;
     const selectedActivity = rulebook.find(
-      (item) =>
-        (item.id || item.activityId || item.code || item.activity_id) ===
-        selectedId,
+      (item) => (item.activityId || item.code) === selectedId,
     );
 
-    // Find the category/group if we can, else default to empty string
-    let categoryName = "";
     if (selectedActivity) {
-      if (selectedActivity.categoryName)
-        categoryName = selectedActivity.categoryName;
-      else if (selectedActivity.groupName)
-        categoryName = selectedActivity.groupName;
-      else if (selectedActivity.group_name)
-        categoryName = selectedActivity.group_name;
-      else categoryName = selectedActivity.groupId || "Assigned";
+      const isLevelBased = selectedActivity.calculationType === "LEVEL";
+      const isFixed = selectedActivity.calculationType === "FIXED";
+
+      setSelectedActivityDetails(selectedActivity);
+
+      let initialPoints = 0;
+      if (isFixed) initialPoints = selectedActivity.points || 0;
+
+      setFormData({
+        ...formData,
+        activity_id: selectedActivity.code,
+        name: selectedActivity.title,
+        category: selectedActivity.categoryName,
+        groupId: selectedActivity.groupId,
+        level_key: "",
+        points_awarded: initialPoints,
+      });
+    }
+  };
+
+  const handleLevelChange = (e) => {
+    const levelKey = e.target.value;
+    let points = 0;
+
+    if (selectedActivityDetails?.levels) {
+      points = selectedActivityDetails.levels[levelKey] || 0;
     }
 
     setFormData({
       ...formData,
-      activity_id: selectedId,
-      name: selectedActivity ? selectedActivity.title : "",
-      category: categoryName,
+      level_key: levelKey,
+      points_awarded: points,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.file) return;
+
     setIsSubmitting(true);
 
-    // Boilerplate submission logic
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSuccess(true);
+    try {
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const submitData = new FormData();
 
-      // Redirect back to batch page after 2 seconds
-      setTimeout(() => {
-        router.push(`/student-dashboard/batches/${batchId}`);
-      }, 2000);
-    }, 1500);
+      submitData.append("activity_code", formData.activity_id);
+      submitData.append("group_name", formData.groupId);
+      submitData.append("points_awarded", formData.points_awarded);
+      if (formData.level_key) {
+        submitData.append("level_key", formData.level_key);
+      }
+      submitData.append("student_id", user.id);
+      submitData.append("academic_year", formData.academic_year);
+      submitData.append("file", formData.file);
+
+      const res = await fetch(`${API_URL}/student/submit`, {
+        method: "POST",
+        body: submitData,
+      });
+
+      if (res.ok) {
+        setSuccess(true);
+        setTimeout(() => {
+          router.push(`/student-dashboard/batches/${batchId}`);
+        }, 2000);
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.detail || "Failed to submit certificate"}`);
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      alert("An error occurred during submission.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!user || loading || fetchingRulebook) {
@@ -193,75 +223,145 @@ export default function StudentAddCertificatePage({ params }) {
                 htmlFor="activity"
                 className="block text-sm font-medium mb-1.5"
               >
-                Certificate Name (Title)
+                Category & Activity (KTU Rulebook)
               </label>
               <select
                 id="activity"
                 className="w-full px-4 py-2.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors appearance-none"
-                value={formData.activity_id}
+                value={
+                  selectedActivityDetails?.activityId ||
+                  selectedActivityDetails?.code ||
+                  ""
+                }
                 onChange={handleActivityChange}
                 required
               >
                 <option value="" disabled>
                   Select an activity
                 </option>
-                {Array.isArray(rulebook) &&
-                  rulebook.map((item) => {
-                    const id =
-                      item.id ||
-                      item.activityId ||
-                      item.code ||
-                      item.activity_id ||
-                      Math.random();
-                    return (
-                      <option key={id} value={id}>
-                        {item.code ? `${item.code} - ` : ""}
-                        {item.title || "Unknown Activity"}
+                {Object.entries(categories).map(([catName, activities]) => (
+                  <optgroup key={catName} label={catName}>
+                    {activities.map((item) => (
+                      <option
+                        key={item.activityId || item.code}
+                        value={item.activityId || item.code}
+                      >
+                        {item.title}
                       </option>
-                    );
-                  })}
+                    ))}
+                  </optgroup>
+                ))}
               </select>
             </div>
 
-            <div>
-              <label
-                htmlFor="category"
-                className="block text-sm font-medium mb-1.5"
-              >
-                Category (Auto-assigned)
-              </label>
-              <input
-                id="category"
-                type="text"
-                className="w-full px-4 py-2.5 text-sm bg-secondary/20 border border-border text-foreground/60 focus:outline-none transition-colors cursor-not-allowed"
-                value={formData.category}
-                readOnly
-                placeholder="Category will appear here"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="category"
+                  className="block text-sm font-medium mb-1.5"
+                >
+                  Category
+                </label>
+                <input
+                  id="category"
+                  type="text"
+                  className="w-full px-4 py-2.5 text-sm bg-secondary/20 border border-border text-foreground/60 focus:outline-none transition-colors cursor-not-allowed"
+                  value={formData.category}
+                  readOnly
+                  placeholder="Auto-assigned"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="academic_year"
+                  className="block text-sm font-medium mb-1.5"
+                >
+                  Academic Year
+                </label>
+                <select
+                  id="academic_year"
+                  className="w-full px-4 py-2.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
+                  value={formData.academic_year}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      academic_year: parseInt(e.target.value),
+                    })
+                  }
+                  required
+                >
+                  {[1, 2, 3, 4].map((year) => (
+                    <option key={year} value={year}>
+                      Year {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="date"
-                className="block text-sm font-medium mb-1.5"
-              >
-                Event Date
-              </label>
-              <input
-                id="date"
-                type="date"
-                className="w-full px-4 py-2.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
-                value={formData.date}
-                onChange={(e) =>
-                  setFormData({ ...formData, date: e.target.value })
-                }
-                required
-              />
+            {selectedActivityDetails?.calculationType === "LEVEL" && (
+              <div>
+                <label
+                  htmlFor="level"
+                  className="block text-sm font-medium mb-1.5"
+                >
+                  Level of Achievement
+                </label>
+                <select
+                  id="level"
+                  className="w-full px-4 py-2.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
+                  value={formData.level_key}
+                  onChange={handleLevelChange}
+                  required
+                >
+                  <option value="" disabled>
+                    Select Level
+                  </option>
+                  {Object.keys(selectedActivityDetails.levels).map((level) => (
+                    <option key={level} value={level}>
+                      {level.charAt(0).toUpperCase() + level.slice(1)} - (
+                      {selectedActivityDetails.levels[level]} Points)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="points"
+                  className="block text-sm font-medium mb-1.5"
+                >
+                  Points to be Awarded
+                </label>
+                <div className="relative">
+                  <input
+                    id="points"
+                    type="number"
+                    readOnly
+                    className="w-full px-4 py-2.5 text-sm bg-secondary/20 border border-border text-foreground/60 focus:outline-none cursor-not-allowed"
+                    value={formData.points_awarded}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-foreground/40 uppercase tracking-wider font-bold">
+                    Max: {selectedActivityDetails?.maxPoints || 0}
+                  </span>
+                </div>
+              </div>
+
+              <div className="md:col-span-1">
+                <CalendarPicker
+                  label="Certificate Date"
+                  value={formData.date}
+                  onChange={(date) => setFormData({ ...formData, date })}
+                />
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1.5">
-                Upload Document (PDF/Image)
+                Upload Certificate (PDF/Image)
               </label>
               <div className="border-2 border-dashed border-border hover:border-foreground/50 transition-colors p-8 flex flex-col items-center justify-center text-center cursor-pointer group bg-secondary/5 relative">
                 <input
@@ -277,14 +377,11 @@ export default function StudentAddCertificatePage({ params }) {
                 {formData.file ? (
                   <div className="flex flex-col items-center">
                     <CheckCircle2 className="w-8 h-8 text-green-500 mb-3" />
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-sm font-medium text-foreground line-clamp-1 max-w-[200px]">
                       {formData.file.name}
                     </p>
                     <p className="text-xs text-foreground/50 mt-1">
                       {(formData.file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                    <p className="text-xs text-foreground/40 mt-3 group-hover:text-foreground/80 transition-colors underline underline-offset-4">
-                      Click to change file
                     </p>
                   </div>
                 ) : (
@@ -296,7 +393,7 @@ export default function StudentAddCertificatePage({ params }) {
                       Click to upload or drag and drop
                     </p>
                     <p className="text-xs text-foreground/50 mt-1">
-                      SVG, PNG, JPG or PDF (MAX. 5MB)
+                      PDF, JPG, PNG or WebP (MAX. 5MB)
                     </p>
                   </div>
                 )}
@@ -314,7 +411,7 @@ export default function StudentAddCertificatePage({ params }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-foreground text-background px-8 py-2.5 text-sm font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center min-w-[140px] disabled:opacity-50"
+              className="bg-foreground text-background px-8 py-2.5 text-sm font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center min-w-[160px] disabled:opacity-50"
             >
               {isSubmitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
