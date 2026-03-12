@@ -1,22 +1,17 @@
 "use client";
 
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useRequireRole } from "@/hooks/useRequireRole";
+import { getAuthHeaders } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/client";
-import {
-  ArrowLeft,
-  Loader2,
-  Users,
-  Check,
-  Trash2,
-  Copy,
-  FileText,
-} from "lucide-react";
+import { ArrowLeft, Users, Trash2, FileText } from "lucide-react";
+import BatchNavCard from "@/components/BatchNavCard";
+import PageLoader from "@/components/PageLoader";
+import BatchCodeBadge from "@/components/BatchCodeBadge";
 
 export default function FacultyBatchPage({ params }) {
-  const { user } = useAuth();
+  const { user, isReady } = useRequireRole("faculty");
   const router = useRouter();
   const { id: batchId } = use(params);
 
@@ -25,32 +20,16 @@ export default function FacultyBatchPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [confirmDeleteBatch, setConfirmDeleteBatch] = useState(false);
   const [deleteBatchLoading, setDeleteBatchLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
+
   useEffect(() => {
-    if (user === null) {
-      router.push("/login");
-    } else if (user?.user_metadata?.role !== "faculty") {
-      router.push("/student-dashboard");
-    } else {
-      fetchBatchDetails();
-    }
-  }, [user, router, batchId]);
+    if (isReady) fetchBatchDetails();
+  }, [isReady, batchId]);
 
   const fetchBatchDetails = async () => {
     setLoading(true);
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-      const res = await fetch(`${API_URL}/batches/${batchId}/members`, {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-      });
+      const { headers, API_URL } = await getAuthHeaders();
+      const res = await fetch(`${API_URL}/batches/${batchId}/members`, { headers });
       if (!res.ok) {
         if (res.status === 404) router.push("/faculty-dashboard");
         throw new Error("Failed to fetch batch details");
@@ -68,22 +47,12 @@ export default function FacultyBatchPage({ params }) {
   const handleDeleteBatch = async () => {
     setDeleteBatchLoading(true);
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
+      const { headers, API_URL } = await getAuthHeaders();
       const res = await fetch(`${API_URL}/batches/${batchId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
+        headers,
       });
-
       if (!res.ok) throw new Error("Failed to delete batch");
-
       router.push("/faculty-dashboard");
       router.refresh();
     } catch (err) {
@@ -94,21 +63,8 @@ export default function FacultyBatchPage({ params }) {
     }
   };
 
-  const handleCopyCode = () => {
-    if (batch?.batch_code) {
-      navigator.clipboard.writeText(batch.batch_code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
-  if (!user || loading) {
-    return (
-      <div className="min-h-[calc(100vh-6rem)] w-full flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-foreground/30" />
-      </div>
-    );
-  }
+  if (!user || loading) return <PageLoader />;
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
@@ -133,21 +89,7 @@ export default function FacultyBatchPage({ params }) {
             {batch?.name}
           </h1>
           <div className="flex items-center gap-4 mt-2">
-            <button
-              onClick={handleCopyCode}
-              className="text-sm text-foreground/60 flex items-center gap-2 hover:text-foreground transition-colors group"
-              title="Click to copy join code"
-            >
-              Batch Code:{" "}
-              <span className="font-mono font-bold text-foreground group-hover:bg-foreground/10 px-1.5 py-0.5 rounded transition-colors">
-                {batch?.batch_code}
-              </span>
-              {copied ? (
-                <Check className="w-3.5 h-3.5 text-green-500" />
-              ) : (
-                <Copy className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
-              )}
-            </button>
+            <BatchCodeBadge code={batch?.batch_code} />
             <span className="text-foreground/30">•</span>
             <p className="text-sm text-foreground/60 flex items-center gap-1">
               <Users className="w-4 h-4" /> {students.length} Students
@@ -157,23 +99,16 @@ export default function FacultyBatchPage({ params }) {
       </div>
 
       <div className="flex items-center justify-center gap-8 py-12">
-        <Link
-          href={`/faculty-dashboard/batches/${batchId}/students`}
-          className="w-40 h-40 bg-secondary/5 border-2 border-dashed border-border hover:border-foreground/20 hover:bg-secondary/10 transition-all group flex items-center justify-center rounded-none"
-        >
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40 group-hover:text-foreground/80">
-            View Students
-          </span>
-        </Link>
-        <Link
+        <BatchNavCard
+          href={`/faculty-dashboard/batches/${batchId}/members`}
+          icon={<Users className="w-8 h-8" />}
+          label="View Members"
+        />
+        <BatchNavCard
           href={`/faculty-dashboard/batches/${batchId}/submissions`}
-          className="w-40 h-40 bg-secondary/5 border-2 border-dashed border-border hover:border-foreground/20 hover:bg-secondary/10 transition-all group flex items-center justify-center flex-col gap-4 rounded-none"
-        >
-          <FileText className="w-8 h-8 text-foreground/20 group-hover:text-foreground/60 transition-colors" />
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40 group-hover:text-foreground/80">
-            View Submissions
-          </span>
-        </Link>
+          icon={<FileText className="w-8 h-8" />}
+          label="View Submissions"
+        />
       </div>
 
       {/* Delete Batch Confirmation Modal */}

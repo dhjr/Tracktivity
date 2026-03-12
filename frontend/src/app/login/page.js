@@ -88,7 +88,39 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-8 space-y-4">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-foreground/40">
+                Temporary Shortcuts
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={() =>
+                setFormData({ email: "name@example.com", password: "12345678" })
+              }
+              className="py-2 px-3 border border-border text-xs font-medium hover:bg-secondary transition-colors"
+            >
+              Student Login
+            </button>
+            <button
+              onClick={() =>
+                setFormData({ email: "fct@rit.com", password: "12345678" })
+              }
+              className="py-2 px-3 border border-border text-xs font-medium hover:bg-secondary transition-colors"
+            >
+              Faculty Login
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-8 text-center">
           <p className="text-sm text-foreground/60">
             Don't have an account?{" "}
             <Link href="/signup" className="text-foreground hover:underline">

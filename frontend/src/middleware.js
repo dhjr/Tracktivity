@@ -7,12 +7,17 @@ export async function middleware(request) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * Match only the relevant paths:
+     * - student-dashboard
+     * - faculty-dashboard
+     * - profile
+     * - login
+     * - signup
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/student-dashboard/:path*",
+    "/faculty-dashboard/:path*",
+    "/profile/:path*",
+    "/login",
+    "/signup",
   ],
 };

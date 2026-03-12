@@ -7,9 +7,7 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Loader2,
   FileText,
-  User,
   Activity,
   Award,
   Calendar,
@@ -17,19 +15,18 @@ import {
   XCircle,
   MessageSquare,
   ExternalLink,
+  Clock,
 } from "lucide-react";
 import PageLoader from "@/components/PageLoader";
 
-export default function SubmissionReviewPage({ params }) {
-  const { user, isReady } = useRequireRole("faculty");
+export default function StudentSubmissionDetailPage({ params }) {
+  const { user, isReady } = useRequireRole("student");
   const router = useRouter();
-  const { id: batchId, studentId, submissionId } = use(params);
+  const { id: batchId, submissionId } = use(params);
 
   const [submission, setSubmission] = useState(null);
   const [rule, setRule] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [verifying, setVerifying] = useState(false);
-  const [comment, setComment] = useState("");
 
   useEffect(() => {
     if (isReady) fetchSubmissionDetail();
@@ -39,38 +36,15 @@ export default function SubmissionReviewPage({ params }) {
     setLoading(true);
     try {
       const { headers, API_URL } = await getAuthHeaders();
-      const res = await fetch(`${API_URL}/faculty/submissions/${submissionId}`, { headers });
+      const res = await fetch(`${API_URL}/student/submissions/${submissionId}`, { headers });
       if (!res.ok) throw new Error("Failed to fetch submission details");
       const data = await res.json();
       setSubmission(data.submission);
       setRule(data.rule);
-      setComment(data.submission.comments || "");
     } catch (err) {
       console.error("Error fetching submission details:", err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleVerify = async (status) => {
-    setVerifying(true);
-    try {
-      const { headers, API_URL } = await getAuthHeaders();
-      const res = await fetch(`${API_URL}/faculty/submissions/${submissionId}/verify`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", ...headers },
-        body: JSON.stringify({ status, comments: comment }),
-      });
-      if (res.ok) {
-        router.push(`/faculty-dashboard/batches/${batchId}/submissions/${studentId}`);
-      } else {
-        const err = await res.json();
-        alert(`Error: ${err.detail || "Failed to verify submission"}`);
-      }
-    } catch (err) {
-      console.error("Error verifying submission:", err);
-    } finally {
-      setVerifying(false);
     }
   };
 
@@ -81,7 +55,7 @@ export default function SubmissionReviewPage({ params }) {
       <div className="min-h-[calc(100vh-6rem)] w-full flex flex-col items-center justify-center gap-4">
         <p className="text-foreground/50">Submission not found</p>
         <Link
-          href={`/faculty-dashboard/batches/${batchId}/submissions/${studentId}`}
+          href={`/student-dashboard/batches/${batchId}/submissions`}
           className="text-sm font-medium underline"
         >
           Go Back
@@ -94,10 +68,10 @@ export default function SubmissionReviewPage({ params }) {
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-6xl mx-auto p-4 md:p-8">
       <div className="flex items-center justify-between mb-8">
         <Link
-          href={`/faculty-dashboard/batches/${batchId}/submissions/${studentId}`}
+          href={`/student-dashboard/batches/${batchId}/submissions`}
           className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Student
+          <ArrowLeft className="w-4 h-4" /> Back to Submissions
         </Link>
         <div className="flex items-center gap-3">
           {submission.status === "pending" && (
@@ -121,36 +95,6 @@ export default function SubmissionReviewPage({ params }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column: Details */}
         <div className="space-y-8">
-          <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/30 mb-4 flex items-center gap-2">
-              <User className="w-4 h-4" /> Student Information
-            </h2>
-            <div className="p-6 border border-border bg-secondary/5 space-y-4">
-              <div>
-                <p className="text-xs text-foreground/50 uppercase tracking-wider mb-1">
-                  Full Name
-                </p>
-                <p className="font-medium">{submission.student?.full_name}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-foreground/50 uppercase tracking-wider mb-1">
-                    KTU ID
-                  </p>
-                  <p className="font-mono text-sm">
-                    {submission.student?.ktuid}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-foreground/50 uppercase tracking-wider mb-1">
-                    Department
-                  </p>
-                  <p className="text-sm">{submission.student?.department}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
           <section>
             <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/30 mb-4 flex items-center gap-2">
               <Activity className="w-4 h-4" /> Activity Details
@@ -177,9 +121,9 @@ export default function SubmissionReviewPage({ params }) {
                   <p className="text-2xl font-bold text-green-500">
                     {submission.points_awarded}
                   </p>
-                  {rule?.max_points && (
+                  {rule?.maxPoints && (
                     <p className="text-[10px] text-foreground/40">
-                      Rulebook Max: {rule.max_points}
+                      Rulebook Max: {rule.maxPoints}
                     </p>
                   )}
                 </div>
@@ -216,58 +160,23 @@ export default function SubmissionReviewPage({ params }) {
             </div>
           </section>
 
-          {submission.status === "pending" && (
-            <section className="space-y-4">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/30 flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" /> Verification
-              </h2>
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Add internal notes or reasons for rejection..."
-                className="w-full h-32 p-4 bg-secondary/5 border border-border focus:border-foreground/30 focus:outline-none text-sm transition-colors resize-none"
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => handleVerify("rejected")}
-                  disabled={verifying}
-                  className="flex items-center justify-center gap-2 px-6 py-3 border border-red-500/20 text-red-500 hover:bg-red-500/5 transition-colors font-bold uppercase tracking-wider text-xs disabled:opacity-50"
-                >
-                  {verifying ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <XCircle className="w-4 h-4" /> Reject
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={() => handleVerify("approved")}
-                  disabled={verifying}
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-foreground text-background hover:bg-foreground/90 transition-colors font-bold uppercase tracking-wider text-xs disabled:opacity-50"
-                >
-                  {verifying ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-background" />
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4" /> Approve & Award
-                      Points
-                    </>
-                  )}
-                </button>
-              </div>
-            </section>
-          )}
-
-          {submission.status !== "pending" && submission.comments && (
+          {submission.comments && (
             <section>
-              <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/30 mb-4">
-                Faculty Comments
+              <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/30 mb-4 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" /> Faculty Comments
               </h2>
               <div className="p-4 border border-border bg-secondary/5 italic text-sm text-foreground/70">
                 "{submission.comments}"
               </div>
             </section>
+          )}
+
+          {submission.status === "pending" && !submission.comments && (
+            <div className="p-4 border border-border border-dashed text-center">
+              <p className="text-xs text-foreground/40 italic">
+                No comments yet. Faculty will review your submission soon.
+              </p>
+            </div>
           )}
         </div>
 
@@ -303,26 +212,5 @@ export default function SubmissionReviewPage({ params }) {
         </div>
       </div>
     </div>
-  );
-}
-
-// Simple Clock component since lucide Clock was used but not locally defined in the scope above if needed
-function Clock({ className }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
   );
 }

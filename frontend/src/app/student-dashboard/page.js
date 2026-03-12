@@ -1,15 +1,13 @@
 "use client";
 
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useRequireRole } from "@/hooks/useRequireRole";
+import { getAuthHeaders } from "@/utils/api";
 import { BookOpen, Loader2, KeyRound, Award, FileText } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/client";
 
 export default function StudentDashboardPage() {
-  const { user } = useAuth();
-  const router = useRouter();
+  const { user, isReady } = useRequireRole("student");
 
   const [batches, setBatches] = useState([]);
   const [loadingBatches, setLoadingBatches] = useState(true);
@@ -23,43 +21,23 @@ export default function StudentDashboardPage() {
   });
 
   useEffect(() => {
-    if (user === null) {
-      router.push("/login");
-    } else if (
-      user?.user_metadata?.role !== "student" &&
-      user?.user_metadata?.role !== undefined
-    ) {
-      router.push("/faculty-dashboard");
-    } else {
-      fetchDashboardData();
-    }
-  }, [user, router]);
+    if (isReady) fetchDashboardData();
+  }, [isReady]);
 
   const fetchDashboardData = async () => {
     setLoadingBatches(true);
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const headers = { Authorization: `Bearer ${session?.access_token}` };
+      const { headers, API_URL } = await getAuthHeaders();
 
-      // Fetch Batches
-      const batchRes = await fetch(`${API_URL}/student/my-batches`, {
-        headers,
-      });
+      const [batchRes, statsRes] = await Promise.all([
+        fetch(`${API_URL}/student/my-batches`, { headers }),
+        fetch(`${API_URL}/student/dashboard?view=summary`, { headers }),
+      ]);
+
       if (batchRes.ok) {
         const data = await batchRes.json();
         setBatches(data.batches || []);
       }
-
-      // Fetch Stats
-      const statsRes = await fetch(
-        `${API_URL}/student/dashboard?view=summary`,
-        { headers },
-      );
       if (statsRes.ok) {
         const data = await statsRes.json();
         setStats({
@@ -81,33 +59,17 @@ export default function StudentDashboardPage() {
     setJoinSuccess(false);
 
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
+      const { headers, API_URL } = await getAuthHeaders();
       const res = await fetch(`${API_URL}/batches/join`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
-        },
+        headers: { "Content-Type": "application/json", ...headers },
         body: JSON.stringify({ batch_code: batchCode }),
       });
-
       const data = await res.json();
-      if (!res.ok)
-        throw new Error(data.detail || data.error || "Failed to join batch");
-
+      if (!res.ok) throw new Error(data.detail || data.error || "Failed to join batch");
       setJoinSuccess(true);
       setBatchCode("");
-
-      // Refresh the batches list to show the newly joined batch
-      await fetchEnrolledBatches();
-
-      // Clear success message after 3 seconds
+      await fetchDashboardData();
       setTimeout(() => setJoinSuccess(false), 3000);
     } catch (err) {
       setJoinError(err.message);

@@ -169,7 +169,7 @@ async def get_student_metadata(
     await verify_admin_access(batch_id, current_user.id, db)
     
     res = db.table("students") \
-        .select("id, full_name, ktuid, department, email, grp1_points, grp2_points, grp3_points") \
+        .select("id, full_name, ktuid, department, grp1_points, grp2_points, grp3_points") \
         .eq("id", student_id) \
         .single() \
         .execute()

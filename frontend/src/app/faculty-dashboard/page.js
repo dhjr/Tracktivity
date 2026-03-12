@@ -1,15 +1,14 @@
 "use client";
 
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useRequireRole } from "@/hooks/useRequireRole";
+import { getAuthHeaders } from "@/utils/api";
 import Link from "next/link";
-import { Users, FileCheck, Settings, Plus, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Users, Plus, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+import BatchCodeBadge from "@/components/BatchCodeBadge";
 
 export default function FacultyDashboardPage() {
-  const { user } = useAuth();
-  const router = useRouter();
+  const { user, isReady } = useRequireRole("faculty");
 
   const [batches, setBatches] = useState([]);
   const [loadingBatches, setLoadingBatches] = useState(true);
@@ -18,29 +17,13 @@ export default function FacultyDashboardPage() {
   const [createError, setCreateError] = useState("");
 
   useEffect(() => {
-    if (user === null) {
-      router.push("/login");
-    } else if (user?.user_metadata?.role !== "faculty") {
-      router.push("/student-dashboard");
-    } else {
-      fetchBatches();
-    }
-  }, [user, router]);
+    if (isReady) fetchBatches();
+  }, [isReady]);
 
   const fetchBatches = async () => {
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-      const res = await fetch(`${API_URL}/faculty/my-batches`, {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-      });
+      const { headers, API_URL } = await getAuthHeaders();
+      const res = await fetch(`${API_URL}/faculty/my-batches`, { headers });
       if (!res.ok) throw new Error("Failed to fetch batches");
       const data = await res.json();
       setBatches(data.batches || []);
@@ -55,33 +38,17 @@ export default function FacultyDashboardPage() {
     e.preventDefault();
     setIsCreating(true);
     setCreateError("");
-
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
+      const { headers, API_URL } = await getAuthHeaders();
       const res = await fetch(`${API_URL}/batches/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({
-          name: newBatchName,
-        }),
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ name: newBatchName }),
       });
-
       const data = await res.json();
-      if (!res.ok)
-        throw new Error(data.detail || data.error || "Failed to create batch");
-
-      // Add the new batch to the top of the list locally
+      if (!res.ok) throw new Error(data.detail || data.error || "Failed to create batch");
       setBatches([data.batch, ...batches]);
-      setNewBatchName(""); // clear input
+      setNewBatchName("");
     } catch (err) {
       setCreateError(err.message);
     } finally {
@@ -104,34 +71,6 @@ export default function FacultyDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        {/* Verification Card - will eventually be embedded contextually inside Rooms, but good for global access too */}
-        <Link
-          href="/faculty/verify"
-          className="group block p-6 bg-background border border-border rounded-xl hover:border-foreground/50 transition-colors"
-        >
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-            <FileCheck className="w-5 h-5 text-primary" />
-          </div>
-          <h3 className="font-medium text-foreground mb-1">
-            Global Verification
-          </h3>
-          <p className="text-sm text-foreground/60">
-            Review and lock KTU IDs of all students enrolled in your batches.
-          </p>
-        </Link>
-
-        {/* Placeholder for Settings */}
-        <div className="block p-6 bg-secondary/20 border border-border border-dashed rounded-xl opacity-70">
-          <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-4">
-            <Settings className="w-5 h-5 text-foreground/60" />
-          </div>
-          <h3 className="font-medium text-foreground mb-1">Settings</h3>
-          <p className="text-sm text-foreground/60">
-            Configure your faculty preferences.
-          </p>
-        </div>
-      </div>
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -200,13 +139,8 @@ export default function FacultyDashboardPage() {
                   >
                     {batch.name}
                   </h3>
-                  <div className="mt-3 flex items-center justify-between bg-secondary/30 px-3 py-2 rounded">
-                    <span className="text-xs text-foreground/60 font-medium">
-                      BATCH CODE:
-                    </span>
-                    <span className="text-sm font-mono tracking-widest font-bold">
-                      {batch.batch_code}
-                    </span>
+                  <div className="mt-3">
+                    <BatchCodeBadge code={batch.batch_code} size="sm" />
                   </div>
                 </div>
 
