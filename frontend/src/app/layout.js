@@ -4,8 +4,9 @@ import AuthProvider from "@/components/providers/AuthProvider";
 import Navbar from "@/components/Navbar";
 
 export const metadata = {
-  title: "Tractivity",
-  description: "Track your activity with style",
+  title: "Tracktivity",
+  description:
+    "KTU Activity point dashboard for seamless activity point tracking.",
 };
 
 export default function RootLayout({ children }) {

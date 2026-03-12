@@ -1,8 +1,44 @@
 "use client";
 
 import { Check, Download, AlertCircle } from "lucide-react";
+import ActivityGroupCard from "@/components/ActivityGroupCard";
 
 export default function AboutPage() {
+  const activityGroups = [
+    {
+      group: "Group I",
+      title: "Social, Cultural & Leadership",
+      minPoints: "40 Points",
+      items: [
+        "NSS, NCC, NSO, Sports, Arts, Games",
+        "Community Service, Blood Donation, Tree Planting",
+        "College Union roles, Magazine publication",
+        "Swimming/First Aid training, Leadership camps",
+      ],
+    },
+    {
+      group: "Group II",
+      title: "Technical & Professional Development",
+      minPoints: "40 Points",
+      items: [
+        "Tech Fests, Paper Presentations, Professional Societies (IEEE, SAE...)",
+        "Short-term Internships (min 2 weeks = 10 pts)",
+        "English Proficiency (TOEFL, IELTS), Aptitude (GATE, CAT, GRE...)",
+        "IEDC, Placement Cell, FOSS/ICFOSS activities",
+      ],
+    },
+    {
+      group: "Group III",
+      title: "Innovation, Research & Entrepreneurship",
+      minPoints: "40 Points",
+      items: [
+        "National/International Hackathons (winners up to 40 pts)",
+        "Long-term Internships, Startups, Patents",
+        "Journal Publications, Prototypes, Skilling Courses (1 point/hour)",
+      ],
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-background text-foreground p-4 md:p-8 lg:p-12 transition-colors duration-300">
       <div className="max-w-5xl mx-auto space-y-12 md:space-y-16 mt-4">
@@ -35,7 +71,7 @@ export default function AboutPage() {
           </h2>
           <div className="overflow-x-auto rounded-xl border border-border bg-card">
             <table className="w-full text-sm md:text-base text-left">
-              <thead className="bg-[#181B25] text-blue-400 font-semibold border-b border-border">
+              <thead className="bg-secondary/80 text-blue-600 dark:text-blue-400 font-semibold border-b border-border">
                 <tr>
                   <th className="px-6 py-4 text-center">Category</th>
                   <th className="px-6 py-4 text-center border-x border-border">
@@ -90,128 +126,9 @@ export default function AboutPage() {
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Group I */}
-            <div className="bg-[#181B25] border border-border rounded-xl p-6 hover:border-blue-500/50 transition-colors shadow-sm">
-              <h3 className="text-blue-400 font-bold text-lg mb-4 leading-tight">
-                Group I{" "}
-                <span className="text-foreground/80 font-semibold">
-                  – Social, Cultural & Leadership
-                </span>
-              </h3>
-              <ul className="space-y-4">
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    NSS, NCC, NSO, Sports, Arts, Games
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    Community Service, Blood Donation, Tree Planting
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    College Union roles, Magazine publication
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    Swimming/First Aid training, Leadership camps
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start pt-2">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground font-bold text-sm md:text-base leading-relaxed">
-                    Minimum: 40 Points
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Group II */}
-            <div className="bg-[#181B25] border border-border rounded-xl p-6 hover:border-blue-500/50 transition-colors shadow-sm">
-              <h3 className="text-blue-400 font-bold text-lg mb-4 leading-tight">
-                Group II{" "}
-                <span className="text-foreground/80 font-semibold">
-                  – Technical & Professional Development
-                </span>
-              </h3>
-              <ul className="space-y-4">
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    Tech Fests, Paper Presentations, Professional Societies
-                    (IEEE, SAE...)
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    Short-term Internships (min 2 weeks = 10 pts)
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    English Proficiency (TOEFL, IELTS), Aptitude (GATE, CAT,
-                    GRE...)
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    IEDC, Placement Cell, FOSS/ICFOSS activities
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start pt-2">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground font-bold text-sm md:text-base leading-relaxed">
-                    Minimum: 40 Points
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Group III */}
-            <div className="bg-[#181B25] border border-border rounded-xl p-6 hover:border-blue-500/50 transition-colors shadow-sm">
-              <h3 className="text-blue-400 font-bold text-lg mb-4 leading-tight">
-                Group III{" "}
-                <span className="text-foreground/80 font-semibold">
-                  – Innovation, Research & Entrepreneurship
-                </span>
-              </h3>
-              <ul className="space-y-4">
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    National/International Hackathons (winners up to 40 pts)
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    Long-term Internships, Startups, Patents
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                    Journal Publications, Prototypes, Skilling Courses (1
-                    point/hour)
-                  </span>
-                </li>
-                <li className="flex gap-3 items-start pt-2 mt-auto">
-                  <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-foreground font-bold text-sm md:text-base leading-relaxed">
-                    Minimum: 40 Points
-                  </span>
-                </li>
-              </ul>
-            </div>
+            {activityGroups.map((group, index) => (
+              <ActivityGroupCard key={index} {...group} />
+            ))}
           </div>
         </section>
 
@@ -231,7 +148,7 @@ export default function AboutPage() {
               ].map((text, i) => (
                 <div
                   key={i}
-                  className="flex gap-3 items-center bg-[#181B25]/50 p-3 md:p-4 rounded-lg border border-border/50"
+                  className="flex gap-3 items-center bg-secondary/30 p-3 md:p-4 rounded-lg border border-border/50"
                 >
                   <div className="w-2 h-2 bg-foreground rounded-full shrink-0 hidden sm:block mx-2" />
                   <Check className="w-5 h-5 text-emerald-500 shrink-0" />
@@ -244,7 +161,7 @@ export default function AboutPage() {
           </div>
 
           {/* Important Rules Dropdown/Card */}
-          <div className="max-w-4xl mx-auto bg-blue-950/20 border border-blue-900/40 rounded-2xl overflow-hidden p-1">
+          <div className="max-w-4xl mx-auto bg-blue-500/10 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 rounded-2xl overflow-hidden p-1">
             <div className="bg-background/80 backdrop-blur-sm rounded-xl p-6 md:p-8">
               <h2 className="text-xl md:text-2xl font-bold text-center text-blue-500 mb-8">
                 Important Rules from Official Handbook

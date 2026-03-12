@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,14 +22,6 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    ...(user
-      ? []
-      : [
-          {
-            name: "Home",
-            href: "/",
-          },
-        ]),
     {
       name: "Dashboard",
       href:
@@ -42,10 +35,10 @@ export default function Navbar() {
       <div className="mx-auto max-w-5xl px-4 flex items-center justify-between h-14">
         <div className="flex items-center gap-8">
           <Link
-            href="/"
+            href={user ? (userRole === "faculty" ? "/faculty-dashboard" : "/student-dashboard") : "/"}
             className="font-semibold text-foreground tracking-tight"
           >
-            Tractivity.
+            Tracktivity.
           </Link>
           <div className="hidden md:flex items-center space-x-6">
             {navLinks.map((link) => (
@@ -66,17 +59,20 @@ export default function Navbar() {
 
         <div className="hidden md:flex items-center space-x-6">
           {user ? (
-            <div className="flex items-center space-x-4 text-sm">
-              <span className="text-foreground/60">{userName}</span>
-              <Link
-                href="/profile"
-                className="text-foreground/60 hover:text-foreground transition-colors"
-              >
-                Profile
-              </Link>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center">
+                <ThemeToggle className="p-2 rounded-full hover:bg-secondary transition-colors" />
+                <Link
+                  href="/profile"
+                  className="text-foreground/60 hover:text-foreground transition-colors p-2 rounded-full hover:bg-secondary"
+                  aria-label="Profile"
+                >
+                  <User className="w-5 h-5" />
+                </Link>
+              </div>
               <button
                 onClick={logout}
-                className="text-foreground/60 hover:text-foreground transition-colors"
+                className="ml-2 px-3 py-1.5 text-xs font-medium text-foreground/70 hover:text-foreground border border-border rounded-md hover:bg-secondary transition-all active:scale-95"
               >
                 Log out
               </button>
@@ -95,6 +91,7 @@ export default function Navbar() {
               >
                 Sign up
               </Link>
+              <ThemeToggle className="p-2 rounded-full hover:bg-secondary transition-colors" />
             </div>
           )}
         </div>
@@ -133,20 +130,24 @@ export default function Navbar() {
           <div className="pt-4 border-t border-border/50 flex flex-col space-y-4 text-sm">
             {user ? (
               <>
-                <span className="text-foreground/50">{userName}</span>
                 <Link
                   href="/profile"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-left text-foreground/70"
+                  className="flex items-center gap-3 text-foreground/70 py-2 hover:text-foreground transition-colors"
                 >
-                  Profile
+                  <User className="w-5 h-5" />
+                  <span className="font-medium">Profile</span>
                 </Link>
+                <div className="flex items-center justify-between py-2 border-b border-border/50">
+                  <span className="text-foreground/70 font-medium">Theme</span>
+                  <ThemeToggle className="p-2 rounded-full hover:bg-secondary transition-colors border border-border" />
+                </div>
                 <button
                   onClick={() => {
                     logout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="text-left text-foreground/70"
+                  className="w-full mt-2 py-2.5 text-center text-sm font-medium text-foreground bg-secondary/50 hover:bg-secondary border border-border rounded-lg transition-all active:scale-[0.98]"
                 >
                   Log out
                 </button>
@@ -167,6 +168,10 @@ export default function Navbar() {
                 >
                   Sign up
                 </Link>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-foreground/70">Theme</span>
+                  <ThemeToggle className="p-2 rounded-full hover:bg-secondary transition-colors border border-border" />
+                </div>
               </>
             )}
           </div>

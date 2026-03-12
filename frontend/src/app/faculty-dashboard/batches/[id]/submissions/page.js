@@ -21,6 +21,7 @@ export default function BatchSubmissionsPage({ params }) {
   const [batch, setBatch] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
     if (user === null) {
@@ -28,11 +29,11 @@ export default function BatchSubmissionsPage({ params }) {
     } else if (user?.user_metadata?.role !== "faculty") {
       router.push("/student-dashboard");
     } else {
-      fetchBatchAndSubmissions();
+      fetchBatchAndSubmissions(activeTab);
     }
-  }, [user, router, batchId]);
+  }, [user, router, batchId, activeTab]);
 
-  const fetchBatchAndSubmissions = async () => {
+  const fetchBatchAndSubmissions = async (statusFilter) => {
     setLoading(true);
     try {
       const supabase = createClient();
@@ -55,13 +56,13 @@ export default function BatchSubmissionsPage({ params }) {
         setBatch(bData.batch);
       }
 
-      // 2. Fetch All Submissions for Batch
-      const res = await fetch(
-        `${API_URL}/faculty/batches/${batchId}/submissions`,
-        {
-          headers,
-        },
-      );
+      // 2. Fetch Submissions for Batch with filter
+      let url = `${API_URL}/faculty/batches/${batchId}/submissions`;
+      if (statusFilter !== "all") {
+        url += `?status=${statusFilter}`;
+      }
+
+      const res = await fetch(url, { headers });
       if (!res.ok) {
         if (res.status === 404) router.push("/faculty-dashboard");
         throw new Error("Failed to fetch submissions");
@@ -101,18 +102,35 @@ export default function BatchSubmissionsPage({ params }) {
           </h1>
           <div className="flex items-center gap-4 mt-2">
             <p className="text-sm text-foreground/60 flex items-center gap-1">
-              <FileText className="w-4 h-4" /> {submissions.length} Total
-              Submissions
+              <FileText className="w-4 h-4" /> {submissions.length} Submissions
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="flex items-center gap-2 mb-8 p-1 bg-secondary/10 w-fit rounded-none border border-border">
+        {["all", "pending", "approved", "rejected"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all rounded-none ${
+              activeTab === tab
+                ? "bg-foreground text-background shadow-sm"
+                : "text-foreground/40 hover:text-foreground hover:bg-secondary/20"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       <div className="w-full pb-12">
         {submissions.length === 0 ? (
           <div className="p-12 border border-border border-dashed rounded-none bg-secondary/5 flex items-center justify-center">
             <span className="text-foreground/30 text-xs font-medium uppercase tracking-widest">
-              No submissions found for this batch
+              {activeTab === "all"
+                ? "No submissions found for this batch"
+                : `No ${activeTab} submissions found`}
             </span>
           </div>
         ) : (
