@@ -1,14 +1,15 @@
 "use client";
 
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useRequireRole } from "@/hooks/useRequireRole";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2, UploadCloud, CheckCircle2 } from "lucide-react";
 import CalendarPicker from "@/components/CalendarPicker";
+import PageLoader from "@/components/PageLoader";
 
 export default function StudentAddCertificatePage({ params }) {
-  const { user } = useAuth();
+  const { user, isReady } = useRequireRole("student");
   const router = useRouter();
   const { id: batchId } = use(params);
 
@@ -33,18 +34,11 @@ export default function StudentAddCertificatePage({ params }) {
   const [selectedActivityDetails, setSelectedActivityDetails] = useState(null);
 
   useEffect(() => {
-    if (user === null) {
-      router.push("/login");
-    } else if (
-      user?.user_metadata?.role !== "student" &&
-      user?.user_metadata?.role !== undefined
-    ) {
-      router.push("/faculty-dashboard");
-    } else {
+    if (isReady) {
       setLoading(false);
       fetchRulebook();
     }
-  }, [user, router]);
+  }, [isReady]);
 
   const fetchRulebook = async () => {
     try {
@@ -171,13 +165,7 @@ export default function StudentAddCertificatePage({ params }) {
     }
   };
 
-  if (!user || loading || fetchingRulebook) {
-    return (
-      <div className="min-h-[calc(100vh-6rem)] w-full flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-foreground/30" />
-      </div>
-    );
-  }
+  if (!user || loading || fetchingRulebook) return <PageLoader />;
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-3xl mx-auto p-4 md:p-8">

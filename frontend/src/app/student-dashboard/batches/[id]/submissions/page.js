@@ -1,15 +1,16 @@
 "use client";
 
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useRequireRole } from "@/hooks/useRequireRole";
+import { getAuthHeaders } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/client";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import PageLoader from "@/components/PageLoader";
 import SubmissionList from "@/components/SubmissionList";
 
 export default function StudentSubmissionsPage({ params }) {
-  const { user } = useAuth();
+  const { user, isReady } = useRequireRole("student");
   const router = useRouter();
   const { id: batchId } = use(params);
 
@@ -19,38 +20,18 @@ export default function StudentSubmissionsPage({ params }) {
   const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
-    if (user === null) {
-      router.push("/login");
-    } else if (
-      user?.user_metadata?.role !== "student" &&
-      user?.user_metadata?.role !== undefined
-    ) {
-      router.push("/faculty-dashboard");
-    } else {
-      fetchSubmissions();
-    }
-  }, [user, router, batchId]);
+    if (isReady) fetchSubmissions();
+  }, [isReady, batchId]);
 
   const fetchSubmissions = async () => {
     setLoading(true);
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const headers = { Authorization: `Bearer ${session?.access_token}` };
-
+      const { headers, API_URL } = await getAuthHeaders();
       const [batchRes, submissionsRes] = await Promise.all([
         fetch(`${API_URL}/batches/${batchId}`, { headers }),
         fetch(`${API_URL}/student/dashboard?view=all`, { headers }),
       ]);
-
-      if (batchRes.ok) {
-        const b = await batchRes.json();
-        setBatchName(b.name);
-      }
-
+      if (batchRes.ok) setBatchName((await batchRes.json()).name);
       if (submissionsRes.ok) {
         const subData = await submissionsRes.json();
         setAllSubmissions(subData.submissions || []);
@@ -63,17 +44,9 @@ export default function StudentSubmissionsPage({ params }) {
   };
 
   const filteredSubmissions =
-    activeTab === "all"
-      ? allSubmissions
-      : allSubmissions.filter((s) => s.status === activeTab);
+    activeTab === "all" ? allSubmissions : allSubmissions.filter((s) => s.status === activeTab);
 
-  if (!user || loading) {
-    return (
-      <div className="min-h-[calc(100vh-6rem)] w-full flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-foreground/30" />
-      </div>
-    );
-  }
+  if (!user || loading) return <PageLoader />;
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
@@ -85,14 +58,14 @@ export default function StudentSubmissionsPage({ params }) {
           <ArrowLeft className="w-4 h-4" /> Back to Batch
         </Link>
       </div>
-
       <div className="mb-8 border-b border-border pb-6">
         <h1 className="text-3xl font-medium tracking-tight text-foreground">
           {batchName} – My Submissions
         </h1>
-        <p className="text-sm text-foreground/60 mt-1">{allSubmissions.length} total submission{allSubmissions.length !== 1 && "s"}</p>
+        <p className="text-sm text-foreground/60 mt-1">
+          {allSubmissions.length} total submission{allSubmissions.length !== 1 && "s"}
+        </p>
       </div>
-
       <div className="w-full pb-12">
         <SubmissionList
           submissions={filteredSubmissions}

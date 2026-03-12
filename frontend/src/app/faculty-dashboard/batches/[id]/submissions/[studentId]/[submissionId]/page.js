@@ -1,10 +1,10 @@
 "use client";
 
-import { useAuth } from "@/components/providers/AuthProvider";
+import { useRequireRole } from "@/hooks/useRequireRole";
+import { getAuthHeaders } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/client";
 import {
   ArrowLeft,
   Loader2,
@@ -18,9 +18,10 @@ import {
   MessageSquare,
   ExternalLink,
 } from "lucide-react";
+import PageLoader from "@/components/PageLoader";
 
 export default function SubmissionReviewPage({ params }) {
-  const { user } = useAuth();
+  const { user, isReady } = useRequireRole("faculty");
   const router = useRouter();
   const { id: batchId, studentId, submissionId } = use(params);
 
@@ -31,38 +32,15 @@ export default function SubmissionReviewPage({ params }) {
   const [comment, setComment] = useState("");
 
   useEffect(() => {
-    if (user === null) {
-      router.push("/login");
-    } else if (user?.user_metadata?.role !== "faculty") {
-      router.push("/student-dashboard");
-    } else {
-      fetchSubmissionDetail();
-    }
-  }, [user, router, submissionId]);
+    if (isReady) fetchSubmissionDetail();
+  }, [isReady, submissionId]);
 
   const fetchSubmissionDetail = async () => {
     setLoading(true);
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-      const res = await fetch(
-        `${API_URL}/faculty/submissions/${submissionId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-        },
-      );
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch submission details");
-      }
-
+      const { headers, API_URL } = await getAuthHeaders();
+      const res = await fetch(`${API_URL}/faculty/submissions/${submissionId}`, { headers });
+      if (!res.ok) throw new Error("Failed to fetch submission details");
       const data = await res.json();
       setSubmission(data.submission);
       setRule(data.rule);
@@ -77,32 +55,14 @@ export default function SubmissionReviewPage({ params }) {
   const handleVerify = async (status) => {
     setVerifying(true);
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-      const res = await fetch(
-        `${API_URL}/faculty/submissions/${submissionId}/verify`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            status,
-            comments: comment,
-          }),
-        },
-      );
-
+      const { headers, API_URL } = await getAuthHeaders();
+      const res = await fetch(`${API_URL}/faculty/submissions/${submissionId}/verify`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ status, comments: comment }),
+      });
       if (res.ok) {
-        router.push(
-          `/faculty-dashboard/batches/${batchId}/submissions/${studentId}`,
-        );
+        router.push(`/faculty-dashboard/batches/${batchId}/submissions/${studentId}`);
       } else {
         const err = await res.json();
         alert(`Error: ${err.detail || "Failed to verify submission"}`);
@@ -114,13 +74,7 @@ export default function SubmissionReviewPage({ params }) {
     }
   };
 
-  if (!user || loading) {
-    return (
-      <div className="min-h-[calc(100vh-6rem)] w-full flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-foreground/30" />
-      </div>
-    );
-  }
+  if (!user || loading) return <PageLoader />;
 
   if (!submission) {
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Download, AlertCircle } from "lucide-react";
+import { Check, Download } from "lucide-react";
 import ActivityGroupCard from "@/components/ActivityGroupCard";
 
 export default function AboutPage() {
@@ -60,7 +60,7 @@ export default function AboutPage() {
             className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 md:px-8 py-3 rounded-lg transition-colors w-full sm:w-auto mt-4"
           >
             <Download className="w-4 h-4" />
-            <span>Download Handbook PDF</span>
+            <span>View/Download Handbook </span>
           </a>
         </div>
 

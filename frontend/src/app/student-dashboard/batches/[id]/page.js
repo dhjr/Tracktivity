@@ -1,16 +1,15 @@
 "use client";
 
-import { useAuth } from "@/components/providers/AuthProvider";
-import { useRouter } from "next/navigation";
+import { useRequireRole } from "@/hooks/useRequireRole";
+import { getAuthHeaders } from "@/utils/api";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/client";
-import { ArrowLeft, Loader2, Users, FileText, PlusCircle, Award } from "lucide-react";
+import { ArrowLeft, Users, FileText, PlusCircle, Award } from "lucide-react";
 import BatchNavCard from "@/components/BatchNavCard";
+import PageLoader from "@/components/PageLoader";
 
 export default function StudentBatchDetailPage({ params }) {
-  const { user } = useAuth();
-  const router = useRouter();
+  const { user, isReady } = useRequireRole("student");
   const { id: batchId } = use(params);
 
   const [batch, setBatch] = useState(null);
@@ -19,38 +18,21 @@ export default function StudentBatchDetailPage({ params }) {
   const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
-    if (user === null) {
-      router.push("/login");
-    } else if (
-      user?.user_metadata?.role !== "student" &&
-      user?.user_metadata?.role !== undefined
-    ) {
-      router.push("/faculty-dashboard");
-    } else {
-      fetchBatchDetails();
-    }
-  }, [user, router, batchId]);
+    if (isReady) fetchBatchDetails();
+  }, [isReady, batchId]);
 
   const fetchBatchDetails = async () => {
     setLoading(true);
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const headers = { Authorization: `Bearer ${session?.access_token}` };
-
+      const { headers, API_URL } = await getAuthHeaders();
       const [batchRes, summaryRes] = await Promise.all([
         fetch(`${API_URL}/batches/${batchId}`, { headers }),
         fetch(`${API_URL}/student/dashboard?view=summary`, { headers }),
       ]);
-
       if (batchRes.ok) {
         const batchData = await batchRes.json();
         setBatch({ ...batchData, enrolled_at: batchData.created_at });
       }
-
       if (summaryRes.ok) {
         const summaryData = await summaryRes.json();
         setTotalPoints(summaryData.total_approved_points || 0);
@@ -63,13 +45,7 @@ export default function StudentBatchDetailPage({ params }) {
     }
   };
 
-  if (!user || loading) {
-    return (
-      <div className="min-h-[calc(100vh-6rem)] w-full flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-foreground/30" />
-      </div>
-    );
-  }
+  if (!user || loading) return <PageLoader />;
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
