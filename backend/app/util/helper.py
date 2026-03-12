@@ -39,7 +39,7 @@ def maxCheck_meritLevelValidation(points_awarded, target_activity,level_key):
         if points_awarded > target_activity["points"]:
              raise HTTPException(status_code=400, detail="Points exceed fixed value for this activity")
 
-def highLevel_winOverride(target_activity,student_id,activity_code,points_awarded,db):
+def highLevel_winOverride(target_activity,student_id,activity_code,points_awarded,db,exclude_submission_id=None):
     activity_title = target_activity["title"] # Use the title from rulebook for consistent querying
     
     rules = target_activity.get("rules", [])
@@ -48,9 +48,13 @@ def highLevel_winOverride(target_activity,student_id,activity_code,points_awarde
             .select("points_awarded, status")\
             .eq("student_id", student_id)\
             .eq("activity_id", activity_code)\
-            .neq("status", "rejected")\
-            .execute()
+            .neq("status", "rejected")
         
+        if exclude_submission_id:
+             existing_event = existing_event.neq("id", exclude_submission_id)  
+
+        existing_event = existing_event.execute()
+
         for entry in existing_event.data:
             if points_awarded <= entry["points_awarded"]:
                 raise HTTPException(
@@ -58,7 +62,7 @@ def highLevel_winOverride(target_activity,student_id,activity_code,points_awarde
                     detail=f"Higher/Equal achievement ({entry['points_awarded']} pts) already exists for this activity."
                 )
             
-def cluster_cap(activity_code,db, student_id, rulebook,points_awarded):
+def cluster_cap(activity_code,db, student_id, rulebook,points_awarded,exclude_submission_id=None):
     relevant_cap = next((c for c in rulebook["capGroups"] if activity_code in c["codes"]), None)
     
     if relevant_cap:
@@ -66,8 +70,10 @@ def cluster_cap(activity_code,db, student_id, rulebook,points_awarded):
             .select("points_awarded")\
             .eq("student_id", student_id)\
             .in_("activity_id", relevant_cap["codes"])\
-            .neq("status", "rejected")\
-            .execute()
+            .neq("status", "rejected")
+        if exclude_submission_id:
+             existing_cluster = existing_cluster.neq("id", exclude_submission_id)
+        existing_cluster = existing_cluster.execute()
         
         current_total = sum(s["points_awarded"] for s in existing_cluster.data)
         if current_total + points_awarded > relevant_cap["maxPoints"]:
