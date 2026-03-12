@@ -5,13 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
-import {
-  ArrowLeft,
-  Loader2,
-  Users,
-  FileText,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowLeft, Loader2, FileText } from "lucide-react";
+import SubmissionList from "@/components/SubmissionList";
 
 export default function BatchSubmissionsPage({ params }) {
   const { user } = useAuth();
@@ -47,27 +42,27 @@ export default function BatchSubmissionsPage({ params }) {
         Authorization: `Bearer ${session?.access_token}`,
       };
 
-      // 1. Fetch Batch Details
-      const bRes = await fetch(`${API_URL}/batches/${batchId}/members`, {
-        headers,
-      });
+      // Fetch batch details + submissions in parallel
+      let submissionsUrl = `${API_URL}/faculty/batches/${batchId}/submissions`;
+      if (statusFilter !== "all") {
+        submissionsUrl += `?status=${statusFilter}`;
+      }
+
+      const [bRes, subRes] = await Promise.all([
+        fetch(`${API_URL}/batches/${batchId}`, { headers }),
+        fetch(submissionsUrl, { headers }),
+      ]);
+
       if (bRes.ok) {
         const bData = await bRes.json();
-        setBatch(bData.batch);
+        setBatch(bData);
       }
 
-      // 2. Fetch Submissions for Batch with filter
-      let url = `${API_URL}/faculty/batches/${batchId}/submissions`;
-      if (statusFilter !== "all") {
-        url += `?status=${statusFilter}`;
-      }
-
-      const res = await fetch(url, { headers });
-      if (!res.ok) {
-        if (res.status === 404) router.push("/faculty-dashboard");
+      if (!subRes.ok) {
+        if (subRes.status === 404) router.push("/faculty-dashboard");
         throw new Error("Failed to fetch submissions");
       }
-      const data = await res.json();
+      const data = await subRes.json();
       setSubmissions(data.submissions || []);
     } catch (err) {
       console.error("Error fetching batch submissions:", err);
@@ -108,113 +103,19 @@ export default function BatchSubmissionsPage({ params }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-8 p-1 bg-secondary/10 w-fit rounded-none border border-border">
-        {["all", "pending", "approved", "rejected"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all rounded-none ${
-              activeTab === tab
-                ? "bg-foreground text-background shadow-sm"
-                : "text-foreground/40 hover:text-foreground hover:bg-secondary/20"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
       <div className="w-full pb-12">
-        {submissions.length === 0 ? (
-          <div className="p-12 border border-border border-dashed rounded-none bg-secondary/5 flex items-center justify-center">
-            <span className="text-foreground/30 text-xs font-medium uppercase tracking-widest">
-              {activeTab === "all"
-                ? "No submissions found for this batch"
-                : `No ${activeTab} submissions found`}
-            </span>
-          </div>
-        ) : (
-          <div className="border border-border rounded-none overflow-hidden bg-background">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-secondary/20 border-b border-border">
-                <tr>
-                  <th className="px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-foreground/50">
-                    Student
-                  </th>
-                  <th className="px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-foreground/50">
-                    Activity
-                  </th>
-                  <th className="px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-foreground/50">
-                    Points
-                  </th>
-                  <th className="px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-foreground/50">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-foreground/50 text-right">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {submissions.map((sub) => (
-                  <tr
-                    key={sub.id}
-                    className="hover:bg-secondary/5 transition-colors cursor-pointer group"
-                    onClick={() =>
-                      router.push(
-                        `/faculty-dashboard/batches/${batchId}/submissions/${sub.student_id}/${sub.id}`,
-                      )
-                    }
-                  >
-                    <td className="px-4 py-3 font-medium text-foreground/80">
-                      <div>{sub.student?.full_name}</div>
-                      <div className="text-foreground/50 text-[10px] font-mono">
-                        {sub.student?.ktuid}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div
-                        className="max-w-[200px] truncate font-medium"
-                        title={sub.activity_name}
-                      >
-                        {sub.activity_name}
-                      </div>
-                      <div className="text-[10px] text-foreground/40">
-                        {sub.group_name} • year {sub.academic_year}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 font-bold text-foreground/70">
-                      {sub.points_awarded}
-                    </td>
-                    <td className="px-4 py-3">
-                      {sub.status === "pending" && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-yellow-500/10 text-yellow-500">
-                          Pending
-                        </span>
-                      )}
-                      {sub.status === "approved" && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-500/10 text-green-500">
-                          Approved
-                        </span>
-                      )}
-                      {sub.status === "rejected" && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-500/10 text-red-500">
-                          Rejected
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end items-center gap-2 text-foreground/50 group-hover:text-foreground transition-colors text-xs font-bold uppercase tracking-wider">
-                        Review{" "}
-                        <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <SubmissionList
+          submissions={submissions}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          showStudent={true}
+          showAction={true}
+          onRowClick={(sub) =>
+            router.push(
+              `/faculty-dashboard/batches/${batchId}/submissions/${sub.student_id}/${sub.id}`,
+            )
+          }
+        />
       </div>
     </div>
   );

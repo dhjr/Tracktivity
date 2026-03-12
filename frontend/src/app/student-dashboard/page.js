@@ -46,20 +46,17 @@ export default function StudentDashboardPage() {
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       const headers = { Authorization: `Bearer ${session?.access_token}` };
 
-      // Fetch Batches
-      const batchRes = await fetch(`${API_URL}/student/my-batches`, {
-        headers,
-      });
+      // Fetch Batches and Stats in parallel
+      const [batchRes, statsRes] = await Promise.all([
+        fetch(`${API_URL}/student/my-batches`, { headers }),
+        fetch(`${API_URL}/student/dashboard?view=summary`, { headers }),
+      ]);
+
       if (batchRes.ok) {
         const data = await batchRes.json();
         setBatches(data.batches || []);
       }
 
-      // Fetch Stats
-      const statsRes = await fetch(
-        `${API_URL}/student/dashboard?view=summary`,
-        { headers },
-      );
       if (statsRes.ok) {
         const data = await statsRes.json();
         setStats({

@@ -14,6 +14,7 @@ import {
   Copy,
   FileText,
 } from "lucide-react";
+import BatchNavCard from "@/components/BatchNavCard";
 
 export default function FacultyBatchPage({ params }) {
   const { user } = useAuth();
@@ -157,23 +158,16 @@ export default function FacultyBatchPage({ params }) {
       </div>
 
       <div className="flex items-center justify-center gap-8 py-12">
-        <Link
-          href={`/faculty-dashboard/batches/${batchId}/students`}
-          className="w-40 h-40 bg-secondary/5 border-2 border-dashed border-border hover:border-foreground/20 hover:bg-secondary/10 transition-all group flex items-center justify-center rounded-none"
-        >
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40 group-hover:text-foreground/80">
-            View Students
-          </span>
-        </Link>
-        <Link
+        <BatchNavCard
+          href={`/faculty-dashboard/batches/${batchId}/members`}
+          icon={<Users className="w-8 h-8" />}
+          label="View Members"
+        />
+        <BatchNavCard
           href={`/faculty-dashboard/batches/${batchId}/submissions`}
-          className="w-40 h-40 bg-secondary/5 border-2 border-dashed border-border hover:border-foreground/20 hover:bg-secondary/10 transition-all group flex items-center justify-center flex-col gap-4 rounded-none"
-        >
-          <FileText className="w-8 h-8 text-foreground/20 group-hover:text-foreground/60 transition-colors" />
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/40 group-hover:text-foreground/80">
-            View Submissions
-          </span>
-        </Link>
+          icon={<FileText className="w-8 h-8" />}
+          label="View Submissions"
+        />
       </div>
 
       {/* Delete Batch Confirmation Modal */}

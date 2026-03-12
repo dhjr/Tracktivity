@@ -116,7 +116,24 @@ async def join_batch(
 
     return {"message": f"Successfully joined batch {batch_name}", "batch": batch_res.data[0]}
 
-# delete a batch
+# get basic details of a single batch by ID (accessible to authenticated members)
+@router.get("/{batch_id}")
+async def get_batch_by_id(
+    batch_id: str,
+    db=Depends(get_supabase),
+    current_user=Depends(get_current_user),
+):
+    batch_res = (
+        db.table("batches")
+        .select("id, name, batch_code, created_at, created_by")
+        .eq("id", batch_id)
+        .single()
+        .execute()
+    )
+    if not batch_res.data:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    return batch_res.data
+
 # can be only done by a faculty
 @router.delete("/{batch_id}")
 async def delete_batch(

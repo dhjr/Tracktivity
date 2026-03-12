@@ -162,8 +162,8 @@ async def get_dashboard_data(
 
     # 2. Handle the "Summary" View (Calculates points)
     if view == DashboardView.SUMMARY:
-        # Fetching only approved to calculate the current progress
-        res = query.eq("status", "approved").execute()
+        # Fetching only points_awarded to calculate the current progress efficiently
+        res = db.table("submissions").select("points_awarded").eq("student_id", student_id).eq("status", "approved").execute()
         total_points = sum(item['points_awarded'] for item in res.data)
         
         # Quick count of pending items for the summary badge
