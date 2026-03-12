@@ -193,3 +193,46 @@ async def get_dashboard_data(
         "count": len(response.data),
         "submissions": response.data
     }
+@app.get("/student/submissions/{submission_id}")
+async def get_submission_detail(
+    submission_id: str,
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("student"))
+):
+    student_id = current_user.id
+    
+    res = db.table("submissions") \
+        .select("""
+            id,
+            batch_id,
+            student_id,
+            activity_id,
+            activity_name,
+            group_name,
+            level,
+            points_awarded,
+            academic_year,
+            certificate_date,
+            certificate_url,
+            status,
+            comments,
+            created_at
+        """) \
+        .eq("id", submission_id) \
+        .eq("student_id", student_id) \
+        .single() \
+        .execute()
+
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Submission not found.")
+
+    submission = res.data
+
+    # Fetch rulebook details for the activity
+    rulebook = fetchRuleBook(db=db)
+    target_activity = validateActivity(rulebook=rulebook, activity_code=submission["activity_id"])
+    
+    return {
+        "submission": submission,
+        "rule": target_activity
+    }

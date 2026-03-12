@@ -71,8 +71,9 @@ export default function StudentSubmissionsPage({ params }) {
           submissions={filteredSubmissions}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          onRowClick={(sub) => router.push(`/student-dashboard/batches/${batchId}/submissions/${sub.id}`)}
           showStudent={false}
-          showAction={false}
+          showAction={true}
         />
       </div>
     </div>
