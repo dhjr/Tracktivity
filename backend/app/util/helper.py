@@ -81,4 +81,59 @@ def cluster_cap(activity_code,db, student_id, rulebook,points_awarded,exclude_su
             raise HTTPException(status_code=400, detail=f"Cluster cap reached. Max allowed remaining: {allowed}")
 
 
+
+STUDENT_TYPE_LIMITS = {
+    "regular":      {"total": 120, "per_group": 40},
+    "lateralEntry": {"total": 90,  "per_group": 30},
+    "pwd":          {"total": 60,  "per_group": 20},
+}
+
+GROUP_COLUMN_MAP = {
+    "GROUP_I":   "grp1_points",
+    "GROUP_II":  "grp2_points",
+    "GROUP_III": "grp3_points"
+}
+
+def group_cap_check(student_id, group_name, points_awarded, db, exclude_submission_id=None):
+    # Fetch student type and current group points
+    try:
+        student_res = db.table("students") \
+            .select("student_type, grp1_points, grp2_points, grp3_points") \
+            .eq("id", student_id) \
+            .single() \
+            .execute()
+    except Exception:
+        raise HTTPException(status_code=404, detail="Student not found.")
+
+    student = student_res.data
+    student_type = student.get("student_type", "regular")
+    limits = STUDENT_TYPE_LIMITS.get(student_type, STUDENT_TYPE_LIMITS["regular"])
+    per_group_limit = limits["per_group"]
+
+    column = GROUP_COLUMN_MAP.get(group_name)
+    if not column:
+        raise HTTPException(status_code=400, detail=f"Unknown group name: {group_name}")
+
+    current_group_points = student[column]
+
+    # If this is a re-verification, subtract the old approved points first
+    # so we don't double-count the submission being updated
+    if exclude_submission_id:
+        old_res = db.table("submissions") \
+            .select("points_awarded, status, group_name") \
+            .eq("id", exclude_submission_id) \
+            .single() \
+            .execute()
+
+        if old_res.data and old_res.data["status"] == "approved" \
+                and old_res.data["group_name"] == group_name:
+            current_group_points -= old_res.data["points_awarded"]
+
+    if current_group_points + points_awarded > per_group_limit:
+        allowed = per_group_limit - current_group_points
+        raise HTTPException(
+            status_code=400,
+            detail=f"Group cap exceeded. {student_type} students can earn max {per_group_limit} pts in {group_name}. "
+                   f"Current: {current_group_points}, Allowed remaining: {allowed}"
+        )
     

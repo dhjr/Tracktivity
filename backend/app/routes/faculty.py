@@ -4,7 +4,7 @@ from internal.session import get_supabase
 from internal.dependencies import require_role
 from schemas.facultyverification import VerifySubmission
 from datetime import datetime, timezone
-from util.helper import fetchRuleBook, validateActivity, maxCheck_meritLevelValidation, highLevel_winOverride, cluster_cap
+from util.helper import fetchRuleBook, validateActivity, maxCheck_meritLevelValidation, highLevel_winOverride, cluster_cap,group_cap_check
 
 router = APIRouter(prefix="/faculty", tags=["faculty"])
 
@@ -308,6 +308,7 @@ async def verify_submission(
             level_key=effective_level
         )
 
+
         highLevel_winOverride(
             target_activity=effective_activity,
             student_id=submission["student_id"],
@@ -329,6 +330,15 @@ async def verify_submission(
         if activity_changed:
             update_payload["activity_name"] = effective_activity["title"]
     
+    if data.status == "approved":
+        group_cap_check(
+            student_id=submission["student_id"],
+            group_name=effective_group_name,
+            points_awarded=effective_points,
+            db=db,
+            exclude_submission_id=submission_id
+        )
+
     previous_status = submission["status"]
     print(f"Previous status: {previous_status}, New status: {data.status}")
     # 5. Persist
