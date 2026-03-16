@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status,Depends
+from fastapi import APIRouter, HTTPException, status,Depends,Query
 from schemas.auth import LoginRequest, SignupRequest
 from internal.session import get_supabase
 
