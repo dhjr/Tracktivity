@@ -4,7 +4,7 @@ import { useRequireRole } from "@/hooks/useRequireRole";
 import { getAuthHeaders } from "@/utils/api";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, PlusCircle, Award } from "lucide-react";
+import { Users, FileText, PlusCircle, Award } from "lucide-react";
 import BatchNavCard from "@/components/BatchNavCard";
 import PageLoader from "@/components/PageLoader";
 
@@ -49,15 +49,6 @@ export default function StudentBatchDetailPage({ params }) {
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <Link
-          href="/student-dashboard"
-          className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-        </Link>
-      </div>
 
       {/* Batch info */}
       <div className="mb-8 border-b border-border pb-6 flex items-end justify-between">

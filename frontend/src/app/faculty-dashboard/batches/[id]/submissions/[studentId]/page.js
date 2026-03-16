@@ -7,7 +7,7 @@ import PageLoader from "@/components/PageLoader";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import {  } from "lucide-react";
 import SubmissionList from "@/components/SubmissionList";
 
 export default function FacultyStudentSubmissionsPage({ params }) {
@@ -59,14 +59,6 @@ export default function FacultyStudentSubmissionsPage({ params }) {
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
-      <div className="flex items-center justify-between mb-6">
-        <Link
-          href={`/faculty-dashboard/batches/${batchId}/submissions`}
-          className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Students
-        </Link>
-      </div>
       <div className="mb-8 border-b border-border pb-6 flex items-center gap-4">
         <div className="w-14 h-14 rounded-full bg-secondary/50 flex items-center justify-center text-lg font-bold text-foreground/60 shrink-0">
           {getInitials(studentInfo?.name)}

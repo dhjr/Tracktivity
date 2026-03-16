@@ -4,7 +4,7 @@ import { useRequireRole } from "@/hooks/useRequireRole";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2, UploadCloud, CheckCircle2 } from "lucide-react";
+import { Loader2, UploadCloud, CheckCircle2, FileText } from "lucide-react";
 import CalendarPicker from "@/components/CalendarPicker";
 import PageLoader from "@/components/PageLoader";
 
@@ -140,9 +140,24 @@ export default function StudentAddCertificatePage({ params }) {
     });
   };
 
+  const isFormValid = useMemo(() => {
+    const basicFields =
+      formData.activity_id &&
+      formData.category &&
+      formData.name &&
+      formData.date &&
+      formData.file;
+
+    if (selectedActivityDetails?.calculationType === "LEVEL") {
+      return !!(basicFields && formData.level_key);
+    }
+
+    return !!basicFields;
+  }, [formData, selectedActivityDetails]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.file) return;
+    if (!isFormValid) return;
 
     setIsSubmitting(true);
 
@@ -263,7 +278,9 @@ export default function StudentAddCertificatePage({ params }) {
                   disabled={!selectedCategory}
                 >
                   <option value="" disabled>
-                    {selectedCategory ? "Select an activity" : "Select category first"}
+                    {selectedCategory
+                      ? "Select an activity"
+                      : "Select category first"}
                   </option>
                   {selectedCategory &&
                     categories[selectedCategory].map((item) => (
@@ -277,6 +294,20 @@ export default function StudentAddCertificatePage({ params }) {
                 </select>
               </div>
             </div>
+
+            {selectedActivityDetails?.documentaryEvidence && (
+              <div className="flex gap-3 p-3 bg-foreground/5 border border-border">
+                <FileText className="w-4 h-4 text-foreground/40 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-foreground/50">
+                    Required Evidence
+                  </p>
+                  <p className="text-xs text-foreground/80 leading-relaxed">
+                    {selectedActivityDetails.documentaryEvidence}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {selectedActivityDetails?.calculationType === "LEVEL" ? (
@@ -298,12 +329,14 @@ export default function StudentAddCertificatePage({ params }) {
                       <option value="" disabled>
                         Select Level
                       </option>
-                      {Object.keys(selectedActivityDetails.levels).map((level) => (
-                        <option key={level} value={level}>
-                          {level.charAt(0).toUpperCase() + level.slice(1)} - (
-                          {selectedActivityDetails.levels[level]} Points)
-                        </option>
-                      ))}
+                      {Object.keys(selectedActivityDetails.levels).map(
+                        (level) => (
+                          <option key={level} value={level}>
+                            {level.charAt(0).toUpperCase() + level.slice(1)} - (
+                            {selectedActivityDetails.levels[level]} Points)
+                          </option>
+                        ),
+                      )}
                     </select>
                   </div>
                   <div>
@@ -432,8 +465,8 @@ export default function StudentAddCertificatePage({ params }) {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="bg-foreground text-background px-8 py-2 text-sm font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center min-w-[160px] disabled:opacity-50"
+              disabled={!isFormValid || isSubmitting}
+              className="bg-foreground text-background px-8 py-2 text-sm font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center min-w-[160px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

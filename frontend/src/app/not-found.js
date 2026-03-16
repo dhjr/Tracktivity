@@ -17,12 +17,11 @@ export default function NotFound() {
       <p className="text-lg md:text-xl text-foreground/60 mb-10 md:mb-12 max-w-lg relative z-10">
         The page you're looking for doesn't exist or has been moved.
       </p>
-
       <Link
         href="/"
         className="px-8 md:px-10 py-3.5 md:py-4 rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 shadow-sm relative z-10"
       >
-        Back to Home
+        Back to Dashboard
       </Link>
     </div>
   );

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft,
   FileText,
   Activity,
   Award,
@@ -50,29 +49,13 @@ export default function StudentSubmissionDetailPage({ params }) {
 
   if (!user || loading) return <PageLoader />;
 
-  if (!submission) {
-    return (
       <div className="min-h-[calc(100vh-6rem)] w-full flex flex-col items-center justify-center gap-4">
         <p className="text-foreground/50">Submission not found</p>
-        <Link
-          href={`/student-dashboard/batches/${batchId}/submissions`}
-          className="text-sm font-medium underline"
-        >
-          Go Back
-        </Link>
       </div>
-    );
-  }
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-6xl mx-auto p-4 md:p-8">
-      <div className="flex items-center justify-between mb-8">
-        <Link
-          href={`/student-dashboard/batches/${batchId}/submissions`}
-          className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Submissions
-        </Link>
+      <div className="flex items-center justify-end mb-8">
         <div className="flex items-center gap-3">
           {submission.status === "pending" && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-500">
