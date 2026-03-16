@@ -6,7 +6,7 @@ import { getInitials } from "@/utils/helpers";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, FileText, ChevronRight } from "lucide-react";
+import { FileText, ChevronRight } from "lucide-react";
 import PageLoader from "@/components/PageLoader";
 
 function StatusDot({ count, status }) {
@@ -82,14 +82,6 @@ export default function BatchSubmissionsPage({ params }) {
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
-      <div className="flex items-center justify-between mb-6">
-        <Link
-          href={`/faculty-dashboard/batches/${batchId}`}
-          className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Batch
-        </Link>
-      </div>
 
       <div className="mb-8 border-b border-border pb-6">
         <h1 className="text-3xl font-medium tracking-tight text-foreground">

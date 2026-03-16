@@ -8,7 +8,7 @@ import PageLoader from "@/components/PageLoader";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, ShieldAlert } from "lucide-react";
+import { ShieldCheck, ShieldAlert } from "lucide-react";
 
 function DetailRow({ label, value }) {
   return (
@@ -62,28 +62,15 @@ export default function StudentMemberDetailPage({ params }) {
 
   if (!user || loading) return <PageLoader />;
 
-  if (!member) {
-    return (
       <div className="min-h-[calc(100vh-6rem)] w-full flex flex-col items-center justify-center gap-4">
         <p className="text-foreground/50">Member not found.</p>
-        <Link href={`/student-dashboard/batches/${batchId}/members`} className="text-sm underline text-foreground/60">
-          Back to Members
-        </Link>
       </div>
-    );
-  }
 
   const isFaculty = member.role === "faculty";
   const name = isFaculty ? member.full_name : member.studentName;
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-xl mx-auto p-4 md:p-8">
-      <Link
-        href={`/student-dashboard/batches/${batchId}/members`}
-        className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors mb-8"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Members
-      </Link>
       <div className="flex flex-col items-center gap-3 py-10 border-b border-border mb-8">
         <div className="w-20 h-20 rounded-full bg-secondary/50 flex items-center justify-center text-2xl font-bold text-foreground/70">
           {getInitials(name)}

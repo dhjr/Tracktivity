@@ -5,7 +5,7 @@ import { getAuthHeaders } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Users, Trash2, FileText } from "lucide-react";
+import { Users, Trash2, FileText } from "lucide-react";
 import BatchNavCard from "@/components/BatchNavCard";
 import PageLoader from "@/components/PageLoader";
 import BatchCodeBadge from "@/components/BatchCodeBadge";
@@ -68,13 +68,7 @@ export default function FacultyBatchPage({ params }) {
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
-      <div className="flex items-center justify-between mb-6">
-        <Link
-          href="/faculty-dashboard"
-          className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-        </Link>
+      <div className="flex items-center justify-end mb-6">
         <button
           onClick={() => setConfirmDeleteBatch(true)}
           className="inline-flex items-center gap-2 text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-500/10 px-3 py-1.5 rounded-md transition-colors"
