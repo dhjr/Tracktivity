@@ -2,7 +2,7 @@
 
 import { useRequireRole } from "@/hooks/useRequireRole";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2, UploadCloud, CheckCircle2 } from "lucide-react";
 import CalendarPicker from "@/components/CalendarPicker";
@@ -32,6 +32,7 @@ export default function StudentAddCertificatePage({ params }) {
   const [rulebook, setRulebook] = useState([]);
   const [fetchingRulebook, setFetchingRulebook] = useState(true);
   const [selectedActivityDetails, setSelectedActivityDetails] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   useEffect(() => {
     if (isReady) {
@@ -73,12 +74,29 @@ export default function StudentAddCertificatePage({ params }) {
   };
 
   // Group activities by category for the dropdown
-  const categories = rulebook.reduce((acc, current) => {
-    const catName = current.categoryName || "Other";
-    if (!acc[catName]) acc[catName] = [];
-    acc[catName].push(current);
-    return acc;
-  }, {});
+  const categories = useMemo(() => {
+    return rulebook.reduce((acc, current) => {
+      const catName = current.categoryName || "Other";
+      if (!acc[catName]) acc[catName] = [];
+      acc[catName].push(current);
+      return acc;
+    }, {});
+  }, [rulebook]);
+
+  const handleCategoryChange = (e) => {
+    const category = e.target.value;
+    setSelectedCategory(category);
+    setSelectedActivityDetails(null);
+    setFormData({
+      ...formData,
+      activity_id: "",
+      name: "",
+      category: category,
+      groupId: "",
+      level_key: "",
+      points_awarded: 0,
+    });
+  };
 
   const handleActivityChange = (e) => {
     const selectedId = e.target.value;
@@ -168,27 +186,18 @@ export default function StudentAddCertificatePage({ params }) {
   if (!user || loading || fetchingRulebook) return <PageLoader />;
 
   return (
-    <div className="min-h-[calc(100vh-6rem)] w-full max-w-3xl mx-auto p-4 md:p-8">
-      <div className="flex items-center justify-between mb-8">
-        <Link
-          href={`/student-dashboard/batches/${batchId}`}
-          className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Batch
-        </Link>
-      </div>
-
-      <div className="mb-8">
-        <h1 className="text-3xl font-medium tracking-tight text-foreground">
+    <div className="min-h-[calc(100vh-4rem)] w-full max-w-3xl mx-auto p-4 md:p-6 pt-8 md:pt-12">
+      <div className="mb-4">
+        <h1 className="text-xl font-medium tracking-tight text-foreground">
           Submit Certificate
         </h1>
-        <p className="text-sm text-foreground/60 mt-2">
+        <p className="text-xs text-foreground/60 mt-0.5">
           Upload your certificate details and file for faculty review.
         </p>
       </div>
 
       {success ? (
-        <div className="p-12 border border-green-500/20 bg-green-500/5 flex flex-col items-center justify-center text-center space-y-4">
+        <div className="p-10 border border-green-500/20 bg-green-500/5 flex flex-col items-center justify-center text-center space-y-4">
           <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center text-green-500 mb-2">
             <CheckCircle2 className="w-8 h-8" />
           </div>
@@ -203,33 +212,61 @@ export default function StudentAddCertificatePage({ params }) {
       ) : (
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 bg-background border border-border p-6 md:p-8 rounded-none"
+          className="space-y-4 bg-background border border-border p-5 md:p-6 rounded-none"
         >
           <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="activity"
-                className="block text-sm font-medium mb-1.5"
-              >
-                Category & Activity (KTU Rulebook)
-              </label>
-              <select
-                id="activity"
-                className="w-full px-4 py-2.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors appearance-none"
-                value={
-                  selectedActivityDetails?.activityId ||
-                  selectedActivityDetails?.code ||
-                  ""
-                }
-                onChange={handleActivityChange}
-                required
-              >
-                <option value="" disabled>
-                  Select an activity
-                </option>
-                {Object.entries(categories).map(([catName, activities]) => (
-                  <optgroup key={catName} label={catName}>
-                    {activities.map((item) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="category-select"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Category
+                </label>
+                <select
+                  id="category-select"
+                  className="w-full px-4 py-1.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors appearance-none"
+                  value={selectedCategory}
+                  onChange={handleCategoryChange}
+                  required
+                >
+                  <option value="" disabled>
+                    Select category
+                  </option>
+                  {Object.keys(categories).map((catName) => (
+                    <option key={catName} value={catName}>
+                      {catName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="activity"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Specific Activity
+                </label>
+                <select
+                  id="activity"
+                  className={`w-full px-4 py-1.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors appearance-none ${
+                    !selectedCategory ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  value={
+                    selectedActivityDetails?.activityId ||
+                    selectedActivityDetails?.code ||
+                    ""
+                  }
+                  onChange={handleActivityChange}
+                  required
+                  disabled={!selectedCategory}
+                >
+                  <option value="" disabled>
+                    {selectedCategory ? "Select an activity" : "Select category first"}
+                  </option>
+                  {selectedCategory &&
+                    categories[selectedCategory].map((item) => (
                       <option
                         key={item.activityId || item.code}
                         value={item.activityId || item.code}
@@ -237,39 +274,89 @@ export default function StudentAddCertificatePage({ params }) {
                         {item.title}
                       </option>
                     ))}
-                  </optgroup>
-                ))}
-              </select>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {selectedActivityDetails?.calculationType === "LEVEL" ? (
+                <div className="grid grid-cols-2 gap-4 md:col-span-2">
+                  <div>
+                    <label
+                      htmlFor="level"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Level
+                    </label>
+                    <select
+                      id="level"
+                      className="w-full px-4 py-1.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
+                      value={formData.level_key}
+                      onChange={handleLevelChange}
+                      required
+                    >
+                      <option value="" disabled>
+                        Select Level
+                      </option>
+                      {Object.keys(selectedActivityDetails.levels).map((level) => (
+                        <option key={level} value={level}>
+                          {level.charAt(0).toUpperCase() + level.slice(1)} - (
+                          {selectedActivityDetails.levels[level]} Points)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="points"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Points (Max: {selectedActivityDetails?.maxPoints || 0})
+                    </label>
+                    <input
+                      id="points"
+                      type="number"
+                      readOnly
+                      className="w-full px-4 py-1.5 text-sm bg-secondary/20 border border-border text-foreground/60 focus:outline-none cursor-not-allowed"
+                      value={formData.points_awarded}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="md:col-span-1">
+                  <label
+                    htmlFor="points"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Points to be Awarded
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="points"
+                      type="number"
+                      readOnly
+                      className="w-full px-4 py-1.5 text-sm bg-secondary/20 border border-border text-foreground/60 focus:outline-none cursor-not-allowed"
+                      value={formData.points_awarded}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-foreground/40 uppercase tracking-wider font-bold">
+                      Max: {selectedActivityDetails?.maxPoints || 0}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
-                  htmlFor="category"
-                  className="block text-sm font-medium mb-1.5"
-                >
-                  Category
-                </label>
-                <input
-                  id="category"
-                  type="text"
-                  className="w-full px-4 py-2.5 text-sm bg-secondary/20 border border-border text-foreground/60 focus:outline-none transition-colors cursor-not-allowed"
-                  value={formData.category}
-                  readOnly
-                  placeholder="Auto-assigned"
-                />
-              </div>
-
-              <div>
-                <label
                   htmlFor="academic_year"
-                  className="block text-sm font-medium mb-1.5"
+                  className="block text-sm font-medium mb-1"
                 >
                   Academic Year
                 </label>
                 <select
                   id="academic_year"
-                  className="w-full px-4 py-2.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
+                  className="w-full px-4 py-1.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
                   value={formData.academic_year}
                   onChange={(e) =>
                     setFormData({
@@ -281,64 +368,13 @@ export default function StudentAddCertificatePage({ params }) {
                 >
                   {[1, 2, 3, 4].map((year) => (
                     <option key={year} value={year}>
-                      Year {year}
+                      Regular Year {year}
                     </option>
                   ))}
                 </select>
               </div>
-            </div>
 
-            {selectedActivityDetails?.calculationType === "LEVEL" && (
               <div>
-                <label
-                  htmlFor="level"
-                  className="block text-sm font-medium mb-1.5"
-                >
-                  Level of Achievement
-                </label>
-                <select
-                  id="level"
-                  className="w-full px-4 py-2.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
-                  value={formData.level_key}
-                  onChange={handleLevelChange}
-                  required
-                >
-                  <option value="" disabled>
-                    Select Level
-                  </option>
-                  {Object.keys(selectedActivityDetails.levels).map((level) => (
-                    <option key={level} value={level}>
-                      {level.charAt(0).toUpperCase() + level.slice(1)} - (
-                      {selectedActivityDetails.levels[level]} Points)
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="points"
-                  className="block text-sm font-medium mb-1.5"
-                >
-                  Points to be Awarded
-                </label>
-                <div className="relative">
-                  <input
-                    id="points"
-                    type="number"
-                    readOnly
-                    className="w-full px-4 py-2.5 text-sm bg-secondary/20 border border-border text-foreground/60 focus:outline-none cursor-not-allowed"
-                    value={formData.points_awarded}
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-foreground/40 uppercase tracking-wider font-bold">
-                    Max: {selectedActivityDetails?.maxPoints || 0}
-                  </span>
-                </div>
-              </div>
-
-              <div className="md:col-span-1">
                 <CalendarPicker
                   label="Certificate Date"
                   value={formData.date}
@@ -348,13 +384,13 @@ export default function StudentAddCertificatePage({ params }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5">
-                Upload Certificate (PDF/Image)
+              <label className="block text-sm font-medium mb-1">
+                Upload Certificate
               </label>
-              <div className="border-2 border-dashed border-border hover:border-foreground/50 transition-colors p-8 flex flex-col items-center justify-center text-center cursor-pointer group bg-secondary/5 relative">
+              <div className="border-2 border-dashed border-border hover:border-foreground/50 transition-colors p-4 flex flex-col items-center justify-center text-center cursor-pointer group bg-secondary/5 relative">
                 <input
                   type="file"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   accept=".pdf,image/*"
                   onChange={(e) =>
                     setFormData({ ...formData, file: e.target.files[0] })
@@ -363,24 +399,21 @@ export default function StudentAddCertificatePage({ params }) {
                 />
 
                 {formData.file ? (
-                  <div className="flex flex-col items-center">
-                    <CheckCircle2 className="w-8 h-8 text-green-500 mb-3" />
-                    <p className="text-sm font-medium text-foreground line-clamp-1 max-w-[200px]">
+                  <div className="flex flex-col items-center relative z-0">
+                    <CheckCircle2 className="w-6 h-6 text-green-500 mb-1" />
+                    <p className="text-[10px] font-medium text-foreground line-clamp-1 max-w-[200px]">
                       {formData.file.name}
-                    </p>
-                    <p className="text-xs text-foreground/50 mt-1">
-                      {(formData.file.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <UploadCloud className="w-6 h-6 text-foreground/60" />
+                  <div className="flex flex-col items-center relative z-0">
+                    <div className="w-8 h-8 rounded-full bg-background border border-border flex items-center justify-center mb-2">
+                      <UploadCloud className="w-4 h-4 text-foreground/60" />
                     </div>
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-xs font-medium text-foreground">
                       Click to upload or drag and drop
                     </p>
-                    <p className="text-xs text-foreground/50 mt-1">
+                    <p className="text-[10px] text-foreground/50 mt-0.5">
                       PDF, JPG, PNG or WebP (MAX. 5MB)
                     </p>
                   </div>
@@ -389,17 +422,18 @@ export default function StudentAddCertificatePage({ params }) {
             </div>
           </div>
 
-          <div className="pt-4 flex items-center justify-end gap-3 border-t border-border mt-8">
-            <Link
-              href={`/student-dashboard/batches/${batchId}`}
-              className="px-6 py-2.5 text-sm font-medium hover:bg-secondary/50 transition-colors border border-transparent"
+          <div className="pt-2 flex items-center justify-end gap-3 border-t border-border mt-2">
+            <button
+              onClick={() => router.back()}
+              type="button"
+              className="px-6 py-2 text-sm font-medium hover:bg-secondary/50 transition-colors border border-transparent"
             >
               Cancel
-            </Link>
+            </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-foreground text-background px-8 py-2.5 text-sm font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center min-w-[160px] disabled:opacity-50"
+              className="bg-foreground text-background px-8 py-2 text-sm font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center min-w-[160px] disabled:opacity-50"
             >
               {isSubmitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

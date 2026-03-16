@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <ThemeProvider>
             <Navbar />
-            <main className="pt-24">{children}</main>
+            <main className="pt-16">{children}</main>
           </ThemeProvider>
         </AuthProvider>
       </body>

@@ -40,7 +40,8 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-6rem)] bg-background text-foreground p-4 md:p-8 lg:p-12 transition-colors duration-300">
+    <div className="min-h-[calc(100vh-4rem)] bg-background
+ text-foreground p-4 md:p-8 lg:p-12 transition-colors duration-300">
       <div className="max-w-5xl mx-auto space-y-12 md:space-y-16 mt-4">
         {/* Header Section */}
         <div className="text-center space-y-6">
