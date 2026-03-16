@@ -19,6 +19,8 @@ import {
   setMonth as dateFnsSetMonth,
   parseISO,
   isValid,
+  isAfter,
+  startOfToday,
 } from "date-fns";
 import {
   ChevronLeft,
@@ -57,31 +59,58 @@ const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
   }, []);
 
   const onDateClick = (day) => {
+    if (isAfter(day, new Date())) return;
     onChange(format(day, "yyyy-MM-dd"));
     setIsOpen(false);
   };
 
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  const nextMonth = () => {
+    const next = addMonths(currentMonth, 1);
+    if (isAfter(startOfMonth(next), new Date())) return;
+    setCurrentMonth(next);
+  };
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
 
   const renderHeader = () => {
     return (
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold text-foreground">
-            {format(currentMonth, "MMMM yyyy")}
-          </span>
-        </div>
+      <div className="flex items-center justify-between px-2 py-2 border-b border-border bg-secondary/10">
         <div className="flex items-center gap-1">
+          <select
+            value={getMonth(currentMonth)}
+            onChange={(e) => handleMonthChange(e.target.value)}
+            className="text-[11px] font-medium bg-transparent border-none focus:ring-0 cursor-pointer hover:bg-secondary px-1.5 py-1 rounded appearance-none"
+          >
+            {[
+              "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+            ].map((m, i) => (
+              <option key={m} value={i}>
+                {m}
+              </option>
+            ))}
+          </select>
+          <select
+            value={getYear(currentMonth)}
+            onChange={(e) => handleYearChange(e.target.value)}
+            className="text-[11px] font-medium bg-transparent border-none focus:ring-0 cursor-pointer hover:bg-secondary px-1.5 py-1 rounded appearance-none"
+          >
+            {years.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-0.5">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               prevMonth();
             }}
-            className="p-1.5 hover:bg-secondary rounded-full transition-colors text-foreground/60 hover:text-foreground"
+            className="p-1 hover:bg-secondary rounded-full transition-colors text-foreground/60 hover:text-foreground"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-3.5 h-3.5" />
           </button>
           <button
             type="button"
@@ -89,9 +118,10 @@ const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
               e.stopPropagation();
               nextMonth();
             }}
-            className="p-1.5 hover:bg-secondary rounded-full transition-colors text-foreground/60 hover:text-foreground"
+            disabled={isAfter(startOfMonth(addMonths(currentMonth, 1)), new Date())}
+            className="p-1 hover:bg-secondary rounded-full transition-colors text-foreground/60 hover:text-foreground disabled:opacity-20 disabled:pointer-events-none"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -130,18 +160,19 @@ const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
         const isSelected =
           value &&
           isSameDay(day, typeof value === "string" ? parseISO(value) : value);
-        const isDisabled = !isSameMonth(day, monthStart);
+        const isFuture = isAfter(day, new Date());
+        const isDisabled = !isSameMonth(day, monthStart) || isFuture;
 
         days.push(
           <div
             key={day.toString()}
             className={`
-              relative h-9 flex items-center justify-center text-xs cursor-pointer transition-all
-              ${isDisabled ? "text-foreground/20" : "text-foreground hover:bg-secondary"}
+              relative h-8 flex items-center justify-center text-xs cursor-pointer transition-all
+              ${isDisabled ? "text-foreground/20 pointer-events-none" : "text-foreground hover:bg-secondary"}
               ${isSelected ? "bg-foreground text-background font-bold hover:bg-foreground/90" : ""}
               ${isSameDay(day, new Date()) && !isSelected ? "text-foreground font-bold border-b-2 border-foreground" : ""}
             `}
-            onClick={() => onDateClick(cloneDay)}
+            onClick={() => !isDisabled && onDateClick(cloneDay)}
           >
             {format(day, "d")}
           </div>,
@@ -159,15 +190,20 @@ const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
   };
 
   // Year Selection Dropdown Logic
-  const currentYear = getYear(currentMonth);
-  const years = Array.from({ length: 20 }, (_, i) => currentYear - 10 + i);
+  const currentYearVisible = getYear(currentMonth);
+  const currentActualYear = getYear(new Date());
+  const years = Array.from({ length: 11 }, (_, i) => currentActualYear - 10 + i);
 
   const handleYearChange = (year) => {
-    setCurrentMonth(dateFnsSetYear(currentMonth, parseInt(year)));
+    const newDate = dateFnsSetYear(currentMonth, parseInt(year));
+    if (isAfter(startOfMonth(newDate), new Date())) return;
+    setCurrentMonth(newDate);
   };
 
   const handleMonthChange = (monthIdx) => {
-    setCurrentMonth(dateFnsSetMonth(currentMonth, parseInt(monthIdx)));
+    const newDate = dateFnsSetMonth(currentMonth, parseInt(monthIdx));
+    if (isAfter(startOfMonth(newDate), new Date())) return;
+    setCurrentMonth(newDate);
   };
 
   return (
@@ -188,55 +224,7 @@ const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 top-full left-0 mt-2 w-[280px] bg-background border border-border shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="flex items-center gap-1 p-2 bg-secondary/10 border-b border-border">
-            <select
-              value={getMonth(currentMonth)}
-              onChange={(e) => handleMonthChange(e.target.value)}
-              className="text-[11px] font-medium bg-transparent border-none focus:ring-0 cursor-pointer hover:bg-secondary px-2 py-1 rounded"
-            >
-              {[
-                "January",
-                "February",
-                "March",
-                "April",
-                "May",
-                "June",
-                "July",
-                "August",
-                "September",
-                "October",
-                "November",
-                "December",
-              ].map((m, i) => (
-                <option key={m} value={i}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <select
-              value={getYear(currentMonth)}
-              onChange={(e) => handleYearChange(e.target.value)}
-              className="text-[11px] font-medium bg-transparent border-none focus:ring-0 cursor-pointer hover:bg-secondary px-2 py-1 rounded"
-            >
-              {Array.from(
-                { length: 50 },
-                (_, i) => new Date().getFullYear() - 25 + i,
-              ).map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="ml-auto p-1 text-foreground/40 hover:text-foreground"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-
+        <div className="absolute z-50 top-full left-0 mt-1 md:top-0 md:bottom-auto md:mt-0 md:right-full md:left-auto md:mr-3 w-[240px] bg-background border border-border shadow-2xl animate-in fade-in slide-in-from-right-2 duration-200">
           {renderHeader()}
           {renderDays()}
           {renderCells()}

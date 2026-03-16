@@ -76,7 +76,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-6rem)] w-full flex items-center justify-center bg-background">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="mb-4 text-center">
           <h1 className="text-xl font-medium tracking-tight text-foreground">

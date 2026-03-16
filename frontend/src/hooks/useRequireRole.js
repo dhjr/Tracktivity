@@ -18,10 +18,12 @@ const ROLE_REDIRECTS = {
  * @returns {{ user: object|null|undefined, isReady: boolean }}
  */
 export function useRequireRole(role) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    if (loading) return;
+
     if (user === null) {
       router.push("/login");
     } else if (
@@ -30,7 +32,7 @@ export function useRequireRole(role) {
     ) {
       router.push(ROLE_REDIRECTS[role] ?? "/");
     }
-  }, [user, router, role]);
+  }, [user, loading, router, role]);
 
   const isReady =
     user != null && user?.user_metadata?.role === role;
