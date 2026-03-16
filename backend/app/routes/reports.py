@@ -14,9 +14,6 @@ from .faculty import verify_admin_access
 router = APIRouter(prefix="/faculty", tags=["reports"])
 
 
-# ─────────────────────────────────────────────
-# HELPERS
-# ─────────────────────────────────────────────
 
 def make_csv_response(headers: list, rows: list, filename: str) -> StreamingResponse:
     output = io.StringIO()
@@ -75,7 +72,6 @@ def make_pdf_response(title: str, headers: list, rows: list, filename: str) -> S
     col_count = len(headers)
 
     if col_count == 4:
-        # Report 2: KTU ID | Name | Category | Total Points
         col_widths = [
             page_width * 0.15,
             page_width * 0.20,
@@ -83,16 +79,23 @@ def make_pdf_response(title: str, headers: list, rows: list, filename: str) -> S
             page_width * 0.25,
         ]
     elif col_count == 5:
-        # Report 3: KTU ID | Name | Category | Activity Name | Points
         col_widths = [
             page_width * 0.13,
-            page_width * 0.17,
-            page_width * 0.25,
-            page_width * 0.35,
-            page_width * 0.10,
+            page_width * 0.20,
+            page_width * 0.15,
+            page_width * 0.37,
+            page_width * 0.15,
         ]
     elif col_count == 6:
-        # Report 1: KTU ID | Name | Grp1 | Grp2 | Grp3 | Total
+        col_widths = [
+            page_width * 0.12,
+            page_width * 0.15,
+            page_width * 0.12,
+            page_width * 0.20,
+            page_width * 0.31,
+            page_width * 0.10,
+        ]
+    elif col_count == 7:
         col_widths = [
             page_width * 0.15,
             page_width * 0.25,
@@ -151,10 +154,9 @@ def get_rulebook_category_map(db) -> dict:
     return mapping
 
 
-# ─────────────────────────────────────────────
+
 # REPORT 1 — Student Point Summary
 # ktuid | student name | grp1 | grp2 | grp3 | total
-# ─────────────────────────────────────────────
 
 @router.get("/batches/{batch_id}/reports/student-summary")
 async def report_student_summary(
@@ -189,10 +191,10 @@ async def report_student_summary(
     return make_pdf_response("Student Point Summary", headers, rows, "student_summary.pdf")
 
 
-# ─────────────────────────────────────────────
+
 # REPORT 2 — Category Breakdown
 # ktuid | student name | category name | total points under that category
-# ─────────────────────────────────────────────
+
 
 @router.get("/batches/{batch_id}/reports/category-breakdown")
 async def report_category_breakdown(
@@ -205,14 +207,12 @@ async def report_category_breakdown(
 
     category_map = get_rulebook_category_map(db)
 
-    # Fetch all approved submissions for this batch with student info
     subs_res = db.table("submissions") \
-        .select("student_id, activity_id, points_awarded") \
+        .select("student_id, activity_id, points_awarded, group_name") \
         .eq("batch_id", batch_id) \
         .eq("status", "approved") \
         .execute()
 
-    # Fetch all students in batch
     students_res = db.table("students") \
         .select("id, ktuid, full_name") \
         .eq("batch_id", batch_id) \
@@ -221,37 +221,42 @@ async def report_category_breakdown(
 
     student_map = {s["id"]: s for s in students_res.data}
 
-    # Aggregate: {student_id: {category_name: total_points}}
+    # Aggregate: {student_id: {(category_name, group_name): total_points}}
     aggregated: dict = {}
     for sub in subs_res.data:
         sid = sub["student_id"]
         cat = category_map.get(sub["activity_id"], "Unknown")
-        pts = sub["points_awarded"]
+        grp = sub["group_name"]
+        key = (cat, grp)
         if sid not in aggregated:
             aggregated[sid] = {}
-        aggregated[sid][cat] = aggregated[sid].get(cat, 0) + pts
+        aggregated[sid][key] = aggregated[sid].get(key, 0) + sub["points_awarded"]
 
-    # Flatten to rows
-    headers = ["KTU ID", "Student Name", "Category", "Total Points"]
+    headers = ["KTU ID", "Student Name", "Group", "Category", "Total Points"]
     rows = []
     for student in students_res.data:
         sid = student["id"]
         cats = aggregated.get(sid, {})
         if not cats:
-            rows.append([student["ktuid"], student["full_name"], "—", 0])
+            rows.append([student["ktuid"], student["full_name"], "—", "—", 0])
         else:
-            for cat_name, total in sorted(cats.items()):
-                rows.append([student["ktuid"], student["full_name"], cat_name, total])
+            for (cat_name, grp_name), total in sorted(cats.items()):
+                rows.append([
+                    student["ktuid"],
+                    student["full_name"],
+                    grp_name,
+                    cat_name,
+                    total
+                ])
 
     if format == "csv":
         return make_csv_response(headers, rows, "category_breakdown.csv")
     return make_pdf_response("Category-wise Point Breakdown", headers, rows, "category_breakdown.pdf")
 
 
-# ─────────────────────────────────────────────
 # REPORT 3 — Activity Breakdown (approved only)
 # ktuid | student name | category name | activity name - points
-# ─────────────────────────────────────────────
+
 
 @router.get("/batches/{batch_id}/reports/activity-breakdown")
 async def report_activity_breakdown(
@@ -265,7 +270,7 @@ async def report_activity_breakdown(
     category_map = get_rulebook_category_map(db)
 
     subs_res = db.table("submissions") \
-        .select("student_id, activity_id, activity_name, points_awarded") \
+        .select("student_id, activity_id, activity_name, points_awarded, group_name") \
         .eq("batch_id", batch_id) \
         .eq("status", "approved") \
         .order("student_id") \
@@ -279,8 +284,7 @@ async def report_activity_breakdown(
 
     student_map = {s["id"]: s for s in students_res.data}
 
-    # Now 5 columns — activity name and points are separate
-    headers = ["KTU ID", "Student Name", "Category", "Activity Name", "Points"]
+    headers = ["KTU ID", "Student Name", "Group", "Category", "Activity Name", "Points"]
     rows = []
     for sub in subs_res.data:
         student = student_map.get(sub["student_id"])
@@ -290,9 +294,10 @@ async def report_activity_breakdown(
         rows.append([
             student["ktuid"],
             student["full_name"],
+            sub["group_name"],
             cat,
-            sub["activity_name"],   # separate column
-            sub["points_awarded"]   # separate column
+            sub["activity_name"],
+            sub["points_awarded"]
         ])
 
     if format == "csv":
