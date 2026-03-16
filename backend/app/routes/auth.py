@@ -45,32 +45,29 @@ async def signup(credentials: SignupRequest,db=Depends(get_supabase)):
             detail=str(e)
         )
 
-@router.post("/check-ktu")
-async def check_ktu(req: dict, db=Depends(get_supabase)):
-    ktu_id = req.get("ktuId")
-    if not ktu_id:
-        raise HTTPException(
-            status_code=400, 
-            detail="KTU ID is required"
-        )
-    
+@router.get("/check-ktu")
+async def check_ktu(
+    ktu_id: str = Query(..., alias="ktuId", min_length=3), 
+    db=Depends(get_supabase)
+):
     try:
-        # 1. Query the 'students' table specifically for this ID
-        # 2. Case-insensitive check using '.ilike' or '.eq' with .upper()
+        # Normalize to uppercase and use limit(1) for speed
+        # We only care if data exists, not what the data is
         result = db.table("students") \
             .select("ktuid") \
             .eq("ktuid", ktu_id.upper()) \
+            .limit(1) \
             .execute()
 
-        # If result.data is empty, the ID is unique
-        is_unique = len(result.data) == 0
+        # result.data will be an empty list [] if not found
+        is_present = len(result.data) > 0
         
-        return {"isPresentInDB": not is_unique}
+        return {"isPresent": is_present}
 
     except Exception as e:
-        # Log the actual error on your server for debugging
+        # In production, use a proper logger instead of print
         print(f"Error checking KTU ID: {e}")
         raise HTTPException(
             status_code=500, 
-            detail="Internal server error during validation"
+            detail="Database validation failed"
         )
