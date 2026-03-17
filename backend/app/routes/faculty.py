@@ -45,6 +45,50 @@ async def get_my_batches(
 
     return {"batches": batches}
 
+
+
+@router.patch("/batches/{batch_id}/admins/{faculty_id}")
+async def promote_to_admin(
+    batch_id: str,
+    faculty_id: str,
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("faculty"))
+):
+    await verify_admin_access(batch_id, current_user.id, db)
+
+    try:
+        member_res = db.table("batch_faculty") \
+            .select("faculty_id, is_admin") \
+            .eq("batch_id", batch_id) \
+            .eq("faculty_id", faculty_id) \
+            .single() \
+            .execute()
+    except Exception:
+        raise HTTPException(
+            status_code=404,
+            detail="Faculty is not a member of this batch."
+        )
+
+    if member_res.data["is_admin"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Faculty is already an admin of this batch."
+        )
+
+    db.table("batch_faculty") \
+        .update({"is_admin": True}) \
+        .eq("batch_id", batch_id) \
+        .eq("faculty_id", faculty_id) \
+        .execute()
+
+    return {
+        "message": "Faculty promoted to admin successfully.",
+        "batch_id": batch_id,
+        "faculty_id": faculty_id
+    }
+
+
+
 # obtain the stats of a batch: total number of students, average points per group
 @router.get("/batches/{batch_id}/stats")
 async def get_batch_stats(
