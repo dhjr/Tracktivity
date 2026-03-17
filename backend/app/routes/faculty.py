@@ -310,6 +310,7 @@ async def verify_submission(
         raise HTTPException(status_code=404, detail="Submission not found.")
 
     submission = res.data
+    previous_status = submission["status"]
 
     await verify_admin_access(submission["batch_id"], current_user.id, db)
 
@@ -383,66 +384,12 @@ async def verify_submission(
             exclude_submission_id=submission_id
         )
 
-    previous_status = submission["status"]
-    print(f"Previous status: {previous_status}, New status: {data.status}")
     # 5. Persist
     db.table("submissions") \
         .update(update_payload) \
         .eq("id", submission_id) \
         .execute()
 
-    # 6. Handle point changes based on status transition
-    group_column_map = {
-        "GROUP_I":   "grp1_points",
-        "GROUP_II":  "grp2_points",
-        "GROUP_III": "grp3_points"
-    }
-
-    column = group_column_map.get(effective_group_name)
-    if not column:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unknown group name: {effective_group_name}"
-        )
-
-    try:
-        student_res = db.table("students") \
-            .select(column) \
-            .eq("id", submission["student_id"]) \
-            .single() \
-            .execute()
-    except Exception:
-        raise HTTPException(status_code=404, detail="Student not found.")
-
-    current_points = student_res.data[column]
-    # previous_status = submission["status"]
-    new_status = data.status
-
-    if previous_status == "approved" and new_status == "approved":
-        # Re-approval with possibly changed points — adjust the difference
-        old_points = submission["points_awarded"]
-        point_delta = effective_points - old_points
-        if point_delta != 0:
-            db.table("students") \
-                .update({column: current_points + point_delta}) \
-                .eq("id", submission["student_id"]) \
-                .execute()
-
-    elif previous_status != "approved" and new_status == "approved":
-        # Fresh approval — add points
-        db.table("students") \
-            .update({column: current_points + effective_points}) \
-            .eq("id", submission["student_id"]) \
-            .execute()
-
-    elif previous_status == "approved" and new_status == "rejected":
-        # Reverting approval — subtract old points
-        db.table("students") \
-            .update({column: current_points - submission["points_awarded"]}) \
-            .eq("id", submission["student_id"]) \
-            .execute()
-
-    # pending → rejected or rejected → rejected: no point change needed
 
     return {
         "message": f"Submission {data.status} successfully.",
