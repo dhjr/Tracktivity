@@ -127,6 +127,7 @@ async def get_batch_stats(
 @router.get("/batches/{batch_id}/submissions")
 async def get_batch_submissions(
     batch_id: str,
+    academic_year: Optional[int] = None,
     status: Optional[str] = None,
     db=Depends(get_supabase),
     current_user=Depends(require_role("faculty"))
@@ -151,8 +152,10 @@ async def get_batch_submissions(
 
     if status:
         query = query.eq("status", status)
+    if academic_year:
+        query = query.eq("academic_year", academic_year)    
         
-    res = query.order("created_at", desc=True).execute()
+    res = query.order("academic_year").order("created_at", desc=True).execute()
 
     submissions = res.data
     for sub in submissions:
