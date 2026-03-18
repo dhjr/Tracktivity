@@ -1,29 +1,38 @@
-import { Check } from "lucide-react";
+import { Check, Info } from "lucide-react";
 
 export default function ActivityGroupCard({ group, title, items, minPoints }) {
   return (
-    <div className="bg-secondary/40 border border-border rounded-xl p-6 hover:border-blue-500/50 transition-colors shadow-sm flex flex-col h-full">
-      <h3 className="text-blue-600 dark:text-blue-400 font-bold text-lg mb-4 leading-tight">
-        {group}{" "}
-        <span className="text-foreground/80 font-semibold">
-          – {title}
-        </span>
-      </h3>
-      <ul className="space-y-4 mb-6 grow">
-        {items.map((item, index) => (
-          <li key={index} className="flex gap-3 items-start">
-            <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-            <span className="text-foreground/90 text-sm md:text-base leading-relaxed">
-              {item}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <div className="flex gap-3 items-start pt-2 border-t border-border">
-        <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-        <span className="text-foreground font-bold text-sm md:text-base leading-relaxed">
-          Minimum: {minPoints}
-        </span>
+    <div className="group relative p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-4xl flex flex-col hover:shadow-2xl hover:border-border transition-all duration-500 overflow-hidden h-full">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-foreground/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-foreground/10 transition-colors duration-700" />
+      
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="flex items-center gap-2 mb-4">
+           <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/60">{group}</span>
+           <div className="h-px w-4 bg-foreground/20" />
+        </div>
+        
+        <h3 className="font-display font-bold text-xl tracking-tight text-foreground group-hover:text-foreground transition-colors mb-6 leading-tight">
+          {title}
+        </h3>
+
+        <ul className="space-y-4 mb-8 grow">
+          {items.map((item, index) => (
+            <li key={index} className="flex gap-3 items-start group/item">
+              <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-foreground/30 group-hover/item:bg-foreground transition-colors shrink-0" />
+              <span className="text-foreground/75 text-sm font-light leading-relaxed group-hover/item:text-foreground/90 transition-colors">
+                {item}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="pt-6 border-t border-border/20 mt-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+             <Info className="w-3.5 h-3.5 text-foreground/50" />
+             <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/60">Minimum Required</span>
+          </div>
+          <span className="text-sm font-display font-bold text-foreground/90">{minPoints}</span>
+        </div>
       </div>
     </div>
   );
