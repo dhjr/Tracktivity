@@ -55,9 +55,9 @@ export default function GuidelinesPage() {
                </div>
             </div>
             <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight text-foreground max-w-4xl mx-auto leading-[1.1]">
-              KTU Activity Points <span className="text-foreground/40 font-light">2024 Scheme</span>
+              KTU Activity Points <span className="text-foreground/60 font-light">2024 Scheme</span>
             </h1>
-            <p className="text-sm md:text-base text-foreground/50 max-w-2xl mx-auto font-light leading-relaxed">
+            <p className="text-sm md:text-base text-foreground/75 max-w-2xl mx-auto font-light leading-relaxed">
               The official guide for B.Tech, B.Des, BBA & BCA Students to navigate the Mandatory Student Activity (MSA) requirements.
             </p>
           </div>
@@ -89,9 +89,9 @@ export default function GuidelinesPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-border/30 bg-secondary/5">
-                      <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-foreground/40">Category of Admission</th>
-                      <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-foreground/40 border-x border-border/30 text-center">Total Points Required</th>
-                      <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-foreground/40 text-center">Min per Group (I, II, III)</th>
+                      <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-foreground/60">Category of Admission</th>
+                      <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-foreground/60 border-x border-border/30 text-center">Total Points Required</th>
+                      <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-foreground/60 text-center">Min per Group (I, II, III)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/20">
@@ -188,34 +188,39 @@ export default function GuidelinesPage() {
             </div>
 
             {/* Crucial Rules */}
-            <div className="bg-primary/2 border border-primary/10 rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden group hover:border-primary/20 transition-all">
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <ShieldCheck className="w-32 h-32" />
-              </div>
-              
-              <div className="relative z-10 space-y-8">
-                <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                      <ShieldCheck className="w-5 h-5 text-primary/60" />
-                   </div>
-                   <h2 className="text-2xl font-display font-medium tracking-tight text-foreground/80">Critical Policies</h2>
-                </div>
-
-                <div className="space-y-6">
-                  {[
-                    "Only activities performed during the enrolled programme duration are valid.",
-                    "Winning + Participation in one event: Only the highest point value counts.",
-                    "Submission of fraudulent documents leads to permanent points forfeiture.",
-                    "Skilling courses must be University-approved (Refer to the official list)."
-                  ].map((text, i) => (
-                    <div key={i} className="flex gap-4 items-start">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-1" />
-                      <p className="text-sm text-foreground/60 leading-relaxed font-light">
-                        {text}
-                      </p>
+            <div className="p-8 bg-secondary/5 border border-border/50 rounded-4xl">
+                 <div className="flex items-center gap-3 mb-6">
+                    <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
+                       <ShieldCheck className="w-4 h-4 text-background" />
                     </div>
-                  ))}
-                </div>
+                    <h3 className="text-xl font-display font-bold text-foreground">Activity Rules & Policies</h3>
+                 </div>
+                 <ul className="space-y-6">
+                    <li className="flex gap-4 items-start">
+                       <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-foreground/40 shrink-0" />
+                       <p className="text-sm text-foreground/75 leading-relaxed font-light">
+                          Activities must be completed <span className="text-foreground font-medium">outside of academic hours</span>.
+                       </p>
+                    </li>
+                    <li className="flex gap-4 items-start">
+                       <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-foreground/40 shrink-0" />
+                       <p className="text-sm text-foreground/75 leading-relaxed font-light">
+                          Points are calculated based on <span className="text-foreground font-medium">levels</span> (National, State, Zonal, College).
+                       </p>
+                    </li>
+                    <li className="flex gap-4 items-start">
+                       <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-foreground/40 shrink-0" />
+                       <p className="text-sm text-foreground/75 leading-relaxed font-light">
+                          Submission of fraudulent documents leads to <span className="text-foreground font-medium">permanent points forfeiture</span>.
+                       </p>
+                    </li>
+                    <li className="flex gap-4 items-start">
+                       <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-foreground/40 shrink-0" />
+                       <p className="text-sm text-foreground/75 leading-relaxed font-light">
+                          Skilling courses must be <span className="text-foreground font-medium">University-approved</span> (Refer to the official list).
+                       </p>
+                    </li>
+                 </ul>
 
                 <div className="pt-6">
                    <a 
@@ -227,7 +232,6 @@ export default function GuidelinesPage() {
                      <ExternalLink className="w-3.5 h-3.5" />
                    </a>
                 </div>
-              </div>
             </div>
           </div>
         </section>

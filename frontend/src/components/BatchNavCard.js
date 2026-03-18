@@ -25,12 +25,12 @@ export default function BatchNavCard({ href, icon, label, description, variant =
       <div className="relative z-10">
         <div className="flex justify-between items-start mb-6">
           <div className="p-3 bg-background rounded-2xl border border-border/50 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-            <div className="text-foreground/40 group-hover:text-foreground/80 transition-colors">
+            <div className="text-foreground/60 group-hover:text-foreground transition-colors">
                {icon}
             </div>
           </div>
           <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 -translate-x-4 group-hover:translate-x-0">
-             <ArrowRight className="w-4 h-4 text-foreground/40" />
+             <ArrowRight className="w-4 h-4 text-foreground/60" />
           </div>
         </div>
         
@@ -38,15 +38,15 @@ export default function BatchNavCard({ href, icon, label, description, variant =
           {label}
         </h3>
         {description && (
-          <p className="text-xs text-foreground/30 font-light leading-relaxed group-hover:text-foreground/50 transition-colors">
+          <p className="text-xs text-foreground/60 font-light leading-relaxed group-hover:text-foreground/80 transition-colors">
             {description}
           </p>
         )}
       </div>
 
-      <div className="mt-8 relative z-10 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/20 group-hover:text-foreground/40 transition-colors">
+      <div className="mt-8 relative z-10 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/40 group-hover:text-foreground/60 transition-colors">
          <span>Explore Section</span>
-         <div className="h-px w-6 bg-foreground/10 group-hover:w-10 transition-all duration-500" />
+         <div className="h-px w-6 bg-foreground/20 group-hover:w-10 transition-all duration-500" />
       </div>
     </Link>
   );

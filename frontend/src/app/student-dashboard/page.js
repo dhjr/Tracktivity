@@ -95,19 +95,19 @@ export default function StudentDashboardPage() {
                <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
                   <Activity className="w-5 h-5 text-background" />
                </div>
-               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/40">Student Portal</span>
+               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/60">Student Portal</span>
             </div>
             <h1 className="text-4xl font-display font-medium tracking-tight text-foreground">
               Dashboard
             </h1>
-            <p className="text-sm text-foreground/50 mt-1 font-light italic">
-              Welcome back, <span className="text-foreground/80 font-normal not-italic">{user?.user_metadata?.name || "Student"}</span>
+            <p className="text-sm text-foreground/70 mt-1 font-light italic">
+              Welcome back, <span className="text-foreground/90 font-normal not-italic">{user?.user_metadata?.name || "Student"}</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
              <div className="px-4 py-2 bg-secondary/10 border border-border/50 rounded-xl backdrop-blur-md">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/30 block">Current Status</span>
-                <span className="text-xs font-medium text-foreground/70">Academic Year 2023-24</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 block">Current Status</span>
+                <span className="text-xs font-medium text-foreground/80">Academic Year 2023-24</span>
              </div>
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function StudentDashboardPage() {
           {/* Points Card */}
           <div className="lg:col-span-2 p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 shadow-2xl">
             <div className="relative z-10">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/40 mb-3 flex items-center gap-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 mb-3 flex items-center gap-2">
                 <Award className="w-3 h-3" />
                 Total Activity Points
               </p>
@@ -125,7 +125,7 @@ export default function StudentDashboardPage() {
                 <p className="text-6xl font-display font-bold text-foreground tracking-tighter">
                   {stats.total_approved_points}
                 </p>
-                <p className="text-lg text-foreground/30 font-light">
+                <p className="text-lg text-foreground/50 font-light">
                   / 100 Approved
                 </p>
               </div>
@@ -148,21 +148,21 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* Pending Card */}
-          <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 shadow-2xl flex flex-col justify-between">
+           <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 shadow-2xl flex flex-col justify-between">
             <div className="relative z-10">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/40 mb-3 flex items-center gap-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 mb-3 flex items-center gap-2">
                 <FileText className="w-3 h-3" />
                 Pending Review
               </p>
               <p className="text-5xl font-display font-bold text-foreground tracking-tighter">
                 {stats.pending_count}
               </p>
-              <p className="mt-2 text-xs text-foreground/40 font-light pr-8 leading-relaxed">
+              <p className="mt-2 text-xs text-foreground/60 font-light pr-8 leading-relaxed">
                 Currently awaiting verification by your department faculty.
               </p>
             </div>
             <div className="relative z-10 pt-6">
-               <button className="w-full py-3 bg-secondary/10 border border-border/30 rounded-2xl text-[11px] font-bold uppercase tracking-widest text-foreground/60 hover:bg-secondary/20 hover:text-foreground transition-all flex items-center justify-center gap-2">
+               <button className="w-full py-3 bg-secondary/10 border border-border/30 rounded-2xl text-[11px] font-bold uppercase tracking-widest text-foreground/80 hover:bg-secondary/20 hover:text-foreground transition-all flex items-center justify-center gap-2">
                   View Details
                   <ArrowRight className="w-3 h-3" />
                </button>
