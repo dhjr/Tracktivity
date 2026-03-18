@@ -2,9 +2,10 @@
 
 import { useRequireRole } from "@/hooks/useRequireRole";
 import { getAuthHeaders } from "@/utils/api";
-import { BookOpen, Loader2, KeyRound, Award, FileText } from "lucide-react";
+import { BookOpen, Loader2, Award, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import JoinBatch from "@/components/JoinBatch";
 
 export default function StudentDashboardPage() {
   const { user, isReady } = useRequireRole("student");
@@ -142,47 +143,25 @@ export default function StudentDashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Join Batch Form Card */}
-          <div className="p-6 bg-secondary/10 border border-border rounded-xl">
-            <h3 className="font-medium mb-4 flex items-center gap-2">
-              <KeyRound className="w-4 h-4" /> Join a Batch
-            </h3>
-            <form onSubmit={handleJoinBatch} className="space-y-4">
-              {joinError && <p className="text-xs text-red-500">{joinError}</p>}
-              {joinSuccess && (
-                <p className="text-xs text-green-500">
-                  Successfully joined the batch!
-                </p>
-              )}
-              <input
-                type="text"
-                placeholder="Ex. CS101A"
-                className="w-full px-3 py-2 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors uppercase placeholder:normal-case font-mono"
-                value={batchCode}
-                onChange={(e) => setBatchCode(e.target.value.toUpperCase())}
-                required
-              />
-              <button
-                type="submit"
-                disabled={isJoining || !batchCode.trim()}
-                className="w-full py-2 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors flex justify-center items-center"
-              >
-                {isJoining ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Join"
-                )}
-              </button>
-            </form>
-          </div>
+          {/* Join Batch Form Card - Only show if no approved batches */}
+          {!loadingBatches && batches.length === 0 && (
+            <JoinBatch
+              batchCode={batchCode}
+              setBatchCode={setBatchCode}
+              isJoining={isJoining}
+              joinError={joinError}
+              joinSuccess={joinSuccess}
+              handleJoinBatch={handleJoinBatch}
+            />
+          )}
 
           {/* List of Joined Batches */}
           {loadingBatches ? (
-            <div className="md:col-span-2 flex items-center justify-center border border-border border-dashed rounded-xl p-8">
+            <div className="md:col-span-3 flex items-center justify-center border border-border border-dashed rounded-xl p-8">
               <Loader2 className="w-6 h-6 animate-spin text-foreground/30" />
             </div>
           ) : batches.length === 0 ? (
-            <div className="md:col-span-2 flex flex-col items-center justify-center border border-border border-dashed rounded-xl p-8 text-center bg-secondary/10">
+            <div className={`${!loadingBatches && batches.length === 0 ? 'md:col-span-2' : 'md:col-span-3'} flex flex-col items-center justify-center border border-border border-dashed rounded-xl p-8 text-center bg-secondary/10`}>
               <span className="text-foreground/40 mb-2">
                 You aren't enrolled in a batch yet.
               </span>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Users, Plus, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import BatchCodeBadge from "@/components/BatchCodeBadge";
+import JoinBatch from "@/components/JoinBatch";
 
 export default function FacultyDashboardPage() {
   const { user, isReady } = useRequireRole("faculty");
@@ -15,6 +16,10 @@ export default function FacultyDashboardPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [newBatchName, setNewBatchName] = useState("");
   const [createError, setCreateError] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
+  const [batchCode, setBatchCode] = useState("");
+  const [joinError, setJoinError] = useState("");
+  const [joinSuccess, setJoinSuccess] = useState(false);
 
   useEffect(() => {
     if (isReady) fetchBatches();
@@ -56,6 +61,32 @@ export default function FacultyDashboardPage() {
     }
   };
 
+  const handleJoinBatch = async (e) => {
+    e.preventDefault();
+    setIsJoining(true);
+    setJoinError("");
+    setJoinSuccess(false);
+
+    try {
+      const { headers, API_URL } = await getAuthHeaders();
+      const res = await fetch(`${API_URL}/batches/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ batch_code: batchCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || data.error || "Failed to join batch");
+      setJoinSuccess(true);
+      setBatchCode("");
+      await fetchBatches();
+      setTimeout(() => setJoinSuccess(false), 3000);
+    } catch (err) {
+      setJoinError(err.message);
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
   if (!user) return null; // Wait for redirect or auth
 
   return (
@@ -81,7 +112,7 @@ export default function FacultyDashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Create Room Form Card */}
+          {/* Create Batch Form Card */}
           <div className="p-6 bg-secondary/10 border border-border rounded-xl">
             <h3 className="font-medium mb-4 flex items-center gap-2">
               <Plus className="w-4 h-4" /> Create New Batch
@@ -113,17 +144,27 @@ export default function FacultyDashboardPage() {
             </form>
           </div>
 
+          {/* Join Batch Form Card */}
+          <JoinBatch
+            batchCode={batchCode}
+            setBatchCode={setBatchCode}
+            isJoining={isJoining}
+            joinError={joinError}
+            joinSuccess={joinSuccess}
+            handleJoinBatch={handleJoinBatch}
+          />
+
           {loadingBatches ? (
-            <div className="md:col-span-2 flex items-center justify-center border border-border border-dashed rounded-xl p-8">
+            <div className="md:col-span-3 flex items-center justify-center border border-border border-dashed rounded-xl p-8">
               <Loader2 className="w-6 h-6 animate-spin text-foreground/30" />
             </div>
           ) : batches.length === 0 ? (
-            <div className="md:col-span-2 flex flex-col items-center justify-center border border-border border-dashed rounded-xl p-8 text-center bg-secondary/10">
+            <div className="md:col-span-3 flex flex-col items-center justify-center border border-border border-dashed rounded-xl p-8 text-center bg-secondary/10">
               <span className="text-foreground/40 mb-2">
-                No batches created yet.
+                No batches found.
               </span>
               <span className="text-sm text-foreground/60">
-                Create your first batch by filling out the form.
+                Create a new batch or join an existing one.
               </span>
             </div>
           ) : (
@@ -142,6 +183,13 @@ export default function FacultyDashboardPage() {
                   <div className="mt-3">
                     <BatchCodeBadge code={batch.batch_code} size="sm" />
                   </div>
+                  {batch.is_admin && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        Admin
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <Link
