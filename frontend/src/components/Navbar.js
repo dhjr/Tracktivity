@@ -28,6 +28,7 @@ export default function Navbar() {
         userRole === "faculty" ? "/faculty-dashboard" : "/student-dashboard",
     },
     { name: "Guidelines", href: "/guidelines" },
+    ...(userRole === "faculty" ? [{ name: "Reports", href: "/faculty-dashboard/reports" }] : []),
   ];
 
   return (
