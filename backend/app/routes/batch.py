@@ -1,6 +1,6 @@
 import random
 import string
-
+from typing import Optional
 from fastapi import APIRouter, HTTPException, status, Depends
 from schemas.batch import BatchCreate, BatchJoin
 from internal.session import get_supabase
@@ -115,6 +115,90 @@ async def join_batch(
             raise HTTPException(status_code=500, detail="Failed to join batch.")
 
     return {"message": f"Successfully joined batch {batch_name}", "batch": batch_res.data[0]}
+
+
+
+
+@router.delete("/leave")
+async def leave_batch(
+    batch_id: Optional[str] = None,
+    db=Depends(get_supabase),
+    current_user=Depends(get_current_user)
+):
+    user_role = current_user.user_metadata.get("role")
+
+    if user_role == "student":
+        try:
+            student_res = db.table("students") \
+                .select("id, batch_id") \
+                .eq("id", current_user.id) \
+                .single() \
+                .execute()
+        except Exception:
+            raise HTTPException(status_code=404, detail="Student record not found.")
+
+        resolved_batch_id = student_res.data.get("batch_id")
+        if not resolved_batch_id:
+            raise HTTPException(status_code=400, detail="You are not enrolled in any batch.")
+
+        db.table("submissions") \
+            .delete() \
+            .eq("student_id", current_user.id) \
+            .eq("batch_id", resolved_batch_id) \
+            .execute()
+
+        db.table("students") \
+            .update({
+                "batch_id": None,
+                "grp1_points": 0,
+                "grp2_points": 0,
+                "grp3_points": 0
+            }) \
+            .eq("id", current_user.id) \
+            .execute()
+
+        return {"message": "Successfully left the batch. All submissions have been deleted."}
+
+    elif user_role == "faculty":
+        if not batch_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Faculty must provide batch_id as a query parameter. e.g. /batches/leave?batch_id=..."
+            )
+
+        try:
+            member_res = db.table("batch_faculty") \
+                .select("faculty_id, is_admin") \
+                .eq("batch_id", batch_id) \
+                .eq("faculty_id", current_user.id) \
+                .single() \
+                .execute()
+        except Exception:
+            raise HTTPException(status_code=404, detail="You are not a member of this batch.")
+
+        if member_res.data["is_admin"]:
+            admin_count_res = db.table("batch_faculty") \
+                .select("faculty_id") \
+                .eq("batch_id", batch_id) \
+                .eq("is_admin", True) \
+                .execute()
+
+            if len(admin_count_res.data) <= 1:
+                raise HTTPException(
+                    status_code=400,
+                    detail="You are the only admin of this batch. Promote another faculty to admin before leaving."
+                )
+
+        db.table("batch_faculty") \
+            .delete() \
+            .eq("batch_id", batch_id) \
+            .eq("faculty_id", current_user.id) \
+            .execute()
+
+        return {"message": "Successfully left the batch."}
+
+    else:
+        raise HTTPException(status_code=403, detail="Unknown role.")
 
 # get basic details of a single batch by ID (accessible to authenticated members)
 @router.get("/{batch_id}")
@@ -260,3 +344,5 @@ async def get_batch_members(
         "students": formatted_students,
         "faculty": faculty_list
     }
+
+

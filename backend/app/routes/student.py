@@ -236,3 +236,94 @@ async def get_submission_detail(
         "submission": submission,
         "rule": target_activity
     }
+
+
+
+@app.delete("/student/submissions/{submission_id}")
+async def delete_submission(
+    submission_id: str,
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("student"))
+):
+    # 1. Check if submission exists and belongs to the student
+    res = db.table("submissions").select("status, certificate_url").eq("id", submission_id).eq("student_id", current_user.id).single().execute()
+    
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Submission not found.")
+    
+    # 2. Guard: Only allow deletion if still pending
+    if res.data["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Cannot delete a submission that has already been processed.")
+
+    # 3. Extract file path from URL to delete from Storage
+    # Assuming URL format: .../storage/v1/object/public/activity-certificates/PATH
+    try:
+        file_path = res.data["certificate_url"].split("activity-certificates/")[-1]
+        db.storage.from_("activity-certificates").remove([file_path])
+    except Exception as e:
+        print(f"Note: Could not delete file from storage: {e}")
+
+    # 4. Delete from DB
+    db.table("submissions").delete().eq("id", submission_id).execute()
+    
+    return {"message": "Submission deleted successfully."}
+
+
+
+@app.put("/student/submissions/{submission_id}")
+async def update_submission(
+    submission_id: str,
+    activity_code: str = Form(...),
+    group_name: str = Form(...),
+    points_awarded: int = Form(...),
+    academic_year: int = Form(...),
+    level_key: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None),
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("student"))
+):
+    # 1. Verify existence and status
+    existing = db.table("submissions").select("*").eq("id", submission_id).eq("student_id", current_user.id).single().execute()
+    if not existing.data:
+        raise HTTPException(status_code=404, detail="Submission not found.")
+    
+    if existing.data["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Cannot edit a submission that is already approved or rejected.")
+
+    # 2. Re-run Validations (same as create)
+    rulebook = fetchRuleBook(db=db)
+    target_activity = validateActivity(rulebook=rulebook, activity_code=activity_code)
+    maxCheck_meritLevelValidation(points_awarded=points_awarded, target_activity=target_activity, level_key=level_key)
+    
+    # Note: You might want to re-run cluster_cap or winOverrides here 
+    # but be careful as they might depend on the current submission's own previous state.
+
+    update_data = {
+        "activity_id": activity_code,
+        "activity_name": target_activity["title"],
+        "group_name": group_name,
+        "points_awarded": points_awarded,
+        "academic_year": academic_year,
+        "level": level_key,
+        "updated_at": datetime.now().isoformat()
+    }
+
+    # 3. Handle File Update (if a new file is uploaded)
+    if file:
+        # Delete old file
+        try:
+            old_path = existing.data["certificate_url"].split("activity-certificates/")[-1]
+            db.storage.from_("activity-certificates").remove([old_path])
+        except: pass
+
+        # Upload new file
+        file_ext = file.filename.split(".")[-1]
+        new_file_path = f"certificates/{current_user.id}/{uuid.uuid4()}.{file_ext}"
+        file_content = await file.read()
+        db.storage.from_("activity-certificates").upload(path=new_file_path, file=file_content)
+        update_data["certificate_url"] = db.storage.from_("activity-certificates").get_public_url(new_file_path)
+
+    # 4. Update Database
+    db.table("submissions").update(update_data).eq("id", submission_id).execute()
+    
+    return {"message": "Submission updated successfully."}
