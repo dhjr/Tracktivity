@@ -3,7 +3,7 @@
 import { useRequireRole } from "@/hooks/useRequireRole";
 import { getAuthHeaders } from "@/utils/api";
 import Link from "next/link";
-import { Users, Plus, Loader2 } from "lucide-react";
+import { Users, Plus, Loader2, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import BatchCodeBadge from "@/components/BatchCodeBadge";
 import JoinBatch from "@/components/JoinBatch";
@@ -109,6 +109,15 @@ export default function FacultyDashboardPage() {
             <Users className="w-6 h-6" />
             My Batches
           </h2>
+          {batches.length > 0 && (
+            <Link
+              href="/faculty-dashboard/reports"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-secondary/50 hover:bg-secondary border border-border rounded-lg transition-colors"
+            >
+              <FileText className="w-4 h-4" />
+              View Reports
+            </Link>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -186,7 +195,7 @@ export default function FacultyDashboardPage() {
                   {batch.is_admin && (
                     <div className="mt-2">
                       <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                        Admin
+                        Creator
                       </span>
                     </div>
                   )}

@@ -109,7 +109,7 @@ async def join_batch(
         res = db.table("batch_faculty").insert({
             "batch_id": batch_id,
             "faculty_id": current_user.id,
-            "is_admin": False
+            "is_admin": True
         }).execute()
         if not res.data:
             raise HTTPException(status_code=500, detail="Failed to join batch.")
