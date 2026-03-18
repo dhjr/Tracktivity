@@ -8,10 +8,13 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+
+  if (!user) return null;
+
 
   const userName =
     user?.user_metadata?.name || user?.email?.split("@")[0] || "User";
@@ -34,33 +37,38 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 w-full bg-background border-b border-border">
       <div className="mx-auto max-w-5xl px-4 flex items-center justify-between h-14">
-        <div className="flex items-center gap-8">
-          <Link
-            href={user ? (userRole === "faculty" ? "/faculty-dashboard" : "/student-dashboard") : "/"}
-            className="font-semibold text-foreground tracking-tight"
-          >
-            Tracktivity.
-          </Link>
-          <div className="hidden md:flex items-center space-x-6">
-            {navLinks.map((link) => (
+        {user ? (
+          <>
+            {/* Logged-in user navbar */}
+            <div className="flex items-center gap-8">
               <Link
-                key={link.name}
-                href={link.href}
-                className={`text-sm transition-colors ${
-                  pathname === link.href
-                    ? "text-foreground font-medium"
-                    : "text-foreground/60 hover:text-foreground"
-                }`}
+                href={userRole === "faculty" ? "/faculty-dashboard" : "/student-dashboard"}
+                className="font-display font-semibold text-foreground tracking-tight flex items-center gap-2"
               >
-                {link.name}
+                <img 
+                  src="/logo.png" 
+                  alt="Tracktivity" 
+                  className="w-8 h-8 rounded-lg"
+                />
               </Link>
-            ))}
-          </div>
-        </div>
+              <div className="hidden md:flex items-center space-x-6">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`text-sm transition-colors ${
+                      pathname === link.href
+                        ? "text-foreground font-medium"
+                        : "text-foreground/60 hover:text-foreground"
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
 
-        <div className="hidden md:flex items-center space-x-6">
-          {user ? (
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center space-x-6">
               <div className="flex items-center">
                 <ThemeToggle className="p-2 rounded-full hover:bg-secondary transition-colors" />
                 <Link
@@ -78,42 +86,46 @@ export default function Navbar() {
                 Log out
               </button>
             </div>
-          ) : (
-            <div className="flex items-center space-x-4 text-sm">
-              <Link
-                href="/login"
-                className="text-foreground/60 hover:text-foreground transition-colors"
-              >
-                Log in
-              </Link>
-              <Link
-                href="/signup"
-                className="text-foreground font-medium hover:text-foreground/80 transition-colors"
-              >
-                Sign up
-              </Link>
+          </>
+        ) : (
+          <>
+            {/* Logged-out user navbar - only theme toggle */}
+            <div className="flex-1" />
+            <div className="flex items-center">
               <ThemeToggle className="p-2 rounded-full hover:bg-secondary transition-colors" />
             </div>
-          )}
-        </div>
+            <div className="flex-1" />
+          </>
+        )}
 
-        {/* Mobile menu button */}
-        <div className="flex md:hidden items-center">
-          <button
-            onClick={toggleMobileMenu}
-            className="p-1 text-foreground/70 hover:text-foreground transition-colors"
-          >
-            {isMobileMenuOpen ? (
-              <X className="block h-5 w-5" />
-            ) : (
-              <Menu className="block h-5 w-5" />
-            )}
-          </button>
-        </div>
+        {/* Mobile menu button - only for logged-in users */}
+        {user && (
+          <div className="flex md:hidden items-center">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-1 text-foreground/70 hover:text-foreground transition-colors"
+            >
+              {isMobileMenuOpen ? (
+                <X className="block h-5 w-5" />
+              ) : (
+                <Menu className="block h-5 w-5" />
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
-      {isMobileMenuOpen && (
+      {/* Mobile menu - only for logged-in users */}
+      {user && isMobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background p-4 flex flex-col space-y-4 shadow-sm pb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <img 
+              src="/logo.png" 
+              alt="Tracktivity" 
+              className="w-6 h-6 rounded-lg"
+            />
+            <span className="font-display font-semibold text-foreground">Tracktivity</span>
+          </div>
           {navLinks.map((link) => (
             <Link
               key={link.name}
@@ -129,52 +141,27 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="pt-4 border-t border-border/50 flex flex-col space-y-4 text-sm">
-            {user ? (
-              <>
-                <Link
-                  href="/profile"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-3 text-foreground/70 py-2 hover:text-foreground transition-colors"
-                >
-                  <User className="w-5 h-5" />
-                  <span className="font-medium">Profile</span>
-                </Link>
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <span className="text-foreground/70 font-medium">Theme</span>
-                  <ThemeToggle className="p-2 rounded-full hover:bg-secondary transition-colors border border-border" />
-                </div>
-                <button
-                  onClick={() => {
-                    logout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full mt-2 py-2.5 text-center text-sm font-medium text-foreground bg-secondary/50 hover:bg-secondary border border-border rounded-lg transition-all active:scale-[0.98]"
-                >
-                  Log out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-foreground/70"
-                >
-                  Log in
-                </Link>
-                <Link
-                  href="/signup"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-foreground font-medium"
-                >
-                  Sign up
-                </Link>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-foreground/70">Theme</span>
-                  <ThemeToggle className="p-2 rounded-full hover:bg-secondary transition-colors border border-border" />
-                </div>
-              </>
-            )}
+            <Link
+              href="/profile"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-3 text-foreground/70 py-2 hover:text-foreground transition-colors"
+            >
+              <User className="w-5 h-5" />
+              <span className="font-medium">Profile</span>
+            </Link>
+            <div className="flex items-center justify-between py-2 border-b border-border/50">
+              <span className="text-foreground/70 font-medium">Theme</span>
+              <ThemeToggle className="p-2 rounded-full hover:bg-secondary transition-colors border border-border" />
+            </div>
+            <button
+              onClick={() => {
+                logout();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full mt-2 py-2.5 text-center text-sm font-medium text-foreground bg-secondary/50 hover:bg-secondary border border-border rounded-lg transition-all active:scale-[0.98]"
+            >
+              Log out
+            </button>
           </div>
         </div>
       )}
