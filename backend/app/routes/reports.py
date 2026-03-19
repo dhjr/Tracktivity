@@ -1,5 +1,6 @@
 import csv
 import io
+from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from reportlab.lib.pagesizes import A4, landscape
@@ -200,6 +201,7 @@ async def report_student_summary(
 async def report_category_breakdown(
     batch_id: str,
     format: str = Query("csv", enum=["csv", "pdf"]),
+    academic_year: Optional[int] = None,
     db=Depends(get_supabase),
     current_user=Depends(require_role("faculty"))
 ):
@@ -207,11 +209,15 @@ async def report_category_breakdown(
 
     category_map = get_rulebook_category_map(db)
 
-    subs_res = db.table("submissions") \
+    query = db.table("submissions") \
         .select("student_id, activity_id, points_awarded, group_name") \
         .eq("batch_id", batch_id) \
-        .eq("status", "approved") \
-        .execute()
+        .eq("status", "approved")
+
+    if academic_year:
+        query = query.eq("academic_year", academic_year)
+
+    subs_res = query.execute()
 
     students_res = db.table("students") \
         .select("id, ktuid, full_name") \
@@ -219,9 +225,6 @@ async def report_category_breakdown(
         .order("ktuid") \
         .execute()
 
-    student_map = {s["id"]: s for s in students_res.data}
-
-    # Aggregate: {student_id: {(category_name, group_name): total_points}}
     aggregated: dict = {}
     for sub in subs_res.data:
         sid = sub["student_id"]
@@ -241,17 +244,12 @@ async def report_category_breakdown(
             rows.append([student["ktuid"], student["full_name"], "—", "—", 0])
         else:
             for (cat_name, grp_name), total in sorted(cats.items()):
-                rows.append([
-                    student["ktuid"],
-                    student["full_name"],
-                    grp_name,
-                    cat_name,
-                    total
-                ])
+                rows.append([student["ktuid"], student["full_name"], grp_name, cat_name, total])
 
+    filename_suffix = f"_year{academic_year}" if academic_year else ""
     if format == "csv":
-        return make_csv_response(headers, rows, "category_breakdown.csv")
-    return make_pdf_response("Category-wise Point Breakdown", headers, rows, "category_breakdown.pdf")
+        return make_csv_response(headers, rows, f"category_breakdown{filename_suffix}.csv")
+    return make_pdf_response("Category-wise Point Breakdown", headers, rows, f"category_breakdown{filename_suffix}.pdf")
 
 
 # REPORT 3 — Activity Breakdown (approved only)
@@ -262,6 +260,7 @@ async def report_category_breakdown(
 async def report_activity_breakdown(
     batch_id: str,
     format: str = Query("csv", enum=["csv", "pdf"]),
+    academic_year: Optional[int] = None,
     db=Depends(get_supabase),
     current_user=Depends(require_role("faculty"))
 ):
@@ -269,12 +268,16 @@ async def report_activity_breakdown(
 
     category_map = get_rulebook_category_map(db)
 
-    subs_res = db.table("submissions") \
+    query = db.table("submissions") \
         .select("student_id, activity_id, activity_name, points_awarded, group_name") \
         .eq("batch_id", batch_id) \
         .eq("status", "approved") \
-        .order("student_id") \
-        .execute()
+        .order("student_id")
+
+    if academic_year:
+        query = query.eq("academic_year", academic_year)
+
+    subs_res = query.execute()
 
     students_res = db.table("students") \
         .select("id, ktuid, full_name") \
@@ -300,6 +303,7 @@ async def report_activity_breakdown(
             sub["points_awarded"]
         ])
 
+    filename_suffix = f"_year{academic_year}" if academic_year else ""
     if format == "csv":
-        return make_csv_response(headers, rows, "activity_breakdown.csv")
-    return make_pdf_response("Activity-wise Point Breakdown", headers, rows, "activity_breakdown.pdf")
+        return make_csv_response(headers, rows, f"activity_breakdown{filename_suffix}.csv")
+    return make_pdf_response("Activity-wise Point Breakdown", headers, rows, f"activity_breakdown{filename_suffix}.pdf")
