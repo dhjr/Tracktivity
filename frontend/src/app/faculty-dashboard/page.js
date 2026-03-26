@@ -3,7 +3,7 @@
 import { useRequireRole } from "@/hooks/useRequireRole";
 import { getAuthHeaders } from "@/utils/api";
 import Link from "next/link";
-import { Users, Plus, Loader2, FileText } from "lucide-react";
+import { Users, Plus, Loader2, FileText, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import BatchCodeBadge from "@/components/BatchCodeBadge";
 import JoinBatch from "@/components/JoinBatch";
@@ -121,36 +121,54 @@ export default function FacultyDashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Create Batch Form Card */}
-          <div className="p-6 bg-secondary/10 border border-border rounded-xl">
-            <h3 className="font-medium mb-4 flex items-center gap-2">
-              <Plus className="w-4 h-4" /> Create New Batch
-            </h3>
-            <form onSubmit={handleCreateBatch} className="space-y-4">
-              {createError && (
-                <p className="text-xs text-red-500">{createError}</p>
-              )}
-              <input
-                type="text"
-                placeholder="Ex: CS 101 - Fall 24"
-                className="w-full px-3 py-2 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
-                value={newBatchName}
-                onChange={(e) => setNewBatchName(e.target.value)}
-                required
-                maxLength={50}
-              />
-              <button
-                type="submit"
-                disabled={isCreating || !newBatchName.trim()}
-                className="w-full py-2 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors flex justify-center items-center"
-              >
-                {isCreating ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Create Batch"
-                )}
-              </button>
-            </form>
+          {/* Create Batch Card */}
+          <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl relative overflow-hidden group hover:border-border transition-all duration-500 flex flex-col justify-between h-full min-h-[250px]">
+             <div className="relative z-10 flex flex-col h-full">
+                <div className="flex items-center gap-2 mb-4">
+                   <div className="p-2 bg-background rounded-lg border border-border/50 shadow-sm">
+                      <Plus className="w-4 h-4 text-foreground/75" />
+                   </div>
+                   <h3 className="font-display font-bold text-lg leading-tight tracking-tight">
+                      Create Batch
+                   </h3>
+                </div>
+
+                <p className="text-xs text-foreground/60 font-light mb-6 leading-relaxed">
+                   Initialize a new tracking group for your students. Each batch will have a unique code for enrollment.
+                </p>
+
+                <form onSubmit={handleCreateBatch} className="space-y-4 mt-auto">
+                   {createError && (
+                     <div className="p-2 bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] rounded-lg animate-in fade-in duration-300">
+                        {createError}
+                     </div>
+                   )}
+                   
+                   <div className="relative group/input">
+                      <input
+                        type="text"
+                        placeholder="Ex. CS 101 - Fall 24"
+                        className="w-full px-4 py-3 text-sm bg-background/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-border transition-all placeholder:normal-case font-medium text-center"
+                        value={newBatchName}
+                        onChange={(e) => setNewBatchName(e.target.value)}
+                        required
+                        maxLength={50}
+                      />
+                   </div>
+
+                   <button
+                     type="submit"
+                     disabled={isCreating || !newBatchName.trim()}
+                     className="w-full py-3.5 bg-foreground text-background text-xs font-bold uppercase tracking-widest rounded-2xl hover:bg-foreground/90 disabled:opacity-30 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                   >
+                     {isCreating ? (
+                       <Loader2 className="w-4 h-4 animate-spin" />
+                     ) : (
+                       "Initialize"
+                     )}
+                   </button>
+                </form>
+             </div>
           </div>
 
           {/* Join Batch Form Card */}
@@ -164,49 +182,56 @@ export default function FacultyDashboardPage() {
           />
 
           {loadingBatches ? (
-            <div className="md:col-span-3 flex items-center justify-center border border-border border-dashed rounded-xl p-8">
-              <Loader2 className="w-6 h-6 animate-spin text-foreground/30" />
+            <div className="md:col-span-3 flex items-center justify-center border border-border border-dashed rounded-[2.5rem] p-12">
+              <Loader2 className="w-8 h-8 animate-spin text-foreground/20" />
             </div>
           ) : batches.length === 0 ? (
-            <div className="md:col-span-3 flex flex-col items-center justify-center border border-border border-dashed rounded-xl p-8 text-center bg-secondary/10">
-              <span className="text-foreground/40 mb-2">
-                No batches found.
+            <div className="md:col-span-3 flex flex-col items-center justify-center border border-border/50 border-dashed rounded-[2.5rem] p-12 text-center bg-secondary/5 backdrop-blur-sm">
+              <span className="text-foreground/20 mb-2 font-display text-lg">
+                No active batches found
               </span>
-              <span className="text-sm text-foreground/60">
-                Create a new batch or join an existing one.
+              <span className="text-xs text-foreground/40 font-light">
+                Get started by creating a new tracking group above.
               </span>
             </div>
           ) : (
             batches.map((batch) => (
               <div
                 key={batch.id}
-                className="p-6 bg-background border border-border rounded-xl flex flex-col justify-between hover:shadow-sm transition-all group"
+                className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl flex flex-col justify-between hover:border-border transition-all duration-500 group relative overflow-hidden h-full min-h-[250px]"
               >
-                <div>
-                  <h3
-                    className="font-medium text-lg leading-tight truncate"
-                    title={batch.name}
-                  >
-                    {batch.name}
-                  </h3>
-                  <div className="mt-3">
-                    <BatchCodeBadge code={batch.batch_code} size="sm" />
-                  </div>
-                  {batch.is_admin && (
-                    <div className="mt-2">
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                        Creator
-                      </span>
-                    </div>
-                  )}
+                <div className="relative z-10">
+                   <div className="flex items-start justify-between gap-4 mb-4">
+                      <h3
+                        className="font-display font-bold text-lg leading-tight truncate group-hover:text-foreground transition-colors"
+                        title={batch.name}
+                      >
+                        {batch.name}
+                      </h3>
+                      {batch.is_admin && (
+                        <span className="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
+                           Primary
+                        </span>
+                      )}
+                   </div>
+                   
+                   <div className="mt-4 flex items-center gap-2">
+                     <BatchCodeBadge code={batch.batch_code} size="sm" />
+                   </div>
                 </div>
 
-                <Link
-                  href={`/faculty-dashboard/batches/${batch.id}`}
-                  className="mt-6 text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors inline-block"
-                >
-                  Manage Batch &rarr;
-                </Link>
+                <div className="mt-auto pt-8">
+                  <Link
+                    href={`/faculty-dashboard/batches/${batch.id}`}
+                    className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 group-hover:text-foreground transition-all flex items-center gap-2"
+                  >
+                    Manage Group
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </div>
+                
+                {/* Subtle background detail */}
+                <Users className="absolute -bottom-4 -right-4 w-24 h-24 text-foreground/[0.02] transform -rotate-12 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-0" />
               </div>
             ))
           )}

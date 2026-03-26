@@ -115,7 +115,7 @@ export default function StudentDashboardPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
           {/* Points Card */}
-          <div className="lg:col-span-2 p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 shadow-2xl">
+          <div className="lg:col-span-2 p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500">
             <div className="relative z-10">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 mb-3 flex items-center gap-2">
                 <Award className="w-3 h-3" />
@@ -148,7 +148,7 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* Pending Card */}
-           <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 shadow-2xl flex flex-col justify-between">
+           <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 flex flex-col justify-between">
             <div className="relative z-10">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 mb-3 flex items-center gap-2">
                 <FileText className="w-3 h-3" />
@@ -214,7 +214,7 @@ export default function StudentDashboardPage() {
                 batches.map((batch) => (
                   <div
                     key={batch.id}
-                    className="p-6 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl flex flex-col justify-between hover:shadow-2xl hover:border-border transition-all group relative overflow-hidden"
+                    className="p-6 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl flex flex-col justify-between hover:border-border transition-all group relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-foreground/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
                     

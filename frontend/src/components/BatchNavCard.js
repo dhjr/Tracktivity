@@ -11,7 +11,7 @@ import { ArrowRight } from "lucide-react";
  */
 export default function BatchNavCard({ href, icon, label, description, variant = "default" }) {
   const base =
-    "group relative p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-[2rem] flex flex-col justify-between hover:shadow-2xl hover:border-border transition-all duration-500 overflow-hidden h-full min-h-[180px]";
+    "group relative p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-[2rem] flex flex-col justify-between hover:border-border transition-all duration-500 overflow-hidden h-full min-h-[180px]";
   
   const styles = {
     default: base,
