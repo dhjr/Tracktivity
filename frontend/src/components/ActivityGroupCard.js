@@ -2,7 +2,7 @@ import { Check, Info } from "lucide-react";
 
 export default function ActivityGroupCard({ group, title, items, minPoints }) {
   return (
-    <div className="group relative p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-4xl flex flex-col hover:shadow-2xl hover:border-border transition-all duration-500 overflow-hidden h-full">
+    <div className="group relative p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-4xl flex flex-col hover:border-border transition-all duration-500 overflow-hidden h-full">
       <div className="absolute top-0 right-0 w-32 h-32 bg-foreground/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-foreground/10 transition-colors duration-700" />
       
       <div className="relative z-10 flex flex-col h-full">

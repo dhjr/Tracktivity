@@ -112,7 +112,15 @@ export default function SubmissionList({
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {submissions.map((sub) => (
+              {[...submissions]
+                .sort((a, b) => {
+                  if (a.status === "pending" && b.status !== "pending") return -1;
+                  if (a.status !== "pending" && b.status === "pending") return 1;
+                  const dateA = new Date(a.created_at || a.submittedAt || 0);
+                  const dateB = new Date(b.created_at || b.submittedAt || 0);
+                  return dateB - dateA;
+                })
+                .map((sub) => (
                 <tr
                   key={sub.id}
                   onClick={() => onRowClick?.(sub)}

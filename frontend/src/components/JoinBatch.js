@@ -11,7 +11,7 @@ export default function JoinBatch({
   handleJoinBatch,
 }) {
   return (
-    <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl relative overflow-hidden group hover:border-border transition-all duration-500 shadow-2xl flex flex-col justify-between h-full min-h-[250px]">
+    <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl relative overflow-hidden group hover:border-border transition-all duration-500 flex flex-col justify-between h-full min-h-[250px]">
 
       <div className="relative z-10 flex flex-col h-full">
         <div className="flex items-center gap-2 mb-4">
@@ -53,7 +53,7 @@ export default function JoinBatch({
           <button
             type="submit"
             disabled={isJoining || !batchCode.trim()}
-            className="w-full py-3.5 bg-foreground text-background text-xs font-bold uppercase tracking-widest rounded-2xl hover:bg-foreground/90 disabled:opacity-30 transition-all active:scale-[0.98] shadow-xl shadow-foreground/10 flex items-center justify-center gap-2"
+            className="w-full py-3.5 bg-foreground text-background text-xs font-bold uppercase tracking-widest rounded-2xl hover:bg-foreground/90 disabled:opacity-30 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
           >
             {isJoining ? (
               <Loader2 className="w-4 h-4 animate-spin" />

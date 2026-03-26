@@ -3,6 +3,24 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useRouter } from "next/navigation";
+import { 
+  User, 
+  Mail, 
+  Building, 
+  Shield, 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  CheckCircle2, 
+  AlertCircle, 
+  Loader2, 
+  Edit3, 
+  X, 
+  Save, 
+  ChevronRight,
+  ShieldCheck,
+  Fingerprint
+} from "lucide-react";
 
 export default function ProfilePage() {
   const { user, updateProfile, updatePassword } = useAuth();
@@ -20,11 +38,10 @@ export default function ProfilePage() {
   });
   const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordMessage, setPasswordMessage] = useState(null); // { type: 'success' | 'error', text: '' }
+  const [passwordMessage, setPasswordMessage] = useState(null); 
   const [showPassword, setShowPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  // Initialize form data when user loads, redirect if not logged in
   useEffect(() => {
     if (user === null) {
       router.push("/login");
@@ -45,15 +62,13 @@ export default function ProfilePage() {
     try {
       const isKtuVerified = user.user_metadata?.isKtuVerified === true;
 
-      // If already verified, we shouldn't attempt to check duplicates or update it
       if (
         !isKtuVerified &&
         user.user_metadata?.role !== "faculty" &&
         formData.ktuId &&
         formData.ktuId !== user.user_metadata?.ktuId
       ) {
-        const API_URL =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
         const checkRes = await fetch(`${API_URL}/auth/check-ktu`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -70,7 +85,6 @@ export default function ProfilePage() {
       await updateProfile({
         name: formData.name,
         department: formData.department,
-        // Only submit the KTU ID if it hasn't been locked yet by a faculty member
         ...(isKtuVerified ? {} : { ktuId: formData.ktuId }),
       });
       setIsEditing(false);
@@ -107,7 +121,6 @@ export default function ProfilePage() {
         type: "success",
         text: "Password updated successfully!",
       });
-      // Optionally hide the form after a delay
       setTimeout(() => {
         setIsChangingPassword(false);
         setPasswordMessage(null);
@@ -123,259 +136,311 @@ export default function ProfilePage() {
     }
   };
 
-  // Prevent flash of empty state while auth loads
   if (!user) {
     return (
-      <div className="min-h-[calc(100vh-6rem)] w-full flex items-center justify-center p-4">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen w-full flex items-center justify-center bg-background text-foreground/20">
+        <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
   }
 
+  const userRole = user.user_metadata?.role || "student";
+
   return (
-    <div className="min-h-[calc(100vh-6rem)] w-full max-w-xl mx-auto p-4 md:p-8">
-      <div className="mb-8 border-b border-border pb-6 flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-medium tracking-tight text-foreground">
-            {user.user_metadata?.name || user.email?.split("@")[0] || "Profile"}
-          </h1>
-          <p className="text-sm text-foreground/60 mt-1">{user.email}</p>
-          <p className="text-xs text-foreground/40 mt-1 uppercase tracking-wider font-medium">
-            Role: {user.user_metadata?.role || "student"}
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            if (isEditing) {
-              setFormData({
-                name: user.user_metadata?.name || "",
-                email: user.email || "",
-                ktuId: user.user_metadata?.ktuId || "",
-                department: user.user_metadata?.department || "",
-              });
-            }
-            setIsEditing(!isEditing);
-          }}
-          className="text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
-        >
-          {isEditing ? "Cancel" : "Edit"}
-        </button>
-      </div>
+    <div className="min-h-screen w-full relative overflow-hidden bg-background">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
-      {isEditing ? (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-sm text-foreground/80">Full Name</label>
-            <input
-              type="text"
-              required
-              className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-            />
+      <div className="relative z-10 w-full max-w-3xl mx-auto p-6 md:p-10">
+        {/* Header Section */}
+        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="flex items-center gap-6">
+             <div className="relative group">
+                <div className="w-24 h-24 rounded-[2rem] bg-secondary/20 border border-border/50 flex items-center justify-center shadow-xl backdrop-blur-md overflow-hidden relative">
+                   <div className="absolute inset-0 bg-linear-to-tr from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                   <User className="w-10 h-10 text-foreground/60 transition-transform duration-500 group-hover:scale-110" />
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-foreground text-background flex items-center justify-center shadow-lg border-2 border-background">
+                   <Fingerprint className="w-4 h-4" />
+                </div>
+             </div>
+             
+             <div>
+                <div className="flex items-center gap-2 mb-2">
+                   <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/60">Account Settings</span>
+                   <div className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-black uppercase tracking-widest text-primary">
+                      {userRole}
+                   </div>
+                </div>
+                <h1 className="text-4xl font-display font-medium tracking-tight text-foreground">
+                  {user.user_metadata?.name || "Account User"}
+                </h1>
+                <p className="text-sm text-foreground/60 mt-1 flex items-center gap-2 font-light">
+                   <Mail className="w-3.5 h-3.5 text-foreground/30" />
+                   {user.email}
+                </p>
+             </div>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-sm text-foreground/80">Department</label>
-            <input
-              type="text"
-              required
-              className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors"
-              value={formData.department}
-              onChange={(e) =>
-                setFormData({ ...formData, department: e.target.value })
-              }
-            />
-          </div>
-          {user.user_metadata?.role !== "faculty" && (
-            <div className="space-y-1.5 flex flex-col">
-              <label className="text-sm text-foreground/80 flex items-center gap-2">
-                KTU ID
-                {user.user_metadata?.isKtuVerified && (
-                  <span className="text-[10px] bg-green-500/10 text-green-600 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold">
-                    Verified & Locked
-                  </span>
-                )}
-              </label>
-              <input
-                type="text"
-                required
-                disabled={user.user_metadata?.isKtuVerified}
-                className={`w-full px-3 py-2 bg-background border border-border focus:outline-none transition-colors uppercase placeholder:normal-case ${
-                  user.user_metadata?.isKtuVerified
-                    ? "opacity-60 cursor-not-allowed bg-secondary/30"
-                    : "focus:border-foreground"
-                }`}
-                value={formData.ktuId}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    ktuId: e.target.value.toUpperCase(),
-                  })
-                }
-              />
-            </div>
-          )}
-          <div className="space-y-1.5">
-            <label className="text-sm text-foreground/80">Email Address</label>
-            <input
-              type="email"
-              disabled
-              className="w-full px-3 py-2 bg-secondary/50 border border-border text-foreground/50 cursor-not-allowed"
-              value={formData.email}
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors mt-4"
-          >
-            {loading ? "Saving..." : "Save Changes"}
-          </button>
-        </form>
-      ) : (
-        <div className="space-y-4 text-sm mt-8">
-          <div className="flex flex-col space-y-1 border-b border-border pb-4">
-            <span className="text-foreground/50">Full Name</span>
-            <span className="text-foreground">
-              {user.user_metadata?.name || "Not provided"}
-            </span>
-          </div>
-          <div className="flex flex-col space-y-1 border-b border-border pb-4">
-            <span className="text-foreground/50">Department</span>
-            <span className="text-foreground">
-              {user.user_metadata?.department || "Not provided"}
-            </span>
-          </div>
-          {user.user_metadata?.role !== "faculty" && (
-            <div className="flex flex-col space-y-1 border-b border-border pb-4">
-              <div className="flex items-center gap-2 text-foreground/50">
-                <span>KTU ID</span>
-                {user.user_metadata?.isKtuVerified ? (
-                  <span className="text-[10px] bg-green-500/10 text-green-600 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold">
-                    Verified
-                  </span>
-                ) : (
-                  <span className="text-[10px] bg-yellow-500/10 text-yellow-600 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold">
-                    Unverified
-                  </span>
-                )}
-              </div>
-              <span className="text-foreground uppercase">
-                {user.user_metadata?.ktuId || "Not provided"}
-              </span>
-            </div>
-          )}
-          <div className="flex flex-col space-y-1 border-b border-border pb-4">
-            <span className="text-foreground/50">Email Address</span>
-            <span className="text-foreground">{user.email}</span>
-          </div>
-          <div className="flex flex-col space-y-1 border-b border-border pb-4">
-            <span className="text-foreground/50">Account Type</span>
-            <span className="text-foreground capitalize">
-              {user.user_metadata?.role || "student"}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Security Section */}
-      <div className="mt-12 border-t border-border pt-8">
-        <div className="flex items-end justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-medium tracking-tight text-foreground">
-              Security
-            </h2>
-            <p className="text-sm text-foreground/60 mt-1">
-              Manage your password and security settings.
-            </p>
-          </div>
+          
           <button
             onClick={() => {
-              setPasswordData({ newPassword: "", confirmPassword: "" });
-              setPasswordMessage(null);
-              setShowPassword(false);
-              setIsChangingPassword(!isChangingPassword);
+              if (isEditing) {
+                setFormData({
+                  name: user.user_metadata?.name || "",
+                  email: user.email || "",
+                  ktuId: user.user_metadata?.ktuId || "",
+                  department: user.user_metadata?.department || "",
+                });
+              }
+              setIsEditing(!isEditing);
             }}
-            className="text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+              isEditing 
+                ? "bg-secondary/20 text-foreground/60 hover:bg-secondary/40 border border-border/50" 
+                : "bg-foreground text-background hover:bg-foreground/90 shadow-lg shadow-foreground/10"
+            }`}
           >
-            {isChangingPassword ? "Cancel" : "Change Password"}
+            {isEditing ? <><X className="w-3.5 h-3.5" /> Cancel Edit</> : <><Edit3 className="w-3.5 h-3.5" /> Edit Profile</>}
           </button>
         </div>
 
-        {isChangingPassword && (
-          <form onSubmit={handlePasswordSubmit} className="space-y-4">
-            {passwordMessage && (
-              <div
-                className={`p-3 text-sm rounded-md ${
-                  passwordMessage.type === "success"
-                    ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
-                    : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
-                }`}
-              >
-                {passwordMessage.text}
+        {/* Unified Profile & Security Card */}
+        <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
+           <div className="p-8 md:p-12 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-[3rem] shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                 <Shield className="w-32 h-32" />
               </div>
-            )}
 
-            <div className="space-y-1.5">
-              <label className="text-sm text-foreground/80 flex items-center justify-between">
-                <span>New Password</span>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-xs text-foreground/50 hover:text-foreground transition-colors"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                minLength={6}
-                className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors placeholder:text-foreground/30"
-                placeholder="Enter new password"
-                value={passwordData.newPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    newPassword: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm text-foreground/80">
-                Confirm New Password
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                minLength={6}
-                className="w-full px-3 py-2 bg-background border border-border focus:outline-none focus:border-foreground transition-colors placeholder:text-foreground/30"
-                placeholder="Confirm new password"
-                value={passwordData.confirmPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    confirmPassword: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={passwordLoading}
-              className="w-full py-2.5 bg-foreground text-background text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors mt-4 flex items-center justify-center"
-            >
-              {passwordLoading ? (
-                <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" />
-              ) : (
-                "Update Password"
-              )}
-            </button>
-          </form>
-        )}
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-10">
+                   <div className="w-10 h-10 rounded-xl bg-background border border-border/50 flex items-center justify-center shadow-sm">
+                      <User className="w-5 h-5 text-foreground/60" />
+                   </div>
+                   <h2 className="text-xl font-display font-medium tracking-tight">Identity Details</h2>
+                </div>
+
+                {isEditing ? (
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2 group">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 ml-1">Full Name</label>
+                        <input
+                          type="text"
+                          required
+                          className="w-full px-5 py-3.5 bg-background/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-border transition-all text-sm font-medium"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          placeholder="Your full name"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2 group">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 ml-1">Department</label>
+                        <input
+                          type="text"
+                          required
+                          className="w-full px-5 py-3.5 bg-background/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-border transition-all text-sm font-medium"
+                          value={formData.department}
+                          onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                          placeholder="e.g. Computer Science"
+                        />
+                      </div>
+
+                      {userRole !== "faculty" && (
+                        <div className="space-y-2 group md:col-span-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 ml-1 flex items-center justify-between">
+                            KTU ID
+                            {user.user_metadata?.isKtuVerified && (
+                              <span className="text-[8px] bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full border border-green-500/20">Verified & Locked</span>
+                            )}
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            disabled={user.user_metadata?.isKtuVerified}
+                            className={`w-full px-5 py-3.5 bg-background/50 border border-border/50 rounded-2xl focus:outline-none transition-all uppercase placeholder:normal-case text-sm font-mono tracking-widest ${
+                              user.user_metadata?.isKtuVerified
+                                ? "opacity-50 cursor-not-allowed grayscale"
+                                : "focus:ring-2 focus:ring-primary/10 focus:border-border"
+                            }`}
+                            value={formData.ktuId}
+                            onChange={(e) => setFormData({ ...formData, ktuId: e.target.value.toUpperCase() })}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-4 bg-foreground text-background rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-foreground/90 transition-all active:scale-[0.98] shadow-xl shadow-foreground/10 flex items-center justify-center gap-2 mt-4"
+                    >
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4" /> Save Changes</>}
+                    </button>
+                  </form>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0 text-sm">
+                    {[
+                      { label: "Full Name", value: user.user_metadata?.name || "Not provided", icon: User },
+                      { label: "Department", value: user.user_metadata?.department || "Not provided", icon: Building },
+                      ...(userRole !== "faculty" ? [{ 
+                         label: "KTU ID", 
+                         value: user.user_metadata?.ktuId || "Not provided", 
+                         icon: ShieldCheck, 
+                         verified: user.user_metadata?.isKtuVerified 
+                      }] : []),
+                      { label: "Email Address", value: user.email, icon: Mail }
+                    ].map((item, i) => (
+                      <div key={i} className={`flex items-center justify-between py-6 border-b border-border/30 group ${i === 3 || (userRole === "faculty" && i === 2) ? 'border-b-0 md:border-b' : ''}`}>
+                         <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-secondary/10 border border-border/50 flex items-center justify-center group-hover:bg-background transition-colors">
+                               <item.icon className="w-4 h-4 text-foreground/60 group-hover:text-foreground transition-colors" />
+                            </div>
+                            <div>
+                               <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-1">{item.label}</p>
+                               <span className={`text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors ${item.label === 'KTU ID' ? 'font-mono uppercase' : ''}`}>
+                                  {item.value}
+                               </span>
+                            </div>
+                         </div>
+                         {item.verified !== undefined && (
+                            <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 ${item.verified ? 'bg-green-500/10 text-green-600 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20'}`}>
+                               {item.verified ? <CheckCircle2 className="w-2.5 h-2.5" /> : <AlertCircle className="w-2.5 h-2.5" />}
+                               {item.verified ? 'Verified' : 'Unverified'}
+                            </div>
+                         )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Unified Security Section */}
+                <div className="mt-12 pt-12 border-t border-border/50">
+                  <div className="flex items-center justify-between mb-8">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-background border border-border/50 flex items-center justify-center shadow-sm">
+                           <Lock className="w-5 h-5 text-foreground/60" />
+                        </div>
+                        <h2 className="text-xl font-display font-medium tracking-tight">Security Access</h2>
+                     </div>
+                     {!isChangingPassword && (
+                        <button
+                          onClick={() => {
+                            setPasswordData({ newPassword: "", confirmPassword: "" });
+                            setPasswordMessage(null);
+                            setShowPassword(false);
+                            setIsChangingPassword(true);
+                          }}
+                          className="text-[10px] font-black uppercase tracking-widest text-foreground/40 hover:text-foreground transition-colors flex items-center gap-2"
+                        >
+                          Modify Password
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                     )}
+                  </div>
+
+                  {!isChangingPassword && (
+                    <p className="text-xs text-foreground/40 font-light mb-8 max-w-lg leading-relaxed">
+                       Secure your account by maintaining a strong, unique password. We recommend updating your credentials periodically to ensure the highest level of security.
+                    </p>
+                  )}
+
+                  {!isChangingPassword ? (
+                    <button
+                      onClick={() => {
+                        setPasswordData({ newPassword: "", confirmPassword: "" });
+                        setPasswordMessage(null);
+                        setShowPassword(false);
+                        setIsChangingPassword(true);
+                      }}
+                      className="w-full py-5 bg-secondary/10 hover:bg-secondary/20 border border-border/50 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-foreground transition-all flex items-center justify-center gap-3 active:scale-[0.98] group"
+                    >
+                       <Lock className="w-3.5 h-3.5 text-foreground/40 group-hover:text-foreground transition-colors" />
+                       Modify Account Password
+                       <ChevronRight className="w-3.5 h-3.5 text-foreground/20 group-hover:text-foreground transition-transform group-hover:translate-x-0.5" />
+                    </button>
+                  ) : (
+                    <form onSubmit={handlePasswordSubmit} className="space-y-6 animate-in slide-in-from-right-4 duration-500 max-w-2xl mx-auto py-4">
+                      {passwordMessage && (
+                        <div
+                          className={`p-4 text-[10px] font-bold rounded-2xl flex items-center gap-3 animate-in shake-1 ${
+                            passwordMessage.type === "success"
+                              ? "bg-green-500/10 text-green-600 border border-green-500/20"
+                              : "bg-red-500/10 text-red-600 border border-red-500/20"
+                          }`}
+                        >
+                           {passwordMessage.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                           <span className="uppercase tracking-widest">{passwordMessage.text}</span>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                           <div className="flex items-center justify-between mb-1 ml-1">
+                              <label className="text-[10px] font-bold uppercase tracking-widest text-foreground/60">New Password</label>
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="text-[9px] font-black uppercase tracking-widest text-foreground/30 hover:text-foreground transition-colors"
+                              >
+                                {showPassword ? "Hide" : "Show"}
+                              </button>
+                           </div>
+                           <input
+                             type={showPassword ? "text" : "password"}
+                             required
+                             minLength={6}
+                             className="w-full px-5 py-3.5 bg-background/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-border transition-all text-sm font-medium"
+                             placeholder="••••••••"
+                             value={passwordData.newPassword}
+                             onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                           />
+                        </div>
+
+                        <div className="space-y-2">
+                           <label className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 mb-1 ml-1 block mt-[3px]">Confirm Password</label>
+                           <input
+                             type={showPassword ? "text" : "password"}
+                             required
+                             minLength={6}
+                             className="w-full px-5 py-3.5 bg-background/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-border transition-all text-sm font-medium"
+                             placeholder="••••••••"
+                             value={passwordData.confirmPassword}
+                             onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                           />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 pt-2">
+                         <button
+                           type="button"
+                           onClick={() => setIsChangingPassword(false)}
+                           className="flex-1 py-4 bg-secondary/10 hover:bg-secondary/20 border border-border/50 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-foreground transition-all"
+                         >
+                           Discard
+                         </button>
+                         <button
+                           type="submit"
+                           disabled={passwordLoading}
+                           className="flex-[2] py-4 bg-foreground text-background rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-foreground/90 transition-all active:scale-[0.98] shadow-xl shadow-foreground/10 flex items-center justify-center gap-2"
+                         >
+                           {passwordLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Update Credentials"}
+                         </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </div>
+           </div>
+        </div>
+      </div>
+
+      {/* Footer Branding */}
+      <div className="mt-20 py-10 border-t border-border/20 text-center relative z-10">
+        <p className="text-[10px] text-foreground/20 uppercase tracking-[0.5em] font-medium pointer-events-none">
+          Powered by Tracktivity
+        </p>
       </div>
     </div>
   );

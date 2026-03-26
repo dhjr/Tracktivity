@@ -2,7 +2,16 @@
 
 import { useRequireRole } from "@/hooks/useRequireRole";
 import { getAuthHeaders } from "@/utils/api";
-import { BookOpen, Loader2, Award, FileText, ArrowRight, Plus, ExternalLink, Activity } from "lucide-react";
+import {
+  BookOpen,
+  Loader2,
+  Award,
+  FileText,
+  ArrowRight,
+  Plus,
+  ExternalLink,
+  Activity,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import JoinBatch from "@/components/JoinBatch";
@@ -67,7 +76,8 @@ export default function StudentDashboardPage() {
         body: JSON.stringify({ batch_code: batchCode }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || data.error || "Failed to join batch");
+      if (!res.ok)
+        throw new Error(data.detail || data.error || "Failed to join batch");
       setJoinSuccess(true);
       setBatchCode("");
       await fetchDashboardData();
@@ -92,30 +102,39 @@ export default function StudentDashboardPage() {
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div>
             <div className="flex items-center gap-2 mb-2">
-               <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-background" />
-               </div>
-               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/60">Student Portal</span>
+              <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
+                <Activity className="w-5 h-5 text-background" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/60">
+                Student Portal
+              </span>
             </div>
             <h1 className="text-4xl font-display font-medium tracking-tight text-foreground">
               Dashboard
             </h1>
             <p className="text-sm text-foreground/70 mt-1 font-light italic">
-              Welcome back, <span className="text-foreground/90 font-normal not-italic">{user?.user_metadata?.name || "Student"}</span>
+              Welcome back,{" "}
+              <span className="text-foreground/90 font-normal not-italic">
+                {user?.user_metadata?.name || "Student"}
+              </span>
             </p>
           </div>
           <div className="flex items-center gap-3">
-             <div className="px-4 py-2 bg-secondary/10 border border-border/50 rounded-xl backdrop-blur-md">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 block">Current Status</span>
-                <span className="text-xs font-medium text-foreground/80">Academic Year 2023-24</span>
-             </div>
+            <div className="px-4 py-2 bg-secondary/10 border border-border/50 rounded-xl backdrop-blur-md">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 block">
+                Current Status
+              </span>
+              <span className="text-xs font-medium text-foreground/80">
+                Academic Year 2023-24
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
           {/* Points Card */}
-          <div className="lg:col-span-2 p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 shadow-2xl">
+          <div className="lg:col-span-2 p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500">
             <div className="relative z-10">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 mb-3 flex items-center gap-2">
                 <Award className="w-3 h-3" />
@@ -126,14 +145,18 @@ export default function StudentDashboardPage() {
                   {stats.total_approved_points}
                 </p>
                 <p className="text-lg text-foreground/50 font-light">
-                  / 100 Approved
+                  / 120 Approved
                 </p>
               </div>
-              
+
               <div className="mt-8">
                 <div className="flex justify-between items-end mb-3">
-                  <span className="text-xs font-medium text-foreground/60 uppercase tracking-widest">Progress to Milestone</span>
-                  <span className="text-xs font-bold text-foreground">{Math.min(stats.total_approved_points, 100)}%</span>
+                  <span className="text-xs font-medium text-foreground/60 uppercase tracking-widest">
+                    Progress to Milestone
+                  </span>
+                  <span className="text-xs font-bold text-foreground">
+                    {Math.min(stats.total_approved_points, 100)}%
+                  </span>
                 </div>
                 <div className="w-full bg-background/50 h-3 rounded-full overflow-hidden border border-border/20 p-0.5 backdrop-blur-sm">
                   <div
@@ -148,7 +171,7 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* Pending Card */}
-           <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 shadow-2xl flex flex-col justify-between">
+          <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 flex flex-col justify-between">
             <div className="relative z-10">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 mb-3 flex items-center gap-2">
                 <FileText className="w-3 h-3" />
@@ -162,10 +185,10 @@ export default function StudentDashboardPage() {
               </p>
             </div>
             <div className="relative z-10 pt-6">
-               <button className="w-full py-3 bg-secondary/10 border border-border/30 rounded-2xl text-[11px] font-bold uppercase tracking-widest text-foreground/80 hover:bg-secondary/20 hover:text-foreground transition-all flex items-center justify-center gap-2">
-                  View Details
-                  <ArrowRight className="w-3 h-3" />
-               </button>
+              <button className="w-full py-3 bg-secondary/10 border border-border/30 rounded-2xl text-[11px] font-bold uppercase tracking-widest text-foreground/80 hover:bg-secondary/20 hover:text-foreground transition-all flex items-center justify-center gap-2">
+                View Details
+                <ArrowRight className="w-3 h-3" />
+              </button>
             </div>
           </div>
         </div>
@@ -200,24 +223,35 @@ export default function StudentDashboardPage() {
               {/* List of Joined Batches */}
               {loadingBatches ? (
                 Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-48 bg-secondary/5 border border-border/50 rounded-3xl animate-pulse" />
+                  <div
+                    key={i}
+                    className="h-48 bg-secondary/5 border border-border/50 rounded-3xl animate-pulse"
+                  />
                 ))
               ) : batches.length === 0 ? (
-                <div className={`${!loadingBatches && batches.length === 0 ? 'md:col-span-1 lg:col-span-2' : 'md:col-span-3'} flex flex-col items-center justify-center min-h-[200px] bg-secondary/5 border border-border/30 border-dashed rounded-3xl px-8 text-center backdrop-blur-sm group hover:border-border/60 transition-colors`}>
+                <div
+                  className={`${!loadingBatches && batches.length === 0 ? "md:col-span-1 lg:col-span-2" : "md:col-span-3"} flex flex-col items-center justify-center min-h-[200px] bg-secondary/5 border border-border/30 border-dashed rounded-3xl px-8 text-center backdrop-blur-sm group hover:border-border/60 transition-colors`}
+                >
                   <div className="w-12 h-12 bg-background rounded-full border border-border/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <BookOpen className="w-6 h-6 text-foreground/20" />
                   </div>
-                  <h3 className="text-sm font-medium text-foreground/60 mb-1">No Active Enrollments</h3>
-                  <p className="text-xs text-foreground/30 font-light max-w-[200px]"> Enrolling in a batch allows you to submit points to specific faculty.</p>
+                  <h3 className="text-sm font-medium text-foreground/60 mb-1">
+                    No Active Enrollments
+                  </h3>
+                  <p className="text-xs text-foreground/30 font-light max-w-[200px]">
+                    {" "}
+                    Enrolling in a batch allows you to submit points to specific
+                    faculty.
+                  </p>
                 </div>
               ) : (
                 batches.map((batch) => (
                   <div
                     key={batch.id}
-                    className="p-6 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl flex flex-col justify-between hover:shadow-2xl hover:border-border transition-all group relative overflow-hidden"
+                    className="p-6 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl flex flex-col justify-between hover:border-border transition-all group relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-foreground/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
-                    
+
                     <div className="relative z-10">
                       <div className="flex justify-between items-start mb-4">
                         <div className="p-2.5 bg-background rounded-xl border border-border/50 shadow-sm group-hover:scale-110 transition-transform duration-500">
@@ -245,7 +279,11 @@ export default function StudentDashboardPage() {
                         {batch.name}
                       </h3>
                       <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-foreground/30">
-                        Joined {new Date(batch.enrolled_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        Joined{" "}
+                        {new Date(batch.enrolled_at).toLocaleDateString(
+                          undefined,
+                          { month: "short", day: "numeric", year: "numeric" },
+                        )}
                       </p>
                     </div>
 

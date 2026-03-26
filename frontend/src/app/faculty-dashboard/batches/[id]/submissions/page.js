@@ -69,7 +69,12 @@ export default function BatchSubmissionsPage({ params }) {
           map[sid].total++;
           map[sid][sub.status] = (map[sid][sub.status] || 0) + 1;
         }
-        setStudents(Object.values(map).sort((a, b) => a.name.localeCompare(b.name)));
+        setStudents(
+          Object.values(map).sort((a, b) => {
+            if (a.pending !== b.pending) return b.pending - a.pending;
+            return a.name.localeCompare(b.name);
+          })
+        );
       }
     } catch (err) {
       console.error("Error:", err);
