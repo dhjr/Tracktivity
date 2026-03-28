@@ -5,7 +5,13 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/providers/AuthProvider";
 import FeatureCard from "@/components/FeatureCard";
-import { Presentation, GraduationCap, ArrowRight } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
+import {
+  Presentation,
+  GraduationCap,
+  ArrowRight,
+  BookOpen,
+} from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -48,9 +54,8 @@ export default function Home() {
               </h1>
 
               <p className="text-base md:text-lg text-foreground/50 max-w-lg font-light leading-relaxed">
-                Avoid last-minute certificate stress! The premium dashboard for
-                KTU students and faculty to track progress with elegance and
-                efficiency.
+                Avoid last-minute certificate stress! The tool for KTU students
+                and faculty to deal with activity points hassle-free!
               </p>
             </div>
 
@@ -69,6 +74,13 @@ export default function Home() {
               >
                 Log In
               </Link>
+              <Link
+                href="/guidelines"
+                className="px-8 py-4 bg-secondary/10 border border-border/30 text-sm font-bold hover:bg-secondary/20 transition-all rounded-xl text-foreground/60 hover:text-foreground backdrop-blur-md active:scale-[0.98] text-center flex items-center justify-center gap-2"
+              >
+                <BookOpen className="w-4 h-4" />
+                Guidelines
+              </Link>
             </div>
           </div>
 
@@ -78,7 +90,7 @@ export default function Home() {
               {/* Decorative Glow */}
               <div className="absolute -inset-4 bg-linear-to-tr from-primary/20 via-primary/5 to-transparent rounded-[3rem] blur-2xl opacity-20 group-hover:opacity-40 transition duration-1000"></div>
 
-              <div className="relative bg-secondary/5 border border-border/30 p-6 lg:p-10 rounded-[2.5rem] lg:rounded-[3.5rem] backdrop-blur-sm shadow-2xl transition-transform duration-700 group-hover:-translate-y-2 group-hover:rotate-2">
+              <div className="relative bg-secondary/5 border border-border/30 p-6 lg:p-10 rounded-[2.5rem] lg:rounded-[3.5rem] backdrop-blur-sm shadow-2xl transition-transform duration-700 group-hover:-translate-y-2 group-hover:rotate-2 animate-float">
                 <img
                   src="/logo.png"
                   alt="Tracktivity Logo"
@@ -95,10 +107,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           {/* Section Heading */}
           <div className="mb-16">
-            <h2 className="text-sm uppercase tracking-[0.4em] text-foreground/30 font-bold mb-4">
+            <h2 className="text-sm uppercase tracking-[0.4em] text-foreground/60 font-black mb-4 flex items-center gap-4">
               What we offer
+              <div className="h-px flex-1 bg-border/50 max-w-[200px]" />
             </h2>
-            <div className="h-px w-12 bg-primary/20" />
           </div>
 
           {/* Feature Cards Grid */}

@@ -58,23 +58,35 @@ export default function FacultyStudentSubmissionsPage({ params }) {
   if (!user || loading) return <PageLoader />;
 
   return (
-    <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
-      <div className="mb-8 border-b border-border pb-6 flex items-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-secondary/50 flex items-center justify-center text-lg font-bold text-foreground/60 shrink-0">
-          {getInitials(studentInfo?.name)}
-        </div>
-        <div>
-          <h1 className="text-2xl font-medium tracking-tight text-foreground">{studentInfo?.name}</h1>
-          <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-foreground/50">
-            {studentInfo?.ktuid && <span className="font-mono">{studentInfo.ktuid}</span>}
-            {studentInfo?.department && (
-              <><span className="text-foreground/20">•</span><span>{studentInfo.department}</span></>
-            )}
-            <span className="text-foreground/20">•</span>
-            <span><span className="text-green-500 font-semibold">{studentInfo?.totalPoints}</span> pts approved</span>
+    <div className="min-h-screen w-full relative overflow-hidden bg-background">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
+        <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="flex items-center gap-5 transition-all">
+            <div className="w-16 h-16 rounded-2xl bg-secondary/30 border border-border/50 backdrop-blur-md flex items-center justify-center text-xl font-bold text-foreground/40 shrink-0 relative overflow-hidden group">
+               <div className="absolute inset-0 bg-linear-to-tr from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+               <span className="relative z-10">{getInitials(studentInfo?.name)}</span>
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-foreground leading-tight flex items-baseline gap-4">
+                {studentInfo?.name}
+                <span className="text-xl md:text-2xl font-normal text-foreground/30">
+                  Total: {allSubmissions.length}
+                </span>
+              </h1>
+              <div className="flex flex-wrap items-center gap-3 mt-2 text-sm md:text-base text-foreground/40 font-medium font-display uppercase tracking-widest">
+                {studentInfo?.ktuid && <span>{studentInfo.ktuid}</span>}
+                <div className="h-1 w-1 rounded-full bg-border" />
+                <span>{studentInfo?.department || "Student"}</span>
+                <div className="h-1 w-1 rounded-full bg-border" />
+                <span className="text-primary/60">{studentInfo?.totalPoints} Points</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
       <div className="w-full pb-12">
         <SubmissionList
           submissions={filteredSubmissions}
@@ -88,5 +100,6 @@ export default function FacultyStudentSubmissionsPage({ params }) {
         />
       </div>
     </div>
-  );
+  </div>
+);
 }

@@ -129,7 +129,7 @@ export default function Navbar() {
             : "opacity-0 -translate-y-4 scale-95 pointer-events-none"
         }`}
       >
-        <div className="mx-4 mt-2 p-6 bg-background/95 backdrop-blur-2xl border border-border/50 rounded-3xl shadow-2xl space-y-6">
+        <div className="mx-4 mt-2 p-6 bg-background border border-border/50 rounded-3xl shadow-2xl space-y-6">
           <div className="grid grid-cols-1 gap-2">
             {navLinks.map((link) => {
               const Icon = link.icon;

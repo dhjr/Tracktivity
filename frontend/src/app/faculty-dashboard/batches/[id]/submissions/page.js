@@ -86,16 +86,20 @@ export default function BatchSubmissionsPage({ params }) {
   if (!user || loading) return <PageLoader />;
 
   return (
-    <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
+    <div className="min-h-screen w-full relative overflow-hidden bg-background">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="mb-8 border-b border-border pb-6">
-        <h1 className="text-3xl font-medium tracking-tight text-foreground">
-          {batch?.name} – Submissions
-        </h1>
-        <p className="text-sm text-foreground/60 flex items-center gap-1 mt-2">
-          <FileText className="w-4 h-4" /> {students.length} student{students.length !== 1 && "s"} with submissions
-        </p>
-      </div>
+      <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
+        <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-foreground leading-tight flex items-baseline gap-4">
+            {batch?.name}
+            <span className="text-xl md:text-2xl font-normal text-foreground/30">
+              Total: {students.length}
+            </span>
+          </h1>
+        </div>
 
       <div className="w-full pb-12">
         {students.length === 0 ? (
@@ -142,5 +146,6 @@ export default function BatchSubmissionsPage({ params }) {
         )}
       </div>
     </div>
-  );
+  </div>
+);
 }

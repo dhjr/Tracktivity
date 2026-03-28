@@ -15,9 +15,17 @@ import {
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import JoinBatch from "@/components/JoinBatch";
+import DashboardHeader from "@/components/DashboardHeader";
 
 export default function StudentDashboard() {
   const { user, isReady } = useRequireRole("student");
+
+  const studentCategory =
+    user?.user_metadata?.studentCategory === "lateralEntry"
+      ? "Lateral Entry"
+      : user?.user_metadata?.studentCategory === "pwd"
+        ? "PwD Student"
+        : "Regular Student";
 
   const targetPoints =
     user?.user_metadata?.studentCategory === "lateralEntry"
@@ -105,25 +113,10 @@ export default function StudentDashboard() {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
-        {/* Header */}
-        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="space-y-1">
-            <h1 className="text-3xl md:text-4xl font-display font-medium tracking-tight text-foreground flex flex-wrap items-center gap-3">
-              Welcome back,{" "}
-              <span className="text-foreground/90">
-                {user?.user_metadata?.name || "Student"}
-              </span>
-              <div className="mt-1 md:mt-0 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary">
-                {user?.user_metadata?.studentCategory === "lateralEntry"
-                  ? "Lateral Entry"
-                  : user?.user_metadata?.studentCategory === "pwd"
-                    ? "PwD Student"
-                    : "Regular Student"}
-              </div>
-            </h1>
-          </div>
-          <div className="flex items-center gap-3"></div>
-        </div>
+        <DashboardHeader
+          name={user?.user_metadata?.name || "Student"}
+          badge={studentCategory}
+        />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
@@ -249,9 +242,6 @@ export default function StudentDashboard() {
 
                     <div className="relative z-10">
                       <div className="flex justify-between items-start mb-4">
-                        <div className="p-2.5 bg-background rounded-xl border border-border/50 shadow-sm group-hover:scale-110 transition-transform duration-500">
-                          <BookOpen className="w-4 h-4 text-foreground/60" />
-                        </div>
                         {batch.status === "pending" ? (
                           <span className="px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
                             Pending

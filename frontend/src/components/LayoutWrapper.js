@@ -23,7 +23,7 @@ export default function LayoutWrapper({ children }) {
       {showNavbar ? (
         <Navbar />
       ) : (
-        <ThemeToggle />
+        pathname !== "/" && <ThemeToggle />
       )}
       <main className={showNavbar ? "pt-16" : ""}>
         {children}
