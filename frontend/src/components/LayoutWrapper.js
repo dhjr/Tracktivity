@@ -10,13 +10,13 @@ export default function LayoutWrapper({ children }) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
 
-  // If loading, show a loader
-  if (loading) {
-    return <PageLoader />;
-  }
 
-  // Show navbar only if user is logged in
   const showNavbar = !!user;
+  // Stability improvement: Apply padding based on route prefix even before auth is resolved
+  const isDashboard = pathname.startsWith("/student-dashboard") || 
+                      pathname.startsWith("/faculty-dashboard") || 
+                      pathname === "/profile" || 
+                      pathname === "/guidelines";
 
   return (
     <>
@@ -25,7 +25,7 @@ export default function LayoutWrapper({ children }) {
       ) : (
         pathname !== "/" && <ThemeToggle />
       )}
-      <main className={showNavbar ? "pt-16" : ""}>
+      <main className={isDashboard ? "pt-16" : ""}>
         {children}
       </main>
     </>

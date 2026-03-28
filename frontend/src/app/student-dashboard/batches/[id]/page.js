@@ -1,51 +1,18 @@
 "use client";
 
 import { useRequireRole } from "@/hooks/useRequireRole";
-import { getAuthHeaders } from "@/utils/api";
-import { useEffect, useState, use } from "react";
-import Link from "next/link";
-import { Users, FileText, PlusCircle, Award, ArrowLeft, ChevronRight, Activity } from "lucide-react";
+import { use } from "react";
+import { Users, FileText, PlusCircle, Award } from "lucide-react";
 import BatchNavCard from "@/components/BatchNavCard";
-import PageLoader from "@/components/PageLoader";
+import BatchDetailSkeleton from "@/components/skeletons/BatchDetailSkeleton";
+import { useStats } from "@/components/providers/StatsProvider";
 
 export default function StudentBatchDetailPage({ params }) {
   const { user, isReady } = useRequireRole("student");
+  const { stats } = useStats();
   const { id: batchId } = use(params);
 
-  const [batch, setBatch] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [totalPoints, setTotalPoints] = useState(0);
-  const [pendingCount, setPendingCount] = useState(0);
-
-  useEffect(() => {
-    if (isReady) fetchBatchDetails();
-  }, [isReady, batchId]);
-
-  const fetchBatchDetails = async () => {
-    setLoading(true);
-    try {
-      const { headers, API_URL } = await getAuthHeaders();
-      const [batchRes, summaryRes] = await Promise.all([
-        fetch(`${API_URL}/batches/${batchId}`, { headers }),
-        fetch(`${API_URL}/student/dashboard?view=summary`, { headers }),
-      ]);
-      if (batchRes.ok) {
-        const batchData = await batchRes.json();
-        setBatch({ ...batchData, enrolled_at: batchData.created_at });
-      }
-      if (summaryRes.ok) {
-        const summaryData = await summaryRes.json();
-        setTotalPoints(summaryData.total_approved_points || 0);
-        setPendingCount(summaryData.pending_count || 0);
-      }
-    } catch (err) {
-      console.error("Error fetching batch details:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!user || loading) return <PageLoader />;
+  if (!isReady) return <BatchDetailSkeleton />;
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-background">
@@ -56,20 +23,20 @@ export default function StudentBatchDetailPage({ params }) {
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
 
         {/* Batch info Header */}
-        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="space-y-2">
             <h1 className="text-5xl font-display font-bold tracking-tight text-foreground leading-[1.1]">
-              {batch?.name}
+              Batch Overview
             </h1>
             <div className="flex flex-wrap items-center gap-6 pt-2">
               <div className="flex items-center gap-2 bg-secondary/5 border border-border/30 px-3 py-1.5 rounded-xl backdrop-blur-sm">
                 <Award className="w-4 h-4 text-green-500" />
-                <span className="text-sm font-medium text-foreground/80">{totalPoints} <span className="text-foreground/60 font-light">Points Earned</span></span>
+                <span className="text-sm font-medium text-foreground/80">{stats.points} <span className="text-foreground/60 font-light">Points Earned</span></span>
               </div>
-              {pendingCount > 0 && (
+              {stats.pendingCount > 0 && (
                 <div className="flex items-center gap-2 bg-secondary/5 border border-border/30 px-3 py-1.5 rounded-xl backdrop-blur-sm">
                   <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-                  <span className="text-sm font-medium text-foreground/80">{pendingCount} <span className="text-foreground/60 font-light">Pending Review</span></span>
+                  <span className="text-sm font-medium text-foreground/80">{stats.pendingCount} <span className="text-foreground/60 font-light">Pending Review</span></span>
                 </div>
               )}
             </div>
@@ -77,7 +44,7 @@ export default function StudentBatchDetailPage({ params }) {
         </div>
 
         {/* Nav cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 py-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 py-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
           <BatchNavCard
             href={`/student-dashboard/batches/${batchId}/members`}
             icon={<Users className="w-6 h-6" />}

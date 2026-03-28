@@ -19,33 +19,37 @@ export default function BatchNavCard({ href, icon, label, description, variant =
   };
 
   return (
-    <Link href={href} className={styles[variant] ?? styles.default}>
+    <Link 
+      href={href} 
+      className={`${styles[variant] ?? styles.default} ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
+      aria-label={`Explore ${label}`}
+    >
       <div className="absolute top-0 right-0 w-32 h-32 bg-foreground/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-foreground/10 transition-colors duration-700" />
       
       <div className="relative z-10">
         <div className="flex justify-between items-start mb-6">
           <div className="p-3 bg-background rounded-2xl border border-border/50 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-            <div className="text-foreground/60 group-hover:text-foreground transition-colors">
+            <div className="text-foreground/75 group-hover:text-foreground transition-colors">
                {icon}
             </div>
           </div>
           <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 -translate-x-4 group-hover:translate-x-0">
-             <ArrowRight className="w-4 h-4 text-foreground/60" />
+             <ArrowRight className="w-4 h-4 text-foreground/75" />
           </div>
         </div>
         
-        <h3 className="font-display font-bold text-xl tracking-tight text-foreground/90 group-hover:text-foreground transition-colors mb-1">
+        <h2 className="font-display font-bold text-xl tracking-tight text-foreground/90 group-hover:text-foreground transition-colors mb-1">
           {label}
-        </h3>
+        </h2>
         {description && (
-          <p className="text-xs text-foreground/60 font-light leading-relaxed group-hover:text-foreground/80 transition-colors">
+          <p className="text-xs text-foreground/75 font-light leading-relaxed group-hover:text-foreground/90 transition-colors">
             {description}
           </p>
         )}
       </div>
 
       <div className="mt-8 relative z-10 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/40 group-hover:text-foreground/60 transition-colors">
-         <span>Explore Section</span>
+         <span aria-hidden="true">Explore Section</span>
          <div className="h-px w-6 bg-foreground/20 group-hover:w-10 transition-all duration-500" />
       </div>
     </Link>
