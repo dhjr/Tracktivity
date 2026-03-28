@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, UploadCloud, CheckCircle2, FileText, Activity, MessageSquare } from "lucide-react";
+import { Loader2, UploadCloud, CheckCircle2, FileText, Activity, MessageSquare, ChevronDown } from "lucide-react";
 import CalendarPicker from "./CalendarPicker";
+import Select from "@/components/ui/Select";
 
 export default function CertificateForm({
   initialData = null,
@@ -185,41 +186,33 @@ export default function CertificateForm({
             <label htmlFor="category-select" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
               Category
             </label>
-            <select
+            <Select
               id="category-select"
-              className="w-full px-4 py-2 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors appearance-none"
               value={selectedCategory}
               onChange={handleCategoryChange}
-              required
-            >
-              <option value="" disabled>Select category</option>
-              {Object.keys(categories).map((catName) => (
-                <option key={catName} value={catName}>{catName}</option>
-              ))}
-            </select>
+              placeholder="Select category"
+              options={Object.keys(categories).map((catName) => ({
+                label: catName,
+                value: catName,
+              }))}
+            />
           </div>
 
           <div>
             <label htmlFor="activity" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
               Specific Activity
             </label>
-            <select
+            <Select
               id="activity"
-              className={`w-full px-4 py-2 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors appearance-none ${!selectedCategory ? "opacity-50 cursor-not-allowed" : ""}`}
               value={selectedActivityDetails?.activityId || selectedActivityDetails?.code || ""}
               onChange={handleActivityChange}
-              required
               disabled={!selectedCategory}
-            >
-              <option value="" disabled>
-                {selectedCategory ? "Select an activity" : "Select category first"}
-              </option>
-              {selectedCategory && categories[selectedCategory].map((item) => (
-                <option key={item.activityId || item.code} value={item.activityId || item.code}>
-                  {item.title}
-                </option>
-              ))}
-            </select>
+              placeholder={selectedCategory ? "Select an activity" : "Select category first"}
+              options={selectedCategory ? categories[selectedCategory].map((item) => ({
+                label: item.title,
+                value: item.activityId || item.code,
+              })) : []}
+            />
           </div>
         </div>
 
@@ -240,20 +233,16 @@ export default function CertificateForm({
                 <label htmlFor="level" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
                   Level
                 </label>
-                <select
+                <Select
                   id="level"
-                  className="w-full px-4 py-2 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
                   value={formData.level_key}
                   onChange={handleLevelChange}
-                  required
-                >
-                  <option value="" disabled>Select Level</option>
-                  {Object.keys(selectedActivityDetails.levels).map((level) => (
-                    <option key={level} value={level}>
-                      {level.charAt(0).toUpperCase() + level.slice(1)} - ({selectedActivityDetails.levels[level]} Points)
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Select Level"
+                  options={Object.keys(selectedActivityDetails.levels).map((level) => ({
+                    label: `${level.charAt(0).toUpperCase() + level.slice(1)} - (${selectedActivityDetails.levels[level]} Points)`,
+                    value: level,
+                  }))}
+                />
               </div>
               <div>
                 <label htmlFor="points" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
@@ -294,17 +283,15 @@ export default function CertificateForm({
             <label htmlFor="academic_year" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
               Academic Year
             </label>
-            <select
+            <Select
               id="academic_year"
-              className="w-full px-4 py-2 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors"
               value={formData.academic_year}
               onChange={(e) => setFormData((prev) => ({ ...prev, academic_year: parseInt(e.target.value) }))}
-              required
-            >
-              {[1, 2, 3, 4].map((year) => (
-                <option key={year} value={year}>Regular Year {year}</option>
-              ))}
-            </select>
+              options={[1, 2, 3, 4].map((year) => ({
+                label: `Regular Year ${year}`,
+                value: year,
+              }))}
+            />
           </div>
 
           <div>

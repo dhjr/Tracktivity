@@ -27,7 +27,9 @@ import {
   ChevronRight,
   Calendar as CalendarIcon,
   X,
+  ChevronDown,
 } from "lucide-react";
+import Select from "@/components/ui/Select";
 
 const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,31 +77,28 @@ const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
     return (
       <div className="flex items-center justify-between px-2 py-2 border-b border-border bg-secondary/10">
         <div className="flex items-center gap-1">
-          <select
+          <Select
+            variant="calendar"
             value={getMonth(currentMonth)}
             onChange={(e) => handleMonthChange(e.target.value)}
-            className="text-[11px] font-medium bg-transparent border-none focus:ring-0 cursor-pointer hover:bg-secondary px-1.5 py-1 rounded appearance-none"
-          >
-            {[
+            options={[
               "Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-            ].map((m, i) => (
-              <option key={m} value={i}>
-                {m}
-              </option>
-            ))}
-          </select>
-          <select
+            ].map((m, i) => ({
+              label: m,
+              value: i,
+            }))}
+          />
+
+          <Select
+            variant="calendar"
             value={getYear(currentMonth)}
             onChange={(e) => handleYearChange(e.target.value)}
-            className="text-[11px] font-medium bg-transparent border-none focus:ring-0 cursor-pointer hover:bg-secondary px-1.5 py-1 rounded appearance-none"
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
+            options={years.map((y) => ({
+              label: y,
+              value: y,
+            }))}
+          />
         </div>
         <div className="flex items-center gap-0.5">
           <button

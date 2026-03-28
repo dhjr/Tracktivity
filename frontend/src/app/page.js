@@ -73,16 +73,16 @@ export default function Home() {
           </div>
 
           {/* Right Column: Logo / Visual Element */}
-          <div className="hidden lg:flex justify-end animate-in fade-in slide-in-from-right-8 duration-1000 delay-200">
+          <div className="flex order-first lg:order-last justify-center lg:justify-end mb-12 lg:mb-0 animate-in fade-in slide-in-from-right-8 duration-1000 delay-200">
             <div className="relative group">
               {/* Decorative Glow */}
               <div className="absolute -inset-4 bg-linear-to-tr from-primary/20 via-primary/5 to-transparent rounded-[3rem] blur-2xl opacity-20 group-hover:opacity-40 transition duration-1000"></div>
 
-              <div className="relative bg-secondary/5 border border-border/30 p-10 rounded-[3.5rem] backdrop-blur-sm shadow-2xl transition-transform duration-700 group-hover:-translate-y-2 group-hover:rotate-2">
+              <div className="relative bg-secondary/5 border border-border/30 p-6 lg:p-10 rounded-[2.5rem] lg:rounded-[3.5rem] backdrop-blur-sm shadow-2xl transition-transform duration-700 group-hover:-translate-y-2 group-hover:rotate-2">
                 <img
                   src="/logo.png"
                   alt="Tracktivity Logo"
-                  className="w-48 h-48 md:w-64 md:h-64 rounded-[2.5rem] border border-border/50 shadow-2xl grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
+                  className="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-3xl lg:rounded-[2.5rem] border border-border/50 shadow-2xl grayscale-[0.1] group-hover:grayscale-0 transition-all duration-700"
                 />
               </div>
             </div>

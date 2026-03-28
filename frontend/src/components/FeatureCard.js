@@ -25,10 +25,10 @@ export default function FeatureCard({ icon: Icon, title, features, accentColor }
           {features.map((item) => (
             <div
               key={item}
-              className="flex items-center gap-4 p-4 rounded-2xl bg-background/30"
+              className="flex items-center gap-4 p-4 rounded-2xl"
             >
               <div className="w-2 h-2 rounded-full bg-zinc-700 transition-transform" />
-              <span className="text-md font-medium text-foreground/70 group-hover/item:text-foreground transition-colors">
+              <span className="text-md font-display font-medium text-foreground/70 group-hover/item:text-foreground transition-colors">
                 {item}
               </span>
             </div>

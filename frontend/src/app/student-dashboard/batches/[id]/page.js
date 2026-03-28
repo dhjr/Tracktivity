@@ -54,33 +54,10 @@ export default function StudentBatchDetailPage({ params }) {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
-        {/* Breadcrumbs */}
-        <div className="mb-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/50 animate-in fade-in slide-in-from-left-4 duration-500">
-           <Link href="/student-dashboard" className="hover:text-foreground transition-colors">Dashboard</Link>
-           <ChevronRight className="w-3 h-3" />
-           <span className="text-foreground/80">{batch?.name || "Batch Details"}</span>
-        </div>
-
-        {/* Back Button */}
-        <Link 
-          href="/student-dashboard" 
-          className="inline-flex items-center gap-2 mb-6 text-xs font-medium text-foreground/60 hover:text-foreground transition-all group"
-        >
-          <div className="w-8 h-8 rounded-full border border-border/50 flex items-center justify-center group-hover:bg-secondary/10 group-hover:border-border transition-all">
-            <ArrowLeft className="w-4 h-4" />
-          </div>
-          Back to Overview
-        </Link>
 
         {/* Batch info Header */}
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 mb-1">
-               <div className="w-6 h-6 rounded-md bg-foreground flex items-center justify-center">
-                  <Activity className="w-3.5 h-3.5 text-background" />
-               </div>
-               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/60">Batch Portal</span>
-            </div>
             <h1 className="text-5xl font-display font-bold tracking-tight text-foreground leading-[1.1]">
               {batch?.name}
             </h1>
@@ -121,17 +98,7 @@ export default function StudentBatchDetailPage({ params }) {
             variant="primary"
           />
         </div>
-
-        {/* Optional: Batch Quick Stats or Recent Activity Placeholder */}
-        <div className="mt-20 p-10 border border-border/30 border-dashed rounded-[2.5rem] bg-secondary/5 backdrop-blur-sm flex flex-col items-center justify-center text-center group hover:border-border/60 transition-all duration-500">
-           <div className="w-16 h-16 rounded-full bg-background border border-border/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Award className="w-8 h-8 text-foreground/30" />
-           </div>
-           <h3 className="text-lg font-display font-medium text-foreground/80 mb-2">Track your growth</h3>
-           <p className="text-sm text-foreground/50 font-light max-w-md">Every submission brings you closer to your graduation requirement. Keep pushing!</p>
-        </div>
       </div>
-
     </div>
   );
 }

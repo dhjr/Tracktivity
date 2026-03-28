@@ -71,26 +71,9 @@ export default function FacultyBatchPage({ params }) {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
-        {/* Navigation / Breadcrumbs */}
-        <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-           <Link 
-            href="/faculty-dashboard" 
-            className="group inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/40 hover:text-foreground transition-colors"
-           >
-              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-              Back to Dashboard
-           </Link>
-        </div>
-
         {/* Header Section */}
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-               <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
-                  <LayoutDashboard className="w-5 h-5 text-background" />
-               </div>
-               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/40">Batch Administration</span>
-            </div>
             <h1 className="text-4xl font-display font-medium tracking-tight text-foreground">
               {batch?.name}
             </h1>
@@ -129,27 +112,6 @@ export default function FacultyBatchPage({ params }) {
             label="Activity Submissions"
             description="Review and approve pending activity point requests from this batch."
           />
-        </div>
-
-        {/* Empty State / Additional Info */}
-        <div className="mt-12 p-8 bg-secondary/5 border border-border/30 border-dashed rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6 animate-in fade-in duration-1000 delay-300">
-           <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-background border border-border/50 flex items-center justify-center shadow-sm shrink-0">
-                 <Sparkles className="w-6 h-6 text-foreground/20" />
-              </div>
-              <div className="max-w-md">
-                 <h4 className="text-sm font-bold text-foreground/80 uppercase tracking-widest mb-1">Batch Insights</h4>
-                 <p className="text-xs text-foreground/40 font-light leading-relaxed">
-                    Student activity summaries and breakdown reports are available in the main Analytics & Reports section.
-                 </p>
-              </div>
-           </div>
-           <Link 
-            href="/faculty-dashboard/reports" 
-            className="px-6 py-3 bg-foreground text-background rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-foreground/90 transition-all active:scale-[0.98]"
-           >
-              Generate Reports
-           </Link>
         </div>
       </div>
 
@@ -203,7 +165,6 @@ export default function FacultyBatchPage({ params }) {
           </div>
         </div>
       )}
-
     </div>
   );
 }

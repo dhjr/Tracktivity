@@ -114,16 +114,13 @@ export default function StudentDashboard() {
                 {user?.user_metadata?.name || "Student"}
               </span>
               <div className="mt-1 md:mt-0 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary">
-                {user?.user_metadata?.studentCategory === "lateralEntry" 
-                  ? "Lateral Entry" 
-                  : user?.user_metadata?.studentCategory === "pwd" 
-                    ? "PwD Student" 
+                {user?.user_metadata?.studentCategory === "lateralEntry"
+                  ? "Lateral Entry"
+                  : user?.user_metadata?.studentCategory === "pwd"
+                    ? "PwD Student"
                     : "Regular Student"}
               </div>
             </h1>
-            <p className="text-sm text-foreground/50 font-light translate-x-1">
-              Academic Year 2023-24
-            </p>
           </div>
           <div className="flex items-center gap-3"></div>
         </div>
@@ -309,7 +306,6 @@ export default function StudentDashboard() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }
