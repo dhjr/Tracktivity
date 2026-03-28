@@ -19,9 +19,11 @@ import {
 } from "lucide-react";
 import PageLoader from "@/components/PageLoader";
 import SubmissionDetailView from "@/components/SubmissionDetailView";
+import { useStats } from "@/components/providers/StatsProvider";
 
 export default function SubmissionReviewPage({ params }) {
   const { user, isReady } = useRequireRole("faculty");
+  const { refreshStats } = useStats();
   const router = useRouter();
   const { id: batchId, studentId, submissionId } = use(params);
 
@@ -62,7 +64,10 @@ export default function SubmissionReviewPage({ params }) {
         body: JSON.stringify({ status, comments: comment }),
       });
       if (res.ok) {
-        router.push(`/faculty-dashboard/batches/${batchId}/submissions/${studentId}`);
+        await refreshStats();
+        router.push(
+          `/faculty-dashboard/batches/${batchId}/submissions/${studentId}`,
+        );
       } else {
         const err = await res.json();
         alert(`Error: ${err.detail || "Failed to verify submission"}`);

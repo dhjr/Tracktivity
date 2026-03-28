@@ -6,9 +6,11 @@ import { useState, use } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import PageLoader from "@/components/PageLoader";
 import CertificateForm from "@/components/CertificateForm";
+import { useStats } from "@/components/providers/StatsProvider";
 
 export default function StudentAddCertificatePage({ params }) {
   const { user, isReady } = useRequireRole("student");
+  const { refreshStats } = useStats();
   const router = useRouter();
   const { id: batchId } = use(params);
 
@@ -41,6 +43,7 @@ export default function StudentAddCertificatePage({ params }) {
 
       if (res.ok) {
         setSuccess(true);
+        await refreshStats();
         setTimeout(() => {
           router.push(`/student-dashboard/batches/${batchId}`);
         }, 2000);

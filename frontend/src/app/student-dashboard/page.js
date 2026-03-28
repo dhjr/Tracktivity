@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import JoinBatch from "@/components/JoinBatch";
 import DashboardHeader from "@/components/DashboardHeader";
+import { useStats } from "@/components/providers/StatsProvider";
 
 export default function StudentDashboard() {
   const { user, isReady } = useRequireRole("student");
@@ -34,44 +35,29 @@ export default function StudentDashboard() {
         ? 60
         : 120;
 
+  const { stats, refreshStats } = useStats();
   const [batches, setBatches] = useState([]);
   const [loadingBatches, setLoadingBatches] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
   const [batchCode, setBatchCode] = useState("");
   const [joinError, setJoinError] = useState("");
   const [joinSuccess, setJoinSuccess] = useState(false);
-  const [stats, setStats] = useState({
-    total_approved_points: 0,
-    pending_count: 0,
-  });
 
   useEffect(() => {
-    if (isReady) fetchDashboardData();
+    if (isReady) fetchBatches();
   }, [isReady]);
 
-  const fetchDashboardData = async () => {
+  const fetchBatches = async () => {
     setLoadingBatches(true);
     try {
       const { headers, API_URL } = await getAuthHeaders();
-
-      const [batchRes, statsRes] = await Promise.all([
-        fetch(`${API_URL}/student/my-batches`, { headers }),
-        fetch(`${API_URL}/student/dashboard?view=summary`, { headers }),
-      ]);
-
-      if (batchRes.ok) {
-        const data = await batchRes.json();
+      const res = await fetch(`${API_URL}/student/my-batches`, { headers });
+      if (res.ok) {
+        const data = await res.json();
         setBatches(data.batches || []);
       }
-      if (statsRes.ok) {
-        const data = await statsRes.json();
-        setStats({
-          total_approved_points: data.total_approved_points || 0,
-          pending_count: data.pending_count || 0,
-        });
-      }
     } catch (err) {
-      console.error("Fetch dashboard data error:", err);
+      console.error("Fetch batches error:", err);
     } finally {
       setLoadingBatches(false);
     }
@@ -95,7 +81,7 @@ export default function StudentDashboard() {
         throw new Error(data.detail || data.error || "Failed to join batch");
       setJoinSuccess(true);
       setBatchCode("");
-      await fetchDashboardData();
+      await Promise.all([fetchBatches(), refreshStats()]);
       setTimeout(() => setJoinSuccess(false), 3000);
     } catch (err) {
       setJoinError(err.message);
@@ -129,7 +115,7 @@ export default function StudentDashboard() {
               </p>
               <div className="flex items-baseline gap-3">
                 <p className="text-6xl font-display font-bold text-foreground tracking-tighter">
-                  {stats.total_approved_points}
+                  {stats.points}
                 </p>
                 <p className="text-lg text-foreground/50 font-light">
                   / {targetPoints} Approved
@@ -144,7 +130,7 @@ export default function StudentDashboard() {
                   <span className="text-xs font-bold text-foreground">
                     {Math.min(
                       Math.round(
-                        (stats.total_approved_points / targetPoints) * 100,
+                        (stats.points / targetPoints) * 100,
                       ),
                       100,
                     )}
@@ -155,7 +141,7 @@ export default function StudentDashboard() {
                   <div
                     className="bg-linear-to-r from-foreground/80 to-foreground h-full rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(0,0,0,0.1)]"
                     style={{
-                      width: `${Math.min((stats.total_approved_points / targetPoints) * 100, 100)}%`,
+                      width: `${Math.min((stats.points / targetPoints) * 100, 100)}%`,
                     }}
                   />
                 </div>
@@ -171,7 +157,7 @@ export default function StudentDashboard() {
                 Pending Review
               </p>
               <p className="text-5xl font-display font-bold text-foreground tracking-tighter">
-                {stats.pending_count}
+                {stats.pendingCount}
               </p>
               <p className="mt-2 text-xs text-foreground/60 font-light pr-8 leading-relaxed">
                 Currently awaiting verification by your department faculty.

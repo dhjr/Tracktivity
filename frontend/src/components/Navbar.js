@@ -5,10 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, User, LogOut, LayoutDashboard, FileText, BarChart3, Settings } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useStats } from "@/components/providers/StatsProvider";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { stats } = useStats();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
