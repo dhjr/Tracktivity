@@ -5,6 +5,7 @@ import { getAuthHeaders } from "@/utils/api";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FileText, Download, Users, BarChart3, List, Loader2, ChevronDown, Activity, Sparkles, FileDown } from "lucide-react";
+import Select from "@/components/ui/Select";
 
 export default function ReportsPage() {
   const { user, isReady } = useRequireRole("faculty");
@@ -118,50 +119,30 @@ export default function ReportsPage() {
           <div className="w-full md:w-auto flex flex-col md:flex-row gap-4">
             {/* Batch Selector */}
             <div className="w-full md:w-64 group">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Users className="w-4 h-4 text-foreground/50 group-focus-within:text-foreground/80 transition-colors" />
-                </div>
-                <select
-                  value={selectedBatch}
-                  onChange={(e) => setSelectedBatch(e.target.value)}
-                  className="w-full pl-11 pr-10 py-3.5 bg-secondary/5 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-border transition-all text-sm appearance-none backdrop-blur-md font-medium text-foreground/90 hover:bg-secondary/10"
-                >
-                  <option value="">Select a Batch</option>
-                  {batches.map((batch) => (
-                    <option key={batch.id} value={batch.id}>
-                      {batch.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                  <ChevronDown className="w-4 h-4 text-foreground/30" />
-                </div>
-              </div>
+              <Select
+                value={selectedBatch}
+                onChange={(e) => setSelectedBatch(e.target.value)}
+                placeholder="Select a Batch"
+                leftIcon={Users}
+                options={batches.map((batch) => ({
+                  label: batch.name,
+                  value: batch.id,
+                }))}
+              />
             </div>
 
             {/* Year Selector */}
             <div className="w-full md:w-48 group">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Activity className="w-4 h-4 text-foreground/50 group-focus-within:text-foreground/80 transition-colors" />
-                </div>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                  className="w-full pl-11 pr-10 py-3.5 bg-secondary/5 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-border transition-all text-sm appearance-none backdrop-blur-md font-medium text-foreground/90 hover:bg-secondary/10"
-                >
-                  <option value="">All Years</option>
-                  {yearOptions.map((year) => (
-                    <option key={year} value={year}>
-                      Academic Year {year}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                  <ChevronDown className="w-4 h-4 text-foreground/30" />
-                </div>
-              </div>
+              <Select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                placeholder="All Years"
+                leftIcon={Activity}
+                options={yearOptions.map((year) => ({
+                  label: `Academic Year ${year}`,
+                  value: year,
+                }))}
+              />
             </div>
           </div>
         </div>
@@ -236,11 +217,6 @@ export default function ReportsPage() {
         )}
       </div>
 
-      <div className="mt-20 py-10 border-t border-border/20 text-center relative z-10">
-        <p className="text-[10px] text-foreground/20 uppercase tracking-[0.5em] font-medium pointer-events-none">
-          Powered by Tracktivity
-        </p>
-      </div>
     </div>
   );
 }

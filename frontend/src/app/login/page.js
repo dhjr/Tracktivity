@@ -43,12 +43,18 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10">
         <div className="mb-4 text-center">
           <Link href="/" className="inline-block mb-3">
-            <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl mx-auto shadow-lg border border-border/50" />
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="w-10 h-10 rounded-xl mx-auto shadow-lg border border-border/50"
+            />
           </Link>
           <h1 className="text-2xl font-display font-medium tracking-tight text-foreground">
             Welcome Back
           </h1>
-          <p className="text-xs text-foreground/50 mt-1 font-light">Enter your credentials to access your dashboard</p>
+          <p className="text-xs text-foreground/50 mt-1 font-light">
+            Enter your credentials to access your dashboard
+          </p>
         </div>
 
         <div className="bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
@@ -61,7 +67,9 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-medium text-foreground/60 ml-1 uppercase tracking-wider">Email Address</label>
+              <label className="text-[11px] font-medium text-foreground/60 ml-1 uppercase tracking-wider">
+                Email Address
+              </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-foreground">
                   <Mail className="h-4 w-4 text-foreground/30" />
@@ -81,7 +89,9 @@ export default function LoginPage() {
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-center ml-1">
-                <label className="text-[11px] font-medium text-foreground/60 uppercase tracking-wider">Password</label>
+                <label className="text-[11px] font-medium text-foreground/60 uppercase tracking-wider">
+                  Password
+                </label>
               </div>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-foreground">
@@ -118,19 +128,26 @@ export default function LoginPage() {
 
           {/* Quick Select Buttons - Redesigned */}
           <div className="mt-6 pt-6 border-t border-border/30">
-            <p className="text-[10px] uppercase tracking-widest font-bold text-foreground/30 text-center mb-4">Quick Select Account</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-foreground/30 text-center mb-4">
+              Quick test Accounts
+            </p>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() =>
-                  setFormData({ email: "name@example.com", password: "12345678" })
+                  setFormData({
+                    email: "name@example.com",
+                    password: "12345678",
+                  })
                 }
                 className="group flex flex-col items-center gap-2 p-3 border border-border/30 rounded-xl hover:bg-secondary/50 hover:border-border transition-all active:scale-95"
               >
                 <div className="w-8 h-8 bg-background rounded-full border border-border/50 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                   <GraduationCap className="w-4 h-4 text-foreground/60" />
                 </div>
-                <span className="text-[10px] font-medium text-foreground/70">Student Portal</span>
+                <span className="text-[10px] font-medium text-foreground/70">
+                  Student Portal
+                </span>
               </button>
               <button
                 type="button"
@@ -142,7 +159,9 @@ export default function LoginPage() {
                 <div className="w-8 h-8 bg-background rounded-full border border-border/50 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                   <Briefcase className="w-4 h-4 text-foreground/60" />
                 </div>
-                <span className="text-[10px] font-medium text-foreground/70">Faculty Portal</span>
+                <span className="text-[10px] font-medium text-foreground/70">
+                  Faculty Portal
+                </span>
               </button>
             </div>
           </div>
@@ -151,19 +170,15 @@ export default function LoginPage() {
         <div className="mt-6 text-center">
           <p className="text-xs text-foreground/40 font-light">
             Don't have an account?{" "}
-            <Link href="/signup" className="text-foreground/80 font-medium hover:underline hover:text-foreground transition-all">
+            <Link
+              href="/signup"
+              className="text-foreground/80 font-medium hover:underline hover:text-foreground transition-all"
+            >
               Create an account
             </Link>
           </p>
         </div>
       </div>
-
-
-      {/* Footer Branding */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[10px] text-foreground/20 uppercase tracking-[0.2em] font-medium pointer-events-none whitespace-nowrap">
-        Powered by Tracktivity
-      </div>
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-"use client";
+
 
 import { Check, Download, BookOpen, Info, ShieldCheck, GraduationCap, ClipboardCheck, ExternalLink } from "lucide-react";
 import ActivityGroupCard from "@/components/ActivityGroupCard";
@@ -47,7 +47,7 @@ export default function GuidelinesPage() {
 
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
         {/* Header Section */}
-        <div className="text-center space-y-8 mb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="text-center space-y-8 mb-20 animate-in fade-in duration-500">
           <div className="space-y-4">
             <div className="flex items-center justify-center gap-2 mb-2">
                <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
@@ -76,7 +76,7 @@ export default function GuidelinesPage() {
         </div>
 
         {/* Requirements Table Section */}
-        <section className="mb-24 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
+        <section className="mb-24 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-75">
            <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 rounded-xl bg-secondary/10 border border-border/50 flex items-center justify-center">
                  <ClipboardCheck className="w-5 h-5 text-foreground/60" />
@@ -237,12 +237,6 @@ export default function GuidelinesPage() {
         </section>
       </div>
 
-      {/* Footer Branding */}
-      <div className="py-20 border-t border-border/20 text-center relative z-10 bg-secondary/5">
-        <p className="text-[10px] text-foreground/20 uppercase tracking-[0.5em] font-medium pointer-events-none">
-          Powered by Tracktivity
-        </p>
-      </div>
     </div>
   );
 }

@@ -16,8 +16,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import JoinBatch from "@/components/JoinBatch";
 
-export default function StudentDashboardPage() {
+export default function StudentDashboard() {
   const { user, isReady } = useRequireRole("student");
+
+  const targetPoints =
+    user?.user_metadata?.studentCategory === "lateralEntry"
+      ? 90
+      : user?.user_metadata?.studentCategory === "pwd"
+        ? 60
+        : 120;
 
   const [batches, setBatches] = useState([]);
   const [loadingBatches, setLoadingBatches] = useState(true);
@@ -100,35 +107,22 @@ export default function StudentDashboardPage() {
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
         {/* Header */}
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
-                <Activity className="w-5 h-5 text-background" />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/60">
-                Student Portal
-              </span>
-            </div>
-            <h1 className="text-4xl font-display font-medium tracking-tight text-foreground">
-              Dashboard
-            </h1>
-            <p className="text-sm text-foreground/70 mt-1 font-light italic">
+          <div className="space-y-1">
+            <h1 className="text-3xl md:text-4xl font-display font-medium tracking-tight text-foreground flex flex-wrap items-center gap-3">
               Welcome back,{" "}
-              <span className="text-foreground/90 font-normal not-italic">
+              <span className="text-foreground/90">
                 {user?.user_metadata?.name || "Student"}
               </span>
-            </p>
+              <div className="mt-1 md:mt-0 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary">
+                {user?.user_metadata?.studentCategory === "lateralEntry"
+                  ? "Lateral Entry"
+                  : user?.user_metadata?.studentCategory === "pwd"
+                    ? "PwD Student"
+                    : "Regular Student"}
+              </div>
+            </h1>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="px-4 py-2 bg-secondary/10 border border-border/50 rounded-xl backdrop-blur-md">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 block">
-                Current Status
-              </span>
-              <span className="text-xs font-medium text-foreground/80">
-                Academic Year 2023-24
-              </span>
-            </div>
-          </div>
+          <div className="flex items-center gap-3"></div>
         </div>
 
         {/* Stats Grid */}
@@ -145,7 +139,7 @@ export default function StudentDashboardPage() {
                   {stats.total_approved_points}
                 </p>
                 <p className="text-lg text-foreground/50 font-light">
-                  / 120 Approved
+                  / {targetPoints} Approved
                 </p>
               </div>
 
@@ -155,14 +149,20 @@ export default function StudentDashboardPage() {
                     Progress to Milestone
                   </span>
                   <span className="text-xs font-bold text-foreground">
-                    {Math.min(stats.total_approved_points, 100)}%
+                    {Math.min(
+                      Math.round(
+                        (stats.total_approved_points / targetPoints) * 100,
+                      ),
+                      100,
+                    )}
+                    %
                   </span>
                 </div>
                 <div className="w-full bg-background/50 h-3 rounded-full overflow-hidden border border-border/20 p-0.5 backdrop-blur-sm">
                   <div
                     className="bg-linear-to-r from-foreground/80 to-foreground h-full rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(0,0,0,0.1)]"
                     style={{
-                      width: `${Math.min(stats.total_approved_points, 100)}%`,
+                      width: `${Math.min((stats.total_approved_points / targetPoints) * 100, 100)}%`,
                     }}
                   />
                 </div>
@@ -184,12 +184,7 @@ export default function StudentDashboardPage() {
                 Currently awaiting verification by your department faculty.
               </p>
             </div>
-            <div className="relative z-10 pt-6">
-              <button className="w-full py-3 bg-secondary/10 border border-border/30 rounded-2xl text-[11px] font-bold uppercase tracking-widest text-foreground/80 hover:bg-secondary/20 hover:text-foreground transition-all flex items-center justify-center gap-2">
-                View Details
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
+            <div className="relative z-10 pt-6"></div>
           </div>
         </div>
 
@@ -310,13 +305,6 @@ export default function StudentDashboardPage() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Footer Branding */}
-      <div className="mt-20 py-10 border-t border-border/20 text-center relative z-10">
-        <p className="text-[10px] text-foreground/20 uppercase tracking-[0.5em] font-medium pointer-events-none">
-          Powered by Tracktivity
-        </p>
       </div>
     </div>
   );

@@ -35,10 +35,10 @@ export default function Navbar() {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 border-b ${
         scrolled 
-          ? "py-3 bg-background/80 backdrop-blur-xl border-border/50 shadow-sm" 
-          : "py-5 bg-transparent border-transparent"
+          ? "py-3 bg-background/90 backdrop-blur-xl border-border/50 shadow-sm" 
+          : "py-5 bg-background/20 backdrop-blur-sm border-transparent"
       }`}
     >
       <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
@@ -48,12 +48,12 @@ export default function Navbar() {
             href={userRole === "faculty" ? "/faculty-dashboard" : "/student-dashboard"}
             className="group flex items-center gap-3 active:scale-95 transition-transform"
           >
-            <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center shadow-lg shadow-foreground/10 group-hover:rotate-6 transition-transform duration-500 overflow-hidden relative">
-               <div className="absolute inset-0 bg-linear-to-tr from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-10 h-10 rounded-xl bg-background/50 border border-border/50 backdrop-blur-md flex items-center justify-center shadow-lg group-hover:shadow-primary/5 group-hover:rotate-6 transition-all duration-500 overflow-hidden relative">
+               <div className="absolute inset-0 bg-linear-to-tr from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                <img 
                   src="/logo.png" 
                   alt="T" 
-                  className="w-7 h-7 object-contain"
+                  className="w-7 h-7 object-contain opacity-80 group-hover:opacity-100 transition-opacity"
                 />
             </div>
             <span className="font-display font-bold text-xl tracking-tight text-foreground hidden sm:block">
