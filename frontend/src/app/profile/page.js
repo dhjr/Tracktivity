@@ -19,7 +19,8 @@ import {
   Save, 
   ChevronRight,
   ShieldCheck,
-  Fingerprint
+  Fingerprint,
+  GraduationCap
 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -31,6 +32,7 @@ export default function ProfilePage() {
     email: "",
     ktuId: "",
     department: "",
+    studentCategory: "",
   });
   const [passwordData, setPasswordData] = useState({
     newPassword: "",
@@ -51,6 +53,7 @@ export default function ProfilePage() {
         email: user.email || "",
         ktuId: user.user_metadata?.ktuId || "",
         department: user.user_metadata?.department || "",
+        studentCategory: user.user_metadata?.studentCategory || "regular",
       });
     }
   }, [user, router]);
@@ -85,6 +88,7 @@ export default function ProfilePage() {
       await updateProfile({
         name: formData.name,
         department: formData.department,
+        studentCategory: formData.studentCategory,
         ...(isKtuVerified ? {} : { ktuId: formData.ktuId }),
       });
       setIsEditing(false);
@@ -191,6 +195,7 @@ export default function ProfilePage() {
                   email: user.email || "",
                   ktuId: user.user_metadata?.ktuId || "",
                   department: user.user_metadata?.department || "",
+                  studentCategory: user.user_metadata?.studentCategory || "regular",
                 });
               }
               setIsEditing(!isEditing);
@@ -246,6 +251,22 @@ export default function ProfilePage() {
                           placeholder="e.g. Computer Science"
                         />
                       </div>
+                      
+                      {userRole !== "faculty" && (
+                        <div className="space-y-2 group">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-foreground/60 ml-1">Student Category</label>
+                          <select
+                            required
+                            className="w-full px-5 py-3.5 bg-background/50 border border-border/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-border transition-all text-sm font-medium appearance-none"
+                            value={formData.studentCategory}
+                            onChange={(e) => setFormData({ ...formData, studentCategory: e.target.value })}
+                          >
+                            <option value="regular">Regular Student</option>
+                            <option value="lateralEntry">Lateral Entry</option>
+                            <option value="pwd">PwD Student</option>
+                          </select>
+                        </div>
+                      )}
 
                       {userRole !== "faculty" && (
                         <div className="space-y-2 group md:col-span-2">
@@ -290,7 +311,12 @@ export default function ProfilePage() {
                          icon: ShieldCheck, 
                          verified: user.user_metadata?.isKtuVerified 
                       }] : []),
-                      { label: "Email Address", value: user.email, icon: Mail }
+                      { label: "Email Address", value: user.email, icon: Mail },
+                      ...(userRole !== "faculty" ? [{
+                         label: "Student Category",
+                         value: user.user_metadata?.studentCategory === "lateralEntry" ? "Lateral Entry" : user.user_metadata?.studentCategory === "pwd" ? "PwD Student" : "Regular Student",
+                         icon: GraduationCap
+                      }] : [])
                     ].map((item, i) => (
                       <div key={i} className={`flex items-center justify-between py-6 border-b border-border/30 group ${i === 3 || (userRole === "faculty" && i === 2) ? 'border-b-0 md:border-b' : ''}`}>
                          <div className="flex items-center gap-4">

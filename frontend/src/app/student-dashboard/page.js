@@ -16,8 +16,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import JoinBatch from "@/components/JoinBatch";
 
-export default function StudentDashboardPage() {
+export default function StudentDashboard() {
   const { user, isReady } = useRequireRole("student");
+
+  const targetPoints =
+    user?.user_metadata?.studentCategory === "lateralEntry"
+      ? 90
+      : user?.user_metadata?.studentCategory === "pwd"
+        ? 60
+        : 120;
 
   const [batches, setBatches] = useState([]);
   const [loadingBatches, setLoadingBatches] = useState(true);
@@ -145,7 +152,7 @@ export default function StudentDashboardPage() {
                   {stats.total_approved_points}
                 </p>
                 <p className="text-lg text-foreground/50 font-light">
-                  / 120 Approved
+                  / {targetPoints} Approved
                 </p>
               </div>
 
@@ -155,14 +162,20 @@ export default function StudentDashboardPage() {
                     Progress to Milestone
                   </span>
                   <span className="text-xs font-bold text-foreground">
-                    {Math.min(stats.total_approved_points, 100)}%
+                    {Math.min(
+                      Math.round(
+                        (stats.total_approved_points / targetPoints) * 100,
+                      ),
+                      100,
+                    )}
+                    %
                   </span>
                 </div>
                 <div className="w-full bg-background/50 h-3 rounded-full overflow-hidden border border-border/20 p-0.5 backdrop-blur-sm">
                   <div
                     className="bg-linear-to-r from-foreground/80 to-foreground h-full rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(0,0,0,0.1)]"
                     style={{
-                      width: `${Math.min(stats.total_approved_points, 100)}%`,
+                      width: `${Math.min((stats.total_approved_points / targetPoints) * 100, 100)}%`,
                     }}
                   />
                 </div>
@@ -184,12 +197,7 @@ export default function StudentDashboardPage() {
                 Currently awaiting verification by your department faculty.
               </p>
             </div>
-            <div className="relative z-10 pt-6">
-              <button className="w-full py-3 bg-secondary/10 border border-border/30 rounded-2xl text-[11px] font-bold uppercase tracking-widest text-foreground/80 hover:bg-secondary/20 hover:text-foreground transition-all flex items-center justify-center gap-2">
-                View Details
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
+            <div className="relative z-10 pt-6"></div>
           </div>
         </div>
 
