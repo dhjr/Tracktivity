@@ -4,7 +4,18 @@ import { useRequireRole } from "@/hooks/useRequireRole";
 import { getAuthHeaders } from "@/utils/api";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FileText, Download, Users, BarChart3, List, Loader2, ChevronDown, Activity, Sparkles, FileDown } from "lucide-react";
+import {
+  FileText,
+  Download,
+  Users,
+  BarChart3,
+  List,
+  Loader2,
+  ChevronDown,
+  Activity,
+  NotepadText,
+  FileDown,
+} from "lucide-react";
 import Select from "@/components/ui/Select";
 
 export default function ReportsPage() {
@@ -37,20 +48,24 @@ export default function ReportsPage() {
 
   const downloadReport = async (reportType, format) => {
     if (!selectedBatch) return;
-    
+
     setDownloading({ type: reportType, format });
     try {
       const { headers, API_URL } = await getAuthHeaders();
       let url = `${API_URL}/faculty/batches/${selectedBatch}/reports/${reportType}?format=${format}`;
-      
-      if (selectedYear && (reportType === "category-breakdown" || reportType === "activity-breakdown")) {
+
+      if (
+        selectedYear &&
+        (reportType === "category-breakdown" ||
+          reportType === "activity-breakdown")
+      ) {
         url += `&academic_year=${selectedYear}`;
       }
 
       const res = await fetch(url, { headers });
-      
+
       if (!res.ok) throw new Error("Failed to download report");
-      
+
       const blob = await res.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -72,19 +87,22 @@ export default function ReportsPage() {
     {
       id: "student-summary",
       title: "Student Point Summary",
-      description: "Overview of all students with their total points across all groups",
+      description:
+        "Overview of all students with their total points across all groups",
       icon: Users,
     },
     {
       id: "category-breakdown",
       title: "Category-wise Point Breakdown",
-      description: "Detailed breakdown of points earned by each student per activity category",
+      description:
+        "Detailed breakdown of points earned by each student per activity category",
       icon: BarChart3,
     },
     {
       id: "activity-breakdown",
       title: "Activity-wise Point Breakdown",
-      description: "Comprehensive view of all approved activities with points awarded",
+      description:
+        "Comprehensive view of all approved activities with points awarded",
       icon: List,
     },
   ];
@@ -101,12 +119,7 @@ export default function ReportsPage() {
         {/* Header Section */}
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-               <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-background" />
-               </div>
-               <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/60">Faculty Portal</span>
-            </div>
+            <div className="flex items-center gap-2 mb-2"></div>
             <h1 className="text-4xl font-display font-medium tracking-tight text-foreground">
               Analytics & Reports
             </h1>
@@ -114,7 +127,7 @@ export default function ReportsPage() {
               Generate and export comprehensive batch performance data.
             </p>
           </div>
-          
+
           {/* Selectors Group */}
           <div className="w-full md:w-auto flex flex-col md:flex-row gap-4">
             {/* Batch Selector */}
@@ -151,12 +164,14 @@ export default function ReportsPage() {
         {!selectedBatch ? (
           <div className="flex flex-col items-center justify-center py-24 px-8 text-center bg-secondary/5 border border-border/30 border-dashed rounded-4xl backdrop-blur-sm animate-in fade-in duration-1000">
             <div className="w-20 h-20 bg-background rounded-3xl border border-border/50 flex items-center justify-center mb-6 shadow-xl relative overflow-hidden group">
-               <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-               <Sparkles className="w-8 h-8 text-foreground/30 group-hover:scale-110 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <NotepadText className="w-8 h-8 text-foreground/30 group-hover:scale-110 transition-transform duration-500" />
             </div>
-            <h3 className="text-xl font-display font-medium text-foreground/75 mb-2">Ready to compile data?</h3>
+            <h3 className="text-xl font-display font-medium text-foreground/75 mb-2">
+              No batch selected.
+            </h3>
             <p className="text-sm text-foreground/50 font-light max-w-sm leading-relaxed">
-              Select a batch from the dropdown above to unlock detailed performance reports and activity summaries.
+              Select a batch and year from the dropdown above to view the report
             </p>
           </div>
         ) : (
@@ -164,14 +179,14 @@ export default function ReportsPage() {
             {reports.map((report) => {
               const Icon = report.icon;
               const isDownloading = downloading.type === report.id;
-              
+
               return (
                 <div
                   key={report.id}
                   className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-4xl flex flex-col justify-between hover:shadow-2xl hover:border-border transition-all group relative overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 w-24 h-24 bg-foreground/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
-                  
+
                   <div className="relative z-10">
                     <div className="w-12 h-12 rounded-2xl bg-background border border-border/50 flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
                       <Icon className="w-6 h-6 text-foreground/70" />
@@ -216,7 +231,6 @@ export default function ReportsPage() {
           </div>
         )}
       </div>
-
     </div>
   );
 }

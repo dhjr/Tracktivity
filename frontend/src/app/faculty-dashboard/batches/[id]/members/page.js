@@ -39,7 +39,8 @@ export default function FacultyBatchMembersPage({ params }) {
           role: "faculty", isAdmin: f.is_admin,
         }));
         const studentList = (data.students || []).map((s) => ({
-          id: s.student_id, name: s.studentName, subtitle: s.department || s.studentType || "Student",
+          id: s.student_id, name: s.studentName, 
+          subtitle: s.studentType ? `${s.studentType} Student` : (s.department || "Student"),
           role: "student", isAdmin: false,
         }));
         setMembers([
@@ -57,40 +58,60 @@ export default function FacultyBatchMembersPage({ params }) {
   if (!user || loading) return <PageLoader />;
 
   return (
-    <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">
-      <div className="mb-8 border-b border-border pb-6">
-        <h1 className="text-3xl font-medium tracking-tight text-foreground">{batch?.name} – Members</h1>
-        <p className="text-sm text-foreground/60 flex items-center gap-1 mt-2">
-          <Users className="w-4 h-4" /> {members.length} member{members.length !== 1 && "s"}
-        </p>
-      </div>
-      <div className="w-full pb-12">
-        {members.length === 0 ? (
-          <div className="p-12 border border-border border-dashed bg-secondary/5 flex items-center justify-center">
-            <span className="text-foreground/30 text-xs font-medium uppercase tracking-widest">No members yet</span>
-          </div>
-        ) : (
-          <div className="border border-border overflow-hidden bg-background divide-y divide-border">
-            {members.map((member) => (
-              <button
-                key={`${member.role}-${member.id}`}
-                onClick={() => router.push(`/faculty-dashboard/batches/${batchId}/members/${member.role}-${member.id}`)}
-                className="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-secondary/5 transition-colors text-left group"
-              >
-                <div className="w-10 h-10 rounded-full bg-secondary/50 flex items-center justify-center shrink-0 text-sm font-bold text-foreground/60 group-hover:text-foreground transition-colors">
-                  {getInitials(member.name)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground/90 truncate">{member.name || "Unknown"}</span>
-                    <RoleBadge role={member.role} isAdmin={member.isAdmin} />
+    <div className="min-h-screen w-full relative overflow-hidden bg-background">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
+        <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-foreground leading-tight flex items-baseline gap-4">
+            {batch?.name}
+            <span className="text-xl md:text-2xl font-normal text-foreground/30">{members.length}</span>
+          </h1>
+        </div>
+
+        <div className="w-full pb-20">
+          {members.length === 0 ? (
+            <div className="p-20 border border-border/30 border-dashed rounded-[2.5rem] bg-secondary/5 backdrop-blur-sm flex flex-col items-center justify-center text-center animate-in fade-in duration-1000">
+              <div className="w-16 h-16 rounded-full bg-background border border-border/50 flex items-center justify-center mb-4">
+                 <Users className="w-8 h-8 text-foreground/20" />
+              </div>
+              <span className="text-sm font-display font-medium text-foreground/40 uppercase tracking-widest">No members found</span>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+              {members.map((member, index) => (
+                <div
+                  key={`${member.role}-${member.id}`}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  className="w-full relative group"
+                >
+                  <div className="relative flex items-center gap-4 p-4 rounded-3xl bg-background/40 border border-border/50 backdrop-blur-md transition-all duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-secondary/30 border border-border/50 flex items-center justify-center shrink-0 text-base font-bold text-foreground/40 transition-all duration-500 overflow-hidden relative">
+                       <span className="relative z-10">{getInitials(member.name)}</span>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center justify-between gap-2">
+                           <span className="font-display font-bold text-lg text-foreground/90 truncate">
+                            {member.name || "Unknown"}
+                           </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           <p className="text-[11px] text-foreground/40 font-medium truncate uppercase tracking-wider">{member.subtitle}</p>
+                           <div className="h-1 w-1 rounded-full bg-border" />
+                           <RoleBadge role={member.role} isAdmin={member.isAdmin} />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-xs text-foreground/40 truncate">{member.subtitle}</p>
                 </div>
-              </button>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

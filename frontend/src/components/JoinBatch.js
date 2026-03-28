@@ -52,7 +52,7 @@ export default function JoinBatch({
 
           <button
             type="submit"
-            disabled={isJoining || !batchCode.trim()}
+            disabled={isJoining || batchCode.trim().length < 6}
             className="w-full py-3.5 bg-foreground text-background text-xs font-bold uppercase tracking-widest rounded-2xl hover:bg-foreground/90 disabled:opacity-30 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
           >
             {isJoining ? (

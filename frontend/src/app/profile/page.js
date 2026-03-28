@@ -387,11 +387,8 @@ export default function ProfilePage() {
 
               {/* Unified Security Section */}
               <div className="mt-12 pt-12 border-t border-border/50">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-xl font-display font-medium tracking-tight">
-                    Security Access
-                  </h2>
-                  {!isChangingPassword && (
+                {!isChangingPassword && (
+                  <div className="flex">
                     <button
                       onClick={() => {
                         setPasswordData({
@@ -402,13 +399,13 @@ export default function ProfilePage() {
                         setShowPassword(false);
                         setIsChangingPassword(true);
                       }}
-                      className="text-[10px] font-black uppercase tracking-widest text-foreground/40 hover:text-foreground transition-colors flex items-center gap-2"
+                      className="text-[10px] font-black uppercase tracking-widest text-foreground/40 hover:text-foreground transition-colors flex items-center gap-2 mb-8"
                     >
                       Modify Password
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {isChangingPassword && (
                   <form

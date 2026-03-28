@@ -1,6 +1,7 @@
 import "./globals.css";
 import ThemeProvider from "@/components/providers/ThemeProvider";
 import AuthProvider from "@/components/providers/AuthProvider";
+import StatsProvider from "@/components/providers/StatsProvider";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import { Inter, Outfit } from "next/font/google";
 
@@ -49,7 +50,9 @@ export default function RootLayout({ children }) {
       <body className={`antialiased font-sans`} suppressHydrationWarning>
         <AuthProvider>
           <ThemeProvider>
-            <LayoutWrapper>{children}</LayoutWrapper>
+            <StatsProvider>
+              <LayoutWrapper>{children}</LayoutWrapper>
+            </StatsProvider>
           </ThemeProvider>
         </AuthProvider>
       </body>
