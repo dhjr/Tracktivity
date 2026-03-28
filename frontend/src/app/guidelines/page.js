@@ -237,12 +237,6 @@ export default function GuidelinesPage() {
         </section>
       </div>
 
-      {/* Footer Branding */}
-      <div className="py-20 border-t border-border/20 text-center relative z-10 bg-secondary/5">
-        <p className="text-[10px] text-foreground/20 uppercase tracking-[0.5em] font-medium pointer-events-none">
-          Powered by Tracktivity
-        </p>
-      </div>
     </div>
   );
 }

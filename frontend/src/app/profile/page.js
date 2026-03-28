@@ -462,12 +462,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Footer Branding */}
-      <div className="mt-20 py-10 border-t border-border/20 text-center relative z-10">
-        <p className="text-[10px] text-foreground/20 uppercase tracking-[0.5em] font-medium pointer-events-none">
-          Powered by Tracktivity
-        </p>
-      </div>
     </div>
   );
 }

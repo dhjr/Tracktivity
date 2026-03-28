@@ -272,9 +272,6 @@ export default function SignupPage() {
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-foreground/20 uppercase tracking-[0.2em] font-medium pointer-events-none whitespace-nowrap">
-        Powered by Tracktivity
-      </div>
     </div>
   );
 }
