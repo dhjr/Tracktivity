@@ -3,12 +3,12 @@ import { Users } from "lucide-react";
 export default function MemberListSkeleton() {
   return (
     <div className="min-h-[calc(100vh-4rem)] w-full relative overflow-hidden bg-background">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* Decorative Background Elements - Hidden on mobile for performance */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[80px] pointer-events-none hidden md:block" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[80px] pointer-events-none hidden md:block" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
-        <div className="mb-12">
+        <div className="mb-10">
           <div className="h-12 w-64 bg-secondary/20 rounded-2xl animate-pulse mb-2" />
           <div className="h-6 w-32 bg-secondary/15 rounded-lg animate-pulse" />
         </div>

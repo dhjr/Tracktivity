@@ -1,13 +1,13 @@
 export default function BatchDetailSkeleton() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] w-full relative overflow-hidden bg-background">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-[calc(100vh-4rem)] w-full relative bg-background">
+      {/* Decorative Background Elements - Hidden on mobile for performance */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[80px] pointer-events-none hidden md:block" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[80px] pointer-events-none hidden md:block" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
         {/* Batch info Header Skeleton */}
-        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
+        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
           <div className="space-y-4 w-full md:w-1/2">
             <div className="h-12 w-3/4 bg-secondary/20 rounded-2xl animate-pulse" />
             <div className="flex flex-wrap items-center gap-6 pt-2">

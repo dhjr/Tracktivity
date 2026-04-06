@@ -150,7 +150,7 @@ export default function SubmissionReviewPage({ params }) {
   }
 
   return (
-    <div className="w-full p-4 md:p-8">
+    <div className="min-h-[calc(100vh-4rem)] w-full relative bg-background p-4 md:p-8">
       <SubmissionDetailView
         submission={submission}
         rule={rule}

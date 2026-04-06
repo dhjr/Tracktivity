@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, User, LogOut, LayoutDashboard, FileText, BarChart3, Settings } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -52,10 +53,13 @@ export default function Navbar() {
           >
             <div className="w-10 h-10 rounded-xl bg-background/50 border border-border/50 backdrop-blur-md flex items-center justify-center shadow-lg group-hover:shadow-primary/5 group-hover:rotate-6 transition-all duration-500 overflow-hidden relative">
                <div className="absolute inset-0 bg-linear-to-tr from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-               <img 
+               <Image 
                   src="/logo.png" 
-                  alt="T" 
-                  className="w-7 h-7 object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                  alt="Tracktivity Logo" 
+                  width={28}
+                  height={28}
+                  priority
+                  className="object-contain opacity-80 group-hover:opacity-100 transition-opacity"
                 />
             </div>
             <span className="font-display font-bold text-xl tracking-tight text-foreground hidden sm:block">

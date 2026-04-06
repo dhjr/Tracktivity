@@ -77,7 +77,7 @@ export default function FacultyBatchPage({ params }) {
   if (!user || loading) return <BatchDetailSkeleton />;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] w-full relative overflow-hidden bg-background">
+    <div className="min-h-[calc(100vh-4rem)] w-full relative bg-background">
       {/* Decorative Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />

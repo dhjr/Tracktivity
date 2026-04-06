@@ -58,12 +58,8 @@ body {
   font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
 }
 
-/* Synchronize theme transitions across all elements */
-*, *::before, *::after {
-  transition-property: background-color, border-color, color, fill, stroke, box-shadow, text-decoration-color;
-  transition-duration: 300ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* Global transitions should be avoided for performance reasons, especially on mobile. */
+
 
 /* Ensure no transition on page load if needed, but here we want smooth switching */
 .no-transition {
@@ -97,3 +93,4 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+

@@ -4,19 +4,17 @@ import { useRequireRole } from "@/hooks/useRequireRole";
 import { getAuthHeaders } from "@/utils/api";
 import {
   BookOpen,
-  Loader2,
   Award,
   FileText,
-  ArrowRight,
-  Plus,
   ExternalLink,
-  Activity,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import JoinBatch from "@/components/JoinBatch";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useStats } from "@/components/providers/StatsProvider";
+
+import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 
 export default function StudentDashboard() {
   const { user, isReady } = useRequireRole("student");
@@ -90,13 +88,15 @@ export default function StudentDashboard() {
     }
   };
 
-  if (!user) return null; // Wait for redirect
+  if (!user || (loadingBatches && batches.length === 0)) {
+    return <DashboardSkeleton />;
+  }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] w-full relative overflow-hidden bg-background">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-[calc(100vh-4rem)] w-full relative  bg-background">
+      {/* Decorative Background Elements - Hidden on mobile for performance */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[80px] pointer-events-none hidden md:block" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[80px] pointer-events-none hidden md:block" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
         <DashboardHeader
@@ -107,7 +107,7 @@ export default function StudentDashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
           {/* Points Card */}
-          <div className="lg:col-span-2 p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500">
+          <div className="lg:col-span-2 p-8 bg-secondary/5 border border-border/50 backdrop-blur-none md:backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500">
             <div className="relative z-10">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 mb-3 flex items-center gap-2">
                 <Award className="w-3 h-3" />
@@ -150,7 +150,7 @@ export default function StudentDashboard() {
           </div>
 
           {/* Pending Card */}
-          <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 flex flex-col justify-between">
+          <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-none md:backdrop-blur-xl rounded-3xl group hover:border-border transition-all duration-500 flex flex-col justify-between">
             <div className="relative z-10">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 mb-3 flex items-center gap-2">
                 <FileText className="w-3 h-3" />
@@ -183,7 +183,7 @@ export default function StudentDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Join Batch Form Card */}
-              {!loadingBatches && batches.length === 0 && (
+              {batches.length === 0 && !loadingBatches && (
                 <JoinBatch
                   batchCode={batchCode}
                   setBatchCode={setBatchCode}
@@ -191,20 +191,14 @@ export default function StudentDashboard() {
                   joinError={joinError}
                   joinSuccess={joinSuccess}
                   handleJoinBatch={handleJoinBatch}
+                  className="backdrop-blur-none md:backdrop-blur-xl"
                 />
               )}
 
               {/* List of Joined Batches */}
-              {loadingBatches ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-48 bg-secondary/5 border border-border/50 rounded-3xl animate-pulse"
-                  />
-                ))
-              ) : batches.length === 0 ? (
+              {batches.length === 0 && !loadingBatches ? (
                 <div
-                  className={`${!loadingBatches && batches.length === 0 ? "md:col-span-1 lg:col-span-2" : "md:col-span-3"} flex flex-col items-center justify-center min-h-[200px] bg-secondary/5 border border-border/30 border-dashed rounded-3xl px-8 text-center backdrop-blur-sm group hover:border-border/60 transition-colors`}
+                  className="md:col-span-1 lg:col-span-2 flex flex-col items-center justify-center min-h-[200px] bg-secondary/5 border border-border/30 border-dashed rounded-3xl px-8 text-center backdrop-blur-none md:backdrop-blur-sm group hover:border-border/60 transition-colors"
                 >
                   <div className="w-12 h-12 bg-background rounded-full border border-border/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <BookOpen className="w-6 h-6 text-foreground/20" />
@@ -222,7 +216,7 @@ export default function StudentDashboard() {
                 batches.map((batch) => (
                   <div
                     key={batch.id}
-                    className="p-6 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl flex flex-col justify-between hover:border-border transition-all group relative overflow-hidden"
+                    className="p-6 bg-secondary/5 border border-border/50 backdrop-blur-none md:backdrop-blur-xl rounded-3xl flex flex-col justify-between hover:border-border transition-all group relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-foreground/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
 

@@ -1,10 +1,10 @@
 export default function CertificateFormSkeleton() {
   return (
     <div className="min-h-[calc(100vh-4rem)] w-full relative overflow-hidden bg-background">
-      {/* Decorative Background Elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+      {/* Decorative Background Elements - Hidden on mobile for performance */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[80px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[80px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-6xl mx-auto p-4 md:px-10 md:py-8 flex flex-col">

@@ -91,13 +91,15 @@ export default function FacultyDashboardPage() {
     }
   };
 
-  if (!user) return null; // Wait for redirect or auth
+  if (!user || (loadingBatches && batches.length === 0)) {
+    return <DashboardSkeleton />;
+  }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] w-full relative overflow-hidden bg-background">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-[calc(100vh-4rem)] w-full relative  bg-background">
+      {/* Decorative Background Elements - Hidden on mobile for performance */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[80px] pointer-events-none hidden md:block" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[80px] pointer-events-none hidden md:block" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
         <DashboardHeader
@@ -120,7 +122,7 @@ export default function FacultyDashboardPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Create Batch Card */}
-            <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl relative overflow-hidden group hover:border-border transition-all duration-500 flex flex-col justify-between h-full min-h-[250px]">
+            <div className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-none md:backdrop-blur-xl rounded-3xl relative overflow-hidden group hover:border-border transition-all duration-500 flex flex-col justify-between h-full min-h-[250px]">
               <div className="relative z-10 flex flex-col h-full">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="p-2 bg-background rounded-lg border border-border/50 shadow-sm">
@@ -181,25 +183,10 @@ export default function FacultyDashboardPage() {
               joinError={joinError}
               joinSuccess={joinSuccess}
               handleJoinBatch={handleJoinBatch}
+              className="backdrop-blur-none md:backdrop-blur-xl"
             />
 
-            {loadingBatches ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="p-8 bg-secondary/5 border border-border/50 rounded-3xl h-[250px] flex flex-col justify-between animate-pulse"
-                >
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="h-6 w-1/2 bg-secondary/20 rounded" />
-                      <div className="h-4 w-12 bg-secondary/15 rounded-full" />
-                    </div>
-                    <div className="h-8 w-24 bg-secondary/15 rounded" />
-                  </div>
-                  <div className="h-4 w-1/3 bg-secondary/10 rounded" />
-                </div>
-              ))
-            ) : batches.length === 0 ? (
+            {batches.length === 0 && !loadingBatches ? (
               <div className="md:col-span-3 flex flex-col items-center justify-center border border-border/50 border-dashed rounded-[2.5rem] p-12 text-center bg-secondary/5 backdrop-blur-sm">
                 <span className="text-foreground/20 mb-2 font-display text-lg">
                   No active batches found
@@ -212,7 +199,7 @@ export default function FacultyDashboardPage() {
               batches.map((batch) => (
                 <div
                   key={batch.id}
-                  className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-xl rounded-3xl flex flex-col justify-between hover:border-border transition-all duration-500 group relative overflow-hidden h-full min-h-[250px]"
+                  className="p-8 bg-secondary/5 border border-border/50 backdrop-blur-none md:backdrop-blur-xl rounded-3xl flex flex-col justify-between hover:border-border transition-all duration-500 group relative overflow-hidden h-full min-h-[250px]"
                 >
                   <div className="relative z-10">
                     <div className="flex items-start justify-between gap-4 mb-4">
@@ -245,7 +232,7 @@ export default function FacultyDashboardPage() {
                   </div>
 
                   {/* Subtle background detail */}
-                  <Users className="absolute -bottom-4 -right-4 w-24 h-24 text-foreground/[0.02] transform -rotate-12 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-0" />
+                  <Users className="absolute -bottom-4 -right-4 w-24 h-24 text-foreground/2 transform -rotate-12 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-0" />
                 </div>
               ))
             )}

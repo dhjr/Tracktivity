@@ -14,7 +14,7 @@ import React from "react";
  */
 export default function DashboardHeader({ name, badge, subtitle, children }) {
   return (
-    <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div className="space-y-1">
         <h1 className="text-3xl md:text-5xl font-display font-medium tracking-tight text-foreground flex flex-wrap items-baseline gap-4 sm:gap-6 leading-tight">
           <span className="opacity-40">Welcome back,</span>
