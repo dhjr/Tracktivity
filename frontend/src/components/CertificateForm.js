@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, UploadCloud, CheckCircle2, FileText, Activity, MessageSquare, ChevronDown } from "lucide-react";
+import {
+  Loader2,
+  UploadCloud,
+  CheckCircle2,
+  FileText,
+  Activity,
+  MessageSquare,
+  ChevronDown,
+} from "lucide-react";
 import CalendarPicker from "./CalendarPicker";
 import Select from "@/components/ui/Select";
 
@@ -28,7 +36,9 @@ export default function CertificateForm({
   const [rulebook, setRulebook] = useState([]);
   const [fetchingRulebook, setFetchingRulebook] = useState(true);
   const [selectedActivityDetails, setSelectedActivityDetails] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(initialData?.category || "");
+  const [selectedCategory, setSelectedCategory] = useState(
+    initialData?.category || "",
+  );
 
   useEffect(() => {
     fetchRulebook();
@@ -36,7 +46,8 @@ export default function CertificateForm({
 
   const fetchRulebook = async () => {
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       const res = await fetch(`${API_URL}/rulebook`);
       if (res.ok) {
         const data = await res.json();
@@ -56,11 +67,12 @@ export default function CertificateForm({
             }
           });
           setRulebook(flattened);
-          
+
           // If editing, find the activity details and set category
           if (initialData?.activity_id) {
             const initialAct = flattened.find(
-              (item) => (item.activityId || item.code) === initialData.activity_id
+              (item) =>
+                (item.activityId || item.code) === initialData.activity_id,
             );
             if (initialAct) {
               setSelectedActivityDetails(initialAct);
@@ -86,9 +98,9 @@ export default function CertificateForm({
   }, [rulebook]);
 
   const handleCategoryChange = (e) => {
-    if (isFaculty) return; // Faculty shouldn't change the category of an existing submission usually? 
+    if (isFaculty) return; // Faculty shouldn't change the category of an existing submission usually?
     // Actually, user said "edit option can look exactly like the upload page itself".
-    
+
     const category = e.target.value;
     setSelectedCategory(category);
     setSelectedActivityDetails(null);
@@ -105,10 +117,10 @@ export default function CertificateForm({
 
   const handleActivityChange = (e) => {
     if (isFaculty) return;
-    
+
     const selectedId = e.target.value;
     const selectedActivity = rulebook.find(
-      (item) => (item.activityId || item.code) === selectedId
+      (item) => (item.activityId || item.code) === selectedId,
     );
 
     if (selectedActivity) {
@@ -132,7 +144,7 @@ export default function CertificateForm({
 
   const handleLevelChange = (e) => {
     if (isFaculty) return;
-    
+
     const levelKey = e.target.value;
     let points = 0;
 
@@ -149,7 +161,7 @@ export default function CertificateForm({
 
   const isFormValid = useMemo(() => {
     if (isFaculty) return true; // Faculty can always comment/status
-    
+
     const basicFields =
       formData.activity_id &&
       formData.category &&
@@ -183,7 +195,10 @@ export default function CertificateForm({
       <div className="bg-background border border-border p-5 md:p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="category-select" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
+            <label
+              htmlFor="category-select"
+              className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5"
+            >
               Category
             </label>
             <Select
@@ -199,19 +214,34 @@ export default function CertificateForm({
           </div>
 
           <div>
-            <label htmlFor="activity" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
+            <label
+              htmlFor="activity"
+              className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5"
+            >
               Specific Activity
             </label>
             <Select
               id="activity"
-              value={selectedActivityDetails?.activityId || selectedActivityDetails?.code || ""}
+              value={
+                selectedActivityDetails?.activityId ||
+                selectedActivityDetails?.code ||
+                ""
+              }
               onChange={handleActivityChange}
               disabled={!selectedCategory}
-              placeholder={selectedCategory ? "Select an activity" : "Select category first"}
-              options={selectedCategory ? categories[selectedCategory].map((item) => ({
-                label: item.title,
-                value: item.activityId || item.code,
-              })) : []}
+              placeholder={
+                selectedCategory
+                  ? "Select an activity"
+                  : "Select category first"
+              }
+              options={
+                selectedCategory
+                  ? categories[selectedCategory].map((item) => ({
+                      label: item.title,
+                      value: item.activityId || item.code,
+                    }))
+                  : []
+              }
             />
           </div>
         </div>
@@ -220,8 +250,12 @@ export default function CertificateForm({
           <div className="flex gap-3 p-3 bg-foreground/5 border border-border">
             <FileText className="w-4 h-4 text-foreground/40 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50">Required Evidence</p>
-              <p className="text-xs text-foreground/80 leading-relaxed">{selectedActivityDetails.documentaryEvidence}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50">
+                Required Evidence
+              </p>
+              <p className="text-xs text-foreground/80 leading-relaxed">
+                {selectedActivityDetails.documentaryEvidence}
+              </p>
             </div>
           </div>
         )}
@@ -230,7 +264,10 @@ export default function CertificateForm({
           {selectedActivityDetails?.calculationType === "LEVEL" ? (
             <>
               <div>
-                <label htmlFor="level" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
+                <label
+                  htmlFor="level"
+                  className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5"
+                >
                   Level
                 </label>
                 <Select
@@ -238,14 +275,19 @@ export default function CertificateForm({
                   value={formData.level_key}
                   onChange={handleLevelChange}
                   placeholder="Select Level"
-                  options={Object.keys(selectedActivityDetails.levels).map((level) => ({
-                    label: `${level.charAt(0).toUpperCase() + level.slice(1)} - (${selectedActivityDetails.levels[level]} Points)`,
-                    value: level,
-                  }))}
+                  options={Object.keys(selectedActivityDetails.levels).map(
+                    (level) => ({
+                      label: `${level.charAt(0).toUpperCase() + level.slice(1)} - (${selectedActivityDetails.levels[level]} Points)`,
+                      value: level,
+                    }),
+                  )}
                 />
               </div>
               <div>
-                <label htmlFor="points" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
+                <label
+                  htmlFor="points"
+                  className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5"
+                >
                   Points (Max: {selectedActivityDetails?.maxPoints || 0})
                 </label>
                 <input
@@ -259,7 +301,10 @@ export default function CertificateForm({
             </>
           ) : (
             <div className="md:col-span-1">
-              <label htmlFor="points" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
+              <label
+                htmlFor="points"
+                className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5"
+              >
                 Points to be Awarded
               </label>
               <div className="relative">
@@ -280,15 +325,23 @@ export default function CertificateForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="academic_year" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
+            <label
+              htmlFor="academic_year"
+              className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5"
+            >
               Academic Year
             </label>
             <Select
               id="academic_year"
               value={formData.academic_year}
-              onChange={(e) => setFormData((prev) => ({ ...prev, academic_year: parseInt(e.target.value) }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  academic_year: parseInt(e.target.value),
+                }))
+              }
               options={[1, 2, 3, 4].map((year) => ({
-                label: `Regular Year ${year}`,
+                label: `Year ${year}`,
                 value: year,
               }))}
             />
@@ -306,29 +359,38 @@ export default function CertificateForm({
         {!isFaculty && (
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5">
-              Upload Certificate {initialData && "(Optional if keeping existing)"}
+              Upload Certificate{" "}
+              {initialData && "(Optional if keeping existing)"}
             </label>
             <div className="border-2 border-dashed border-border hover:border-foreground/50 transition-colors p-6 flex flex-col items-center justify-center text-center cursor-pointer group bg-secondary/5 relative">
               <input
                 type="file"
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 accept=".pdf,image/*"
-                onChange={(e) => setFormData((prev) => ({ ...prev, file: e.target.files[0] }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, file: e.target.files[0] }))
+                }
                 required={!initialData}
               />
 
               {formData.file ? (
                 <div className="flex flex-col items-center relative z-0">
                   <CheckCircle2 className="w-8 h-8 text-green-500 mb-2" />
-                  <p className="text-xs font-medium text-foreground line-clamp-1 max-w-[250px]">{formData.file.name}</p>
+                  <p className="text-xs font-medium text-foreground line-clamp-1 max-w-[250px]">
+                    {formData.file.name}
+                  </p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center relative z-0">
                   <div className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center mb-3">
                     <UploadCloud className="w-5 h-5 text-foreground/60" />
                   </div>
-                  <p className="text-sm font-medium text-foreground">Click to upload or drag and drop</p>
-                  <p className="text-[10px] text-foreground/50 mt-1">PDF, JPG, PNG or WebP (MAX. 5MB)</p>
+                  <p className="text-sm font-medium text-foreground">
+                    Click to upload or drag and drop
+                  </p>
+                  <p className="text-[10px] text-foreground/50 mt-1">
+                    PDF, JPG, PNG or WebP (MAX. 5MB)
+                  </p>
                 </div>
               )}
             </div>
@@ -338,7 +400,10 @@ export default function CertificateForm({
         {isFaculty && (
           <div className="pt-6 border-t border-border space-y-4">
             <div>
-              <label htmlFor="comments" className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5 items-center gap-2">
+              <label
+                htmlFor="comments"
+                className="block text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-1.5 items-center gap-2"
+              >
                 <MessageSquare className="w-3 h-3" /> Faculty Comments
               </label>
               <textarea
@@ -347,16 +412,16 @@ export default function CertificateForm({
                 className="w-full px-4 py-3 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors resize-none italic"
                 placeholder="Add feedback for the student..."
                 value={formData.comments}
-                onChange={(e) => setFormData((prev) => ({ ...prev, comments: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, comments: e.target.value }))
+                }
               />
             </div>
           </div>
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-4">
-        {footer}
-      </div>
+      <div className="flex items-center justify-end gap-4">{footer}</div>
     </form>
   );
 }

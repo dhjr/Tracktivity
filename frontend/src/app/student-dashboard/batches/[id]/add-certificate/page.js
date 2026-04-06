@@ -21,7 +21,8 @@ export default function StudentAddCertificatePage({ params }) {
     setIsSubmitting(true);
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       const submitData = new FormData();
 
       submitData.append("activity_code", formData.activity_id);
@@ -33,7 +34,7 @@ export default function StudentAddCertificatePage({ params }) {
       submitData.append("student_id", user.id);
       submitData.append("academic_year", formData.academic_year);
       submitData.append("file", formData.file);
-      // Date isn't explicitly sent in existing backend student/submit but maybe it should be? 
+      // Date isn't explicitly sent in existing backend student/submit but maybe it should be?
       // Keeping existing logic.
 
       const res = await fetch(`${API_URL}/student/submit`, {
@@ -90,7 +91,7 @@ export default function StudentAddCertificatePage({ params }) {
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           footer={
-            <>
+            <div className="flex items-center justify-center gap-4">
               <button
                 onClick={() => router.back()}
                 type="button"
@@ -109,7 +110,7 @@ export default function StudentAddCertificatePage({ params }) {
                   "Submit Certificate"
                 )}
               </button>
-            </>
+            </div>
           }
         />
       )}
