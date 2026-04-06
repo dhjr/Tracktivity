@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import CalendarPicker from "./CalendarPicker";
 import Select from "@/components/ui/Select";
+import CertificateFormSkeleton from "@/components/skeletons/CertificateFormSkeleton";
 
 export default function CertificateForm({
   initialData = null,
@@ -207,21 +208,14 @@ export default function CertificateForm({
   };
 
   if (fetchingRulebook) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <Loader2 className="w-6 h-6 animate-spin text-foreground/40" />
-      </div>
-    );
+    return <CertificateFormSkeleton />;
   }
 
   return (
-    <form
-      onSubmit={onLocalSubmit}
-      className="w-full h-full flex flex-col overflow-hidden"
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start grow overflow-hidden pb-4">
+    <form onSubmit={onLocalSubmit} className="w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Form Details */}
-        <div className="lg:col-span-7 h-full overflow-y-auto pr-4 scrollbar-hide">
+        <div className="lg:col-span-7">
           <div className="p-6 md:p-8 bg-background border border-border space-y-6 relative group/card">
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -249,7 +243,7 @@ export default function CertificateForm({
                     htmlFor="activity"
                     className="block text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-2"
                   >
-                    Specific Activity
+                    Select activity
                   </label>
                   <Select
                     id="activity"
@@ -280,7 +274,7 @@ export default function CertificateForm({
                   <FileText className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/40">
-                      Required Evidence
+                      Required certificate
                     </p>
                     <p className="text-xs text-foreground/80 leading-relaxed italic">
                       {selectedActivityDetails.documentaryEvidence}
@@ -377,8 +371,7 @@ export default function CertificateForm({
         <div className="lg:col-span-5 space-y-6">
           <div className="flex flex-col h-full">
             <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-4 flex items-center gap-2">
-              <UploadCloud className="w-3 h-3 text-primary" /> documentary
-              evidence
+              Upload certificate
             </p>
 
             <div
@@ -421,13 +414,10 @@ export default function CertificateForm({
                     <X className="w-4 h-4" />
                   </button>
 
-                  <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md p-3 border-t border-border flex items-center justify-between">
-                    <p className="text-[10px] font-bold text-foreground/40 uppercase truncate max-w-[200px]">
+                  <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md p-3 border-t border-border">
+                    <p className="text-[10px] font-bold text-foreground/40 uppercase truncate">
                       {formData.file.name}
                     </p>
-                    <span className="text-[10px] font-bold text-primary uppercase tracking-widest outline outline-primary/20 px-2 py-0.5">
-                      ready
-                    </span>
                   </div>
                 </div>
               ) : (
@@ -447,11 +437,8 @@ export default function CertificateForm({
               )}
             </div>
           </div>
+          {footer}
         </div>
-      </div>
-
-      <div className="mt-4 flex items-center justify-end shrink-0 pb-2">
-        {footer}
       </div>
     </form>
   );

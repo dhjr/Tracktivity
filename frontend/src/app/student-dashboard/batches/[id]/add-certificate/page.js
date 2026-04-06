@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import { Loader2, CheckCircle2, ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import PageLoader from "@/components/PageLoader";
 import CertificateForm from "@/components/CertificateForm";
+import CertificateFormSkeleton from "@/components/skeletons/CertificateFormSkeleton";
 import { useStats } from "@/components/providers/StatsProvider";
 import { getAuthHeaders } from "@/utils/api";
 
@@ -83,20 +83,19 @@ export default function StudentAddCertificatePage({ params }) {
     }
   };
 
-  if (!isReady || !user || loading) return <PageLoader />;
+  if (!isReady || !user || loading) return <CertificateFormSkeleton />;
 
   return (
-    <div className="h-[calc(100vh-4rem)] w-full relative overflow-hidden bg-background flex flex-col">
+    <div className="min-h-[calc(100vh-4rem)] w-full relative bg-background flex flex-col">
       {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+      </div>
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto p-4 md:px-10 md:py-8 flex flex-col h-full overflow-hidden">
+      <div className="relative z-10 w-full max-w-6xl mx-auto p-4 md:px-10 md:py-8 flex flex-col min-h-0">
         <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 shrink-0">
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold uppercase tracking-[0.3em] text-foreground/30">
-              Batch: {batch?.name || "..."}
-            </span>
             <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-foreground leading-tight">
               Create Submission
             </h1>
@@ -122,7 +121,7 @@ export default function StudentAddCertificatePage({ params }) {
             </div>
           </div>
         ) : (
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 h-full overflow-hidden flex flex-col">
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
             <CertificateForm
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}

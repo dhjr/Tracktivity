@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, use } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import PageLoader from "@/components/PageLoader";
+import CertificateFormSkeleton from "@/components/skeletons/CertificateFormSkeleton";
 import CertificateForm from "@/components/CertificateForm";
 import { getAuthHeaders } from "@/utils/api";
 
@@ -82,7 +83,7 @@ export default function StudentEditSubmissionPage({ params }) {
     }
   };
 
-  if (!isReady || loading) return <PageLoader />;
+  if (!isReady || loading) return <CertificateFormSkeleton />;
   if (!submission) return <div className="p-12 text-center text-foreground/50">Submission not found.</div>;
 
   return (

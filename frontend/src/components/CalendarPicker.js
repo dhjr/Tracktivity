@@ -146,13 +146,13 @@ const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
   };
 
   const renderDays = () => {
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const days = ["S", "M", "T", "W", "T", "F", "S"];
     return (
-      <div className="grid grid-cols-7 mb-2 border-b border-border bg-secondary/20">
-        {days.map((day) => (
+      <div className="grid grid-cols-7 border-b border-border bg-secondary/20">
+        {days.map((day, index) => (
           <div
-            key={day}
-            className="py-2 text-[10px] font-bold text-center uppercase tracking-widest text-foreground/40"
+            key={index}
+            className="py-2.5 text-[10px] font-bold text-center uppercase tracking-widest text-foreground/40"
           >
             {day}
           </div>
