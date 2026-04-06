@@ -1,6 +1,6 @@
 export default function CertificateFormSkeleton() {
   return (
-    <div className="min-h-screen w-full relative overflow-hidden bg-background">
+    <div className="min-h-[calc(100vh-4rem)] w-full relative overflow-hidden bg-background">
       {/* Decorative Background Elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />

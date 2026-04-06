@@ -12,6 +12,7 @@ import {
   ShieldAlert,
   ShieldCheck,
 } from "lucide-react";
+import MemberListSkeleton from "@/components/skeletons/MemberListSkeleton";
 
 export default function FacultyBatchStudentsPage({ params }) {
   const { user } = useAuth();
@@ -67,13 +68,7 @@ export default function FacultyBatchStudentsPage({ params }) {
     // Left empty for future implementation
   };
 
-  if (!user || loading) {
-    return (
-      <div className="min-h-[calc(100vh-6rem)] w-full flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-foreground/30" />
-      </div>
-    );
-  }
+  if (!user || loading) return <MemberListSkeleton />;
 
   return (
     <div className="min-h-[calc(100vh-6rem)] w-full max-w-5xl mx-auto p-4 md:p-8">

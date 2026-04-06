@@ -405,7 +405,7 @@ async def verify_submission(
 async def update_submission_metadata(
     submission_id: str,
     activity_id: Optional[str] = Form(None),
-    points_awarded: Optional[float] = Form(None),
+    points_awarded: Optional[int] = Form(None),
     academic_year: Optional[int] = Form(None),
     group_name: Optional[str] = Form(None),
     level: Optional[str] = Form(None),
@@ -433,7 +433,7 @@ async def update_submission_metadata(
     }
 
     if activity_id: update_payload["activity_id"] = activity_id
-    if points_awarded is not None: update_payload["points_awarded"] = points_awarded
+    if points_awarded is not None: update_payload["points_awarded"] = int(points_awarded)
     if academic_year: update_payload["academic_year"] = academic_year
     if group_name: update_payload["group_name"] = group_name
     if level: update_payload["level"] = level
