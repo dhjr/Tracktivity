@@ -17,6 +17,7 @@ import {
   FileDown,
 } from "lucide-react";
 import Select from "@/components/ui/Select";
+import ReportsSkeleton from "@/components/skeletons/ReportsSkeleton";
 
 export default function ReportsPage() {
   const { user, isReady } = useRequireRole("faculty");
@@ -107,10 +108,10 @@ export default function ReportsPage() {
     },
   ];
 
-  if (!user) return null;
+  if (!user || loadingBatches) return <ReportsSkeleton />;
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden bg-background">
+    <div className="min-h-[calc(100vh-4rem)] w-full relative overflow-hidden bg-background">
       {/* Decorative Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />

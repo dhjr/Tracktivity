@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import BatchCodeBadge from "@/components/BatchCodeBadge";
 import JoinBatch from "@/components/JoinBatch";
 import DashboardHeader from "@/components/DashboardHeader";
+import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 
 export default function FacultyDashboardPage() {
   const { user, isReady } = useRequireRole("faculty");
@@ -93,7 +94,7 @@ export default function FacultyDashboardPage() {
   if (!user) return null; // Wait for redirect or auth
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden bg-background">
+    <div className="min-h-[calc(100vh-4rem)] w-full relative overflow-hidden bg-background">
       {/* Decorative Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
@@ -183,9 +184,21 @@ export default function FacultyDashboardPage() {
             />
 
             {loadingBatches ? (
-              <div className="md:col-span-3 flex items-center justify-center border border-border border-dashed rounded-[2.5rem] p-12">
-                <Loader2 className="w-8 h-8 animate-spin text-foreground/20" />
-              </div>
+              Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="p-8 bg-secondary/5 border border-border/50 rounded-3xl h-[250px] flex flex-col justify-between animate-pulse"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="h-6 w-1/2 bg-secondary/20 rounded" />
+                      <div className="h-4 w-12 bg-secondary/15 rounded-full" />
+                    </div>
+                    <div className="h-8 w-24 bg-secondary/15 rounded" />
+                  </div>
+                  <div className="h-4 w-1/3 bg-secondary/10 rounded" />
+                </div>
+              ))
             ) : batches.length === 0 ? (
               <div className="md:col-span-3 flex flex-col items-center justify-center border border-border/50 border-dashed rounded-[2.5rem] p-12 text-center bg-secondary/5 backdrop-blur-sm">
                 <span className="text-foreground/20 mb-2 font-display text-lg">

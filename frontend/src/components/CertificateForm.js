@@ -1,17 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  Loader2,
-  UploadCloud,
-  CheckCircle2,
-  FileText,
-  Activity,
-  MessageSquare,
-  ChevronDown,
-  Calendar,
-  X,
-} from "lucide-react";
+import { UploadCloud, FileText, X } from "lucide-react";
 import CalendarPicker from "./CalendarPicker";
 import Select from "@/components/ui/Select";
 import CertificateFormSkeleton from "@/components/skeletons/CertificateFormSkeleton";
@@ -19,7 +9,6 @@ import CertificateFormSkeleton from "@/components/skeletons/CertificateFormSkele
 export default function CertificateForm({
   initialData = null,
   onSubmit,
-  isSubmitting = false,
   isFaculty = false,
   footer,
 }) {
@@ -218,7 +207,7 @@ export default function CertificateForm({
         <div className="lg:col-span-7">
           <div className="p-6 md:p-8 bg-background border border-border space-y-6 relative group/card">
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <div>
                   <label
                     htmlFor="category-select"

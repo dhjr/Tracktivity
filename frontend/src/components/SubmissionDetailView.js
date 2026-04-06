@@ -140,7 +140,7 @@ export default function SubmissionDetailView({
                       "Category"}
                 </p>
                 {isEditing ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <Select
                       value={selectedCategory}
                       onChange={(e) => {
@@ -298,7 +298,7 @@ export default function SubmissionDetailView({
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-border flex items-center justify-between">
+              <div className="pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <p className="text-[10px] text-foreground/40 uppercase tracking-widest mb-1 font-bold">
                     Submitted on
@@ -313,23 +313,18 @@ export default function SubmissionDetailView({
                 </div>
 
                 {isEditing && (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={toggleEdit}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-foreground/40 hover:text-foreground transition-colors"
+                      className="inline-flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-foreground/40 hover:text-foreground transition-colors"
                     >
-                      <RotateCcw className="w-3.5 h-3.5" /> Cancel
+                      <RotateCcw className="w-3 h-3" /> Cancel
                     </button>
                     <button
                       onClick={handleSave}
                       disabled={isSubmitting}
-                      className="inline-flex items-center gap-2 px-6 py-2 bg-foreground text-background text-xs font-bold uppercase tracking-wider hover:bg-foreground/90 transition-colors shadow-lg disabled:opacity-50"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-foreground text-background text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/90 transition-colors shadow-lg disabled:opacity-50"
                     >
-                      {isSubmitting ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Check className="w-3.5 h-3.5" />
-                      )}
                       Save Changes
                     </button>
                   </div>
