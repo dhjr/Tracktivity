@@ -1,15 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import {
+  FileText,
+  Activity,
   Award,
   Calendar,
-  CheckCircle2,
-  XCircle,
   MessageSquare,
   ExternalLink,
-  Clock,
+  Maximize2,
+  X,
 } from "lucide-react";
 import { formatDate } from "@/utils/helpers";
+import StatusBadge from "./StatusBadge";
 
 export default function SubmissionDetailView({
   submission,
@@ -18,33 +21,12 @@ export default function SubmissionDetailView({
   footer, // Slot for bottom of left column (e.g. Verification actions)
   userRole = "student", // Add role to control edit permission
 }) {
+  const [isFullViewOpen, setIsFullViewOpen] = useState(false);
   if (!submission) return null;
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      {/* Header with Status */}
-      <div className="flex items-center justify-between mb-6">
-        <div />
-        <div className="flex items-center gap-3">
-          {submission.status === "pending" && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-500">
-              <Clock className="w-3.5 h-3.5" /> Pending Review
-            </span>
-          )}
-          {submission.status === "approved" && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-500">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Approved
-            </span>
-          )}
-          {submission.status === "rejected" && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
-              <XCircle className="w-3.5 h-3.5" /> Rejected
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-8">
+    <div className="w-full max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-12 pb-8">
         {/* Left Column: Details */}
         <div className="space-y-6">
           {extraInfo}
@@ -52,8 +34,8 @@ export default function SubmissionDetailView({
           <section>
             <div className="p-6 border border-border bg-background space-y-8">
               <div>
-                <p className="text-xs text-foreground/50 uppercase tracking-widest font-bold mb-2 flex items-center gap-2">
-                  <Activity className="w-3.5 h-3.5" /> Managed Activity
+                <p className="text-[10px] text-foreground/40 uppercase tracking-widest font-bold mb-1.5">
+                  Activity name
                 </p>
                 <h1 className="font-bold text-3xl leading-tight text-foreground tracking-tight">
                   {submission.activity_name}
@@ -65,23 +47,21 @@ export default function SubmissionDetailView({
                   <p className="text-[10px] text-foreground/40 uppercase tracking-widest mb-1.5 font-bold">
                     Activity Code
                   </p>
-                  <p className="text-sm font-mono bg-secondary/30 px-2 py-1 inline-block border border-border/50">
-                    {submission.activity_id}
-                  </p>
-                </div>
-                
-                <div>
-                  <p className="text-[10px] text-foreground/40 uppercase tracking-widest mb-1.5 font-bold">
-                    Category Group
-                  </p>
                   <p className="text-sm font-medium">
-                    {submission.group_name}
+                    {submission.activity_id}
                   </p>
                 </div>
 
                 <div>
+                  <p className="text-[10px] text-foreground/40 uppercase tracking-widest mb-1.5 font-bold">
+                    Group
+                  </p>
+                  <p className="text-sm font-medium">{submission.group_name}</p>
+                </div>
+
+                <div>
                   <p className="text-[10px] text-foreground/40 uppercase tracking-widest mb-1.5 font-bold flex items-center gap-1">
-                    <Calendar className="w-3 h-3" /> Academic Year
+                    Academic Year
                   </p>
                   <p className="text-sm font-medium">
                     Year {submission.academic_year}
@@ -90,7 +70,7 @@ export default function SubmissionDetailView({
 
                 <div>
                   <p className="text-[10px] text-foreground/40 uppercase tracking-widest mb-1.5 font-bold flex items-center gap-1">
-                    <Award className="w-3 h-3" /> Points Earned
+                    Points Earned
                   </p>
                   <div className="flex items-baseline gap-2">
                     <p className="text-2xl font-black text-green-500">
@@ -108,7 +88,7 @@ export default function SubmissionDetailView({
               <div className="pt-6 border-t border-border flex items-center justify-between">
                 <div>
                   <p className="text-[10px] text-foreground/40 uppercase tracking-widest mb-1 font-bold">
-                    Certificate Date
+                    Submitted on
                   </p>
                   <p className="text-sm font-medium">
                     {formatDate(submission.certificate_date, {
@@ -138,28 +118,39 @@ export default function SubmissionDetailView({
 
         {/* Right Column: Certificate Preview */}
         <div className="flex flex-col h-full">
-          <div className="space-y-4 grow">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/30 flex items-center justify-between">
-              <a
-                href={submission.certificate_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] underline hover:text-foreground transition-colors flex items-center gap-1"
-              >
-                Open Original <ExternalLink className="w-2.5 h-2.5" />
-              </a>
-            </h2>
-            <div className="aspect-4/5 lg:aspect-3/4 w-full border border-border bg-black/5 flex items-center justify-center overflow-hidden">
+          <div className="space-y-4 grow flex flex-col">
+            <div className="flex items-center justify-between">
+              <StatusBadge status={submission.status} />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsFullViewOpen(true)}
+                  title="View Full Screen"
+                  className="p-1.5 text-foreground/40 hover:text-foreground hover:bg-secondary/20 transition-colors rounded-md"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+                <a
+                  href={submission.certificate_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Open Original"
+                  className="p-1.5 text-foreground/40 hover:text-foreground hover:bg-secondary/20 transition-colors rounded-md"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+            <div className="grow w-full border border-border bg-black/5 flex items-center justify-center overflow-hidden min-h-[350px] lg:min-h-0">
               {submission.certificate_url?.toLowerCase().endsWith(".pdf") ? (
                 <iframe
                   src={submission.certificate_url}
-                  className="w-full h-full border-none"
+                  className="w-full h-full border-none lg:min-h-[600px]"
                 />
               ) : (
                 <img
                   src={submission.certificate_url}
                   alt="Certificate"
-                  className="max-w-full max-h-full object-contain shadow-2xl"
+                  className="max-w-full h-auto max-h-full object-contain"
                 />
               )}
             </div>
@@ -178,6 +169,33 @@ export default function SubmissionDetailView({
           </div>
         </div>
       </div>
+
+      {/* Full-Screen Modal */}
+      {isFullViewOpen && (
+        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 lg:p-12">
+          <button
+            onClick={() => setIsFullViewOpen(false)}
+            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-10000"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          <div className="w-full h-full max-w-6xl flex items-center justify-center overflow-hidden">
+            {submission.certificate_url?.toLowerCase().endsWith(".pdf") ? (
+              <iframe
+                src={submission.certificate_url}
+                className="w-full h-full border-none rounded-lg bg-white"
+              />
+            ) : (
+              <img
+                src={submission.certificate_url}
+                alt="Certificate Full View"
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

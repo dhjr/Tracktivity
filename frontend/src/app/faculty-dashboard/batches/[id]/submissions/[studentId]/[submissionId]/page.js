@@ -41,7 +41,10 @@ export default function SubmissionReviewPage({ params }) {
     setLoading(true);
     try {
       const { headers, API_URL } = await getAuthHeaders();
-      const res = await fetch(`${API_URL}/faculty/submissions/${submissionId}`, { headers });
+      const res = await fetch(
+        `${API_URL}/faculty/submissions/${submissionId}`,
+        { headers },
+      );
       if (!res.ok) throw new Error("Failed to fetch submission details");
       const data = await res.json();
       setSubmission(data.submission);
@@ -58,11 +61,14 @@ export default function SubmissionReviewPage({ params }) {
     setVerifying(true);
     try {
       const { headers, API_URL } = await getAuthHeaders();
-      const res = await fetch(`${API_URL}/faculty/submissions/${submissionId}/verify`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", ...headers },
-        body: JSON.stringify({ status, comments: comment }),
-      });
+      const res = await fetch(
+        `${API_URL}/faculty/submissions/${submissionId}/verify`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", ...headers },
+          body: JSON.stringify({ status, comments: comment }),
+        },
+      );
       if (res.ok) {
         await refreshStats();
         router.push(
@@ -96,31 +102,35 @@ export default function SubmissionReviewPage({ params }) {
         rule={rule}
         userRole="faculty"
         extraInfo={
-          <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground/30 mb-4 flex items-center gap-2">
-              <User className="w-4 h-4" /> Student Information
-            </h2>
-            <div className="p-6 border border-border bg-secondary/5 space-y-4">
-              <div>
-                <p className="text-xs text-foreground/50 uppercase tracking-wider mb-1">
-                  Full Name
-                </p>
-                <p className="font-medium">{submission.student?.full_name}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+          <section className="mb-8">
+            <div className="p-6 border border-border bg-background shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center gap-3 mb-6">
                 <div>
-                  <p className="text-xs text-foreground/50 uppercase tracking-wider mb-1">
+                  <p className="text-[10px] text-foreground/40 uppercase tracking-widest font-bold">
+                    Student name
+                  </p>
+                  <h3 className="font-bold text-xl text-foreground">
+                    {submission.student?.full_name}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-8 pt-6 border-t border-border/50">
+                <div>
+                  <p className="text-[10px] text-foreground/40 uppercase tracking-widest mb-1.5 font-bold">
                     KTU ID
                   </p>
-                  <p className="font-mono text-sm">
+                  <p className="font-mono text-sm bg-secondary/10 px-2 py-0.5 inline-block border border-border/30">
                     {submission.student?.ktuid}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-foreground/50 uppercase tracking-wider mb-1">
+                  <p className="text-[10px] text-foreground/40 uppercase tracking-widest mb-1.5 font-bold">
                     Department
                   </p>
-                  <p className="text-sm">{submission.student?.department}</p>
+                  <p className="text-sm font-medium">
+                    {submission.student?.department}
+                  </p>
                 </div>
               </div>
             </div>
@@ -131,4 +141,3 @@ export default function SubmissionReviewPage({ params }) {
     </div>
   );
 }
-
