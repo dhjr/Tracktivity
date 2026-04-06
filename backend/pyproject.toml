@@ -9,10 +9,8 @@ dependencies = [
     "python-lsp-server[all]>=1.14.0",
     "supabase>=2.28.0",
     "uvicorn>=0.41.0",
-    "fastapi[standard]>=0.128.0",
     "psycopg2-binary>=2.9.11",
     "sqlmodel>=0.0.31",
-    "supabase>=2.28.0",
     "python-dotenv>=1.2.2",
     "reportlab>=4.4.10",
 ]

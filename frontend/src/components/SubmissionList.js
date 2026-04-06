@@ -1,40 +1,9 @@
 "use client";
 
-import { CheckCircle2, Clock, XCircle, ChevronRight, FileText } from "lucide-react";
+import { ChevronRight, FileText } from "lucide-react";
+import StatusBadge from "./StatusBadge";
 
 const TABS = ["all", "pending", "approved", "rejected"];
-
-const statusConfig = {
-  approved: {
-    icon: CheckCircle2,
-    label: "Approved",
-    className: "bg-green-500/10 text-green-500",
-  },
-  pending: {
-    icon: Clock,
-    label: "Pending",
-    className: "bg-yellow-500/10 text-yellow-500",
-  },
-  rejected: {
-    icon: XCircle,
-    label: "Rejected",
-    className: "bg-red-500/10 text-red-500",
-  },
-};
-
-function StatusBadge({ status }) {
-  const config = statusConfig[status];
-  if (!config) return null;
-  const Icon = config.icon;
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.className}`}
-    >
-      <Icon className="w-3.5 h-3.5" />
-      {config.label}
-    </span>
-  );
-}
 
 /**
  * A shared component for displaying a filtered list of submissions.

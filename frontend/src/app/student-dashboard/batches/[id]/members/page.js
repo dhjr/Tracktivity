@@ -4,18 +4,16 @@ import { useRequireRole } from "@/hooks/useRequireRole";
 import { getAuthHeaders } from "@/utils/api";
 import { getInitials } from "@/utils/helpers";
 import RoleBadge from "@/components/RoleBadge";
-import PageLoader from "@/components/PageLoader";
+import MemberListSkeleton from "@/components/skeletons/MemberListSkeleton";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { Users, ArrowLeft } from "lucide-react";
 
 export default function StudentBatchMembersPage({ params }) {
   const { user, isReady } = useRequireRole("student");
   const router = useRouter();
   const { id: batchId } = use(params);
-
-  const [batch, setBatch] = useState(null);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,11 +25,9 @@ export default function StudentBatchMembersPage({ params }) {
     setLoading(true);
     try {
       const { headers, API_URL } = await getAuthHeaders();
-      const [batchRes, membersRes] = await Promise.all([
-        fetch(`${API_URL}/batches/${batchId}`, { headers }),
+      const [membersRes] = await Promise.all([
         fetch(`${API_URL}/batches/${batchId}/members`, { headers }),
       ]);
-      if (batchRes.ok) setBatch(await batchRes.json());
       if (membersRes.ok) {
         const data = await membersRes.json();
         const facultyList = (data.faculty || []).map((f) => ({
@@ -62,7 +58,7 @@ export default function StudentBatchMembersPage({ params }) {
     }
   };
 
-  if (!user || loading) return <PageLoader />;
+  if (!user || loading) return <MemberListSkeleton />;
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-background">
@@ -71,9 +67,10 @@ export default function StudentBatchMembersPage({ params }) {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10">
-        <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Header Section - Simplified */}
+        <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-foreground leading-tight flex items-baseline gap-4">
-            {batch?.name}
+            Batch Members
             <span className="text-xl md:text-2xl font-normal text-foreground/30">
               Total: {members.length}
             </span>
@@ -91,7 +88,7 @@ export default function StudentBatchMembersPage({ params }) {
               </span>
             </div>
           ) : (
-            <div className="flex flex-col gap-3 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+            <div className="flex flex-col gap-3 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
               {members.map((member, index) => (
                 <div
                   key={`${member.role}-${member.id}`}

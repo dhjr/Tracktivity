@@ -83,83 +83,85 @@ export default function FacultyEditSubmissionPage({ params }) {
   if (!submission) return <div className="p-12 text-center text-foreground/50">Submission not found.</div>;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] w-full max-w-3xl mx-auto p-4 md:p-6 pt-8 md:pt-12">
-      <div className="mb-6">
-        <h1 className="text-2xl font-medium tracking-tight text-foreground">
-          Review Submission
-        </h1>
-        <p className="text-xs text-foreground/60 mt-1">
-          Review certificate details and provide feedback or verify the points.
-        </p>
-      </div>
+    <div className="min-h-screen w-full relative overflow-hidden bg-background">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
-      {success.state ? (
-        <div className={`p-12 border flex flex-col items-center justify-center text-center space-y-4 ${
-          success.action === 'approved' ? 'border-green-500/20 bg-green-500/5' : 'border-red-500/20 bg-red-500/5'
-        }`}>
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-2 ${
-            success.action === 'approved' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
-          }`}>
-            {success.action === 'approved' ? <CheckCircle2 className="w-8 h-8" /> : <XCircle className="w-8 h-8" />}
-          </div>
-          <h2 className="text-xl font-medium text-foreground">
-            Submission {success.action === 'approved' ? 'Approved' : 'Rejected'}!
-          </h2>
-          <p className="text-sm text-foreground/60">
-            The status has been updated and the student will be notified. Redirecting...
+      <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-10 flex flex-col items-center">
+        {/* Header Section - Simplified & Centered */}
+        <div className="mb-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <h1 className="text-5xl font-display font-bold tracking-tight text-foreground leading-[1.1]">
+            Review Submission
+          </h1>
+          <p className="text-sm text-foreground/40 mt-4 max-w-md mx-auto">
+            Review certificate details and provide feedback or verify the points.
           </p>
         </div>
-      ) : (
-        <div id="dummy-form-container">
-          <CertificateForm
-            initialData={submission}
-            isFaculty={true}
-            onSubmit={(data) => handleVerify(data, "approved")}
-            isSubmitting={isSubmitting}
-            footer={
-              <div className="flex w-full items-center justify-between">
-                <button
-                  onClick={() => router.back()}
-                  type="button"
-                  className="px-8 py-2 text-sm font-medium hover:bg-secondary/50 transition-colors"
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </button>
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => {
-                      // Grab comments from the form state involves a bit of a trick 
-                      // if I don't want to add more props. 
-                      // Actually, I'll just update CertificateForm to pass both data and status or something.
-                      // For now, I'll just trigger a hidden submit or similar if I had access.
-                      // Simplified: I'll just use a 'Verify' button and a 'Reject' button that both call verify.
-                      const commentsArea = document.getElementById('comments');
-                      handleVerify({ comments: commentsArea?.value || '' }, "rejected");
-                    }}
-                    type="button"
-                    className="px-8 py-2 text-sm font-medium border border-red-500/50 text-red-500 hover:bg-red-500/5 transition-colors disabled:opacity-50"
-                    disabled={isSubmitting}
-                  >
-                    Reject Submission
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-green-600 text-white px-10 py-2 text-sm font-medium hover:bg-green-700 transition-colors flex items-center justify-center min-w-[180px] disabled:opacity-50"
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      "Approve & Verify"
-                    )}
-                  </button>
-                </div>
+
+        <div className="w-full max-w-2xl">
+          {success.state ? (
+            <div className={`p-12 border flex flex-col items-center justify-center text-center space-y-4 ${
+              success.action === 'approved' ? 'border-green-500/20 bg-green-500/5' : 'border-red-500/20 bg-red-500/5'
+            }`}>
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-2 ${
+                success.action === 'approved' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+              }`}>
+                {success.action === 'approved' ? <CheckCircle2 className="w-8 h-8" /> : <XCircle className="w-8 h-8" />}
               </div>
-            }
-          />
+              <h2 className="text-xl font-medium text-foreground">
+                Submission {success.action === 'approved' ? 'Approved' : 'Rejected'}!
+              </h2>
+              <p className="text-sm text-foreground/60">
+                The status has been updated and the student will be notified. Redirecting...
+              </p>
+            </div>
+          ) : (
+            <CertificateForm
+              initialData={submission}
+              isFaculty={true}
+              onSubmit={(data) => handleVerify(data, "approved")}
+              isSubmitting={isSubmitting}
+              footer={
+                <div className="flex w-full items-center justify-center gap-4">
+                  <button
+                    onClick={() => router.back()}
+                    type="button"
+                    className="px-8 py-2 text-sm font-medium hover:bg-secondary/50 transition-colors"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => {
+                        const commentsArea = document.getElementById('comments');
+                        handleVerify({ comments: commentsArea?.value || '' }, "rejected");
+                      }}
+                      type="button"
+                      className="px-8 py-2 text-sm font-medium border border-red-500/50 text-red-500 hover:bg-red-500/5 transition-colors disabled:opacity-50 min-w-[180px]"
+                      disabled={isSubmitting}
+                    >
+                      Reject Submission
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="bg-green-600 text-white px-10 py-2 text-sm font-medium hover:bg-green-700 transition-colors flex items-center justify-center min-w-[200px] disabled:opacity-50"
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        "Approve & Verify"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              }
+            />
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

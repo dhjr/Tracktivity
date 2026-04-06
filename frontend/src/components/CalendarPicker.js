@@ -34,7 +34,9 @@ import Select from "@/components/ui/Select";
 const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [popoverPos, setPopoverPos] = useState({ top: 0, left: 0 });
   const containerRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Parse initial value if it exists
   useEffect(() => {
@@ -59,6 +61,22 @@ const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const toggleCalendar = () => {
+    if (!isOpen && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      // Prefer below, but flip if no space
+      if (spaceBelow < 320 && spaceAbove > 320) {
+        setPopoverPos({ top: rect.top - 320, left: rect.left });
+      } else {
+        setPopoverPos({ top: rect.bottom + 8, left: rect.left });
+      }
+    }
+    setIsOpen(!isOpen);
+  };
 
   const onDateClick = (day) => {
     if (isAfter(day, new Date())) return;
@@ -128,13 +146,13 @@ const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
   };
 
   const renderDays = () => {
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const days = ["S", "M", "T", "W", "T", "F", "S"];
     return (
-      <div className="grid grid-cols-7 mb-2 border-b border-border bg-secondary/20">
-        {days.map((day) => (
+      <div className="grid grid-cols-7 border-b border-border bg-secondary/20">
+        {days.map((day, index) => (
           <div
-            key={day}
-            className="py-2 text-[10px] font-bold text-center uppercase tracking-widest text-foreground/40"
+            key={index}
+            className="py-2.5 text-[10px] font-bold text-center uppercase tracking-widest text-foreground/40"
           >
             {day}
           </div>
@@ -207,23 +225,34 @@ const CalendarPicker = ({ value, onChange, label = "Select Date" }) => {
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      <label className="block text-sm font-medium mb-1.5">{label}</label>
+      <label className="block text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-2">
+        {label}
+      </label>
       <div
+        ref={inputRef}
         className="relative group cursor-pointer"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleCalendar}
       >
         <input
           type="text"
           readOnly
           placeholder="YYYY-MM-DD"
-          className="w-full px-4 py-2.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors cursor-pointer"
+          className="w-full px-4 py-2.5 text-sm bg-background border border-border focus:border-foreground focus:outline-none transition-colors cursor-pointer font-mono"
           value={value || ""}
         />
         <CalendarIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40 group-hover:text-foreground transition-colors" />
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 top-full left-0 mt-1 md:top-0 md:bottom-auto md:mt-0 md:right-full md:left-auto md:mr-3 w-[240px] bg-background border border-border shadow-2xl animate-in fade-in slide-in-from-right-2 duration-200">
+        <div 
+          style={{ 
+            position: 'fixed', 
+            top: `${popoverPos.top}px`, 
+            left: `${popoverPos.left}px`,
+            zIndex: 9999
+          }}
+          className="w-[240px] bg-background border border-border shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        >
           {renderHeader()}
           {renderDays()}
           {renderCells()}

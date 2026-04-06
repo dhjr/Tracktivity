@@ -13,7 +13,9 @@ export default function Select({
   variant = "form", // 'form' or 'calendar'
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [popoverPos, setPopoverPos] = useState({ top: 0, left: 0, width: 0 });
   const containerRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -27,6 +29,30 @@ export default function Select({
 
   const selectedOption = options.find((opt) => opt.value === value);
 
+  const toggleOpen = () => {
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      const menuHeight = Math.min(240, options.length * 40 + 12);
+      if (spaceBelow < menuHeight && spaceAbove > menuHeight) {
+        setPopoverPos({ 
+            top: rect.top - (menuHeight + 8), 
+            left: rect.left, 
+            width: rect.width 
+        });
+      } else {
+        setPopoverPos({ 
+            top: rect.bottom + 8, 
+            left: rect.left, 
+            width: rect.width 
+        });
+      }
+    }
+    setIsOpen(!isOpen);
+  };
+
   const handleSelect = (optionValue) => {
     if (disabled) return;
     onChange({ target: { value: optionValue } }); // Mocking event structure for ease of migration
@@ -38,9 +64,10 @@ export default function Select({
   return (
     <div className={`relative ${isCalendar ? "" : "w-full"} ${className}`} ref={containerRef}>
       <button
+        ref={buttonRef}
         type="button"
         disabled={disabled}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onClick={() => !disabled && toggleOpen()}
         className={`
           flex items-center justify-between transition-all outline-none
           ${isCalendar
@@ -66,11 +93,16 @@ export default function Select({
 
       {isOpen && (
         <div 
+          style={{
+            position: 'fixed',
+            top: `${popoverPos.top}px`,
+            left: `${popoverPos.left}px`,
+            width: isCalendar ? '128px' : `${popoverPos.width}px`,
+            zIndex: 9999
+          }}
           className={`
-            absolute z-50 mt-2 min-w-full overflow-hidden
-            bg-background/90 backdrop-blur-xl border border-border/50 shadow-2xl rounded-2xl 
-            animate-in fade-in zoom-in-95 duration-200 origin-top
-            ${isCalendar ? "top-full left-0 w-32" : "top-full left-0"}
+            overflow-hidden
+            bg-background/90 backdrop-blur-xl border border-border shadow-2xl animate-in fade-in zoom-in-95 duration-200 origin-top
           `}
         >
           <div className="max-h-60 overflow-y-auto p-1.5">
@@ -81,14 +113,14 @@ export default function Select({
                   key={option.value}
                   onClick={() => handleSelect(option.value)}
                   className={`
-                    flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs cursor-pointer transition-all
+                    flex items-start justify-between px-3.5 py-2.5 rounded-xl text-xs cursor-pointer transition-all
                     ${isActive 
                       ? "bg-foreground text-background font-bold shadow-lg shadow-foreground/10" 
                       : "text-foreground/70 hover:bg-secondary hover:text-foreground"
                     }
                   `}
                 >
-                  <span className="truncate">{option.label}</span>
+                  <span className="flex-1 text-left leading-tight py-0.5">{option.label}</span>
                   {isActive && <Check className="w-3.5 h-3.5" />}
                 </div>
               );

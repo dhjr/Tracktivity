@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Form, File, UploadFile
 from internal.session import get_supabase
 from internal.dependencies import require_role
 from schemas.facultyverification import VerifySubmission
@@ -400,6 +400,110 @@ async def verify_submission(
         "status": data.status,
         "previous_status": previous_status
     }
+
+@router.patch("/submissions/{submission_id}")
+async def update_submission_metadata(
+    submission_id: str,
+    activity_id: Optional[str] = Form(None),
+    points_awarded: Optional[float] = Form(None),
+    academic_year: Optional[int] = Form(None),
+    group_name: Optional[str] = Form(None),
+    level: Optional[str] = Form(None),
+    certificate_date: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None),
+    db=Depends(get_supabase),
+    current_user=Depends(require_role("faculty"))
+):
+    # 1. Fetch existing submission
+    try:
+        res = db.table("submissions") \
+            .select("*") \
+            .eq("id", submission_id) \
+            .single() \
+            .execute()
+    except Exception:
+        raise HTTPException(status_code=404, detail="Submission not found.")
+    
+    submission = res.data
+    await verify_admin_access(submission["batch_id"], current_user.id, db)
+
+    # 2. Extract update fields
+    update_payload = {
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    if activity_id: update_payload["activity_id"] = activity_id
+    if points_awarded is not None: update_payload["points_awarded"] = points_awarded
+    if academic_year: update_payload["academic_year"] = academic_year
+    if group_name: update_payload["group_name"] = group_name
+    if level: update_payload["level"] = level
+    if certificate_date: update_payload["certificate_date"] = certificate_date
+
+    # Handle file update
+    if file:
+        try:
+            file_ext = file.filename.split(".")[-1]
+            file_name = f"{submission['student_id']}/{submission_id}_{int(datetime.now().timestamp())}.{file_ext}"
+            file_content = await file.read()
+            
+            db.storage.from_("activity-certificates").upload(
+                path=file_name,
+                file=file_content,
+                file_options={"content-type": file.content_type}
+            )
+            
+            public_url = db.storage.from_("activity-certificates").get_public_url(file_name)
+            update_payload["certificate_url"] = public_url
+        except Exception as e:
+            print(f"File upload error: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to upload new certificate: {str(e)}")
+
+    activity_changed = "activity_id" in update_payload and update_payload["activity_id"] != submission["activity_id"]
+    points_changed   = "points_awarded" in update_payload and update_payload["points_awarded"] != submission["points_awarded"]
+
+    # 3. Validation if critical fields changed
+    if activity_changed or points_changed:
+        effective_activity_id = update_payload.get("activity_id", submission["activity_id"])
+        effective_points      = update_payload.get("points_awarded", submission["points_awarded"])
+        effective_level       = update_payload.get("level", submission["level"])
+
+        rulebook = fetchRuleBook(db=db)
+        effective_activity = validateActivity(rulebook, effective_activity_id)
+
+        maxCheck_meritLevelValidation(
+            points_awarded=effective_points,
+            target_activity=effective_activity,
+            level_key=effective_level
+        )
+
+        highLevel_winOverride(
+            target_activity=effective_activity,
+            student_id=submission["student_id"],
+            activity_code=effective_activity_id,
+            points_awarded=effective_points,
+            db=db,
+            exclude_submission_id=submission_id
+        )
+
+        cluster_cap(
+            activity_code=effective_activity_id,
+            db=db,
+            student_id=submission["student_id"],
+            rulebook=rulebook,
+            points_awarded=effective_points,
+            exclude_submission_id=submission_id
+        )
+
+        if activity_changed:
+            update_payload["activity_name"] = effective_activity["title"]
+
+    # 4. Save
+    db.table("submissions") \
+        .update(update_payload) \
+        .eq("id", submission_id) \
+        .execute()
+
+    return {"message": "Submission updated successfully.", "updated_fields": list(update_payload.keys())}
 
 @router.post("/verify-student")
 async def verify_student(req: dict, db=Depends(get_supabase), current_user=Depends(require_role("faculty"))):
