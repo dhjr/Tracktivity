@@ -3,6 +3,8 @@
 import { ChevronRight, FileText } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 
+const TABS = ["all", "pending", "approved", "rejected"];
+
 /**
  * A shared component for displaying a filtered list of submissions.
  *
